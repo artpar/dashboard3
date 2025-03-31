@@ -129,13 +129,13 @@ export async function sendMessageToBackgroundScript(request) {
                         const signinResponse1 = await daptinClient.actionManager.doAction('user_account', 'signin_100xbot', {
                             email: request.email, password: request.password,
                         })
-                        
+
                         // Check for error notifications first
-                        const errorNotification = signinResponse1.find(res => 
-                            res.ResponseType === 'client.notify' && 
+                        const errorNotification = signinResponse1.find(res =>
+                            res.ResponseType === 'client.notify' &&
                             res.Attributes.type === 'error'
                         );
-                        
+
                         if (errorNotification) {
                             reject({
                                 message: errorNotification.Attributes.message,
@@ -144,13 +144,13 @@ export async function sendMessageToBackgroundScript(request) {
                             });
                             return;
                         }
-                        
+
                         // If no errors, proceed with normal login flow
-                        const tokenResponse = signinResponse1.find(res => 
-                            res.ResponseType === 'client.store.set' && 
+                        const tokenResponse = signinResponse1.find(res =>
+                            res.ResponseType === 'client.store.set' &&
                             res.Attributes['key'] === 'token'
                         );
-                        
+
                         if (!tokenResponse) {
                             reject({
                                 message: 'No authentication token received',
@@ -159,26 +159,26 @@ export async function sendMessageToBackgroundScript(request) {
                             });
                             return;
                         }
-                        
+
                         var newUserToken2 = tokenResponse.Attributes['value'];
                         console.log('Initiate email otp for ', request.email, signinResponse1)
                         let signinResponseElement1 = signinResponse1[0]
                         let newUserObject2 = JSON.parse(atob(newUserToken2.split('.')[1]))
-                        
+
                         const customerResponse = signinResponse1.find(e => e.ResponseType === 'customer');
                         const creditResponse = signinResponse1.find(e => e.ResponseType === 'credit');
-                        
-                        if (!customerResponse || !creditResponse) {
-                            reject({
-                                message: 'Missing required user data in response',
-                                title: 'Failed',
-                                type: 'error'
-                            });
-                            return;
-                        }
-                        
-                        let customer2 = customerResponse.Attributes[0];
-                        let credit2 = creditResponse.Attributes[0];
+
+                        // if (!customerResponse || !creditResponse) {
+                        //     reject({
+                        //         message: 'Missing required user data in response',
+                        //         title: 'Failed',
+                        //         type: 'error'
+                        //     });
+                        //     return;
+                        // }
+
+                        let customer2 = customerResponse?.Attributes[0];
+                        let credit2 = creditResponse?.Attributes[0];
 
                         daptinUserAuth = {
                             token: newUserToken2, user: newUserObject2, credit: credit2, customer: customer2,
