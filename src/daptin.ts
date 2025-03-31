@@ -15,6 +15,15 @@ export async function reloadToken() {
     await daptinClient.worldManager.init()
     await daptinClient.worldManager.loadModel('workgroup', false)
   }
+  const result = await daptinClient.aggregateClient
+    .entity('user_account')
+    .groupBy('date(created_at)')
+    .count()
+    .max("date(created_at)")
+    .min("date(created_at)")
+    .execute();
+
+  console.log('Total users:', result[0].attributes.count);
 
   // return new Promise((resolve, reject) => {})
 }

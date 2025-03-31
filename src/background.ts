@@ -1,4 +1,5 @@
-import { daptinClient } from './daptin'
+import { daptinClient, reloadToken } from './daptin'
+reloadToken();
 
 let daptinUserAuth = {}
 try {
