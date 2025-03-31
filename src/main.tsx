@@ -16,6 +16,20 @@ import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
+import { useEffect } from 'react'
+
+// Create a component to initialize auth state
+function AuthInitializer() {
+  const { getAuthState } = useAuthStore()
+  
+  useEffect(() => {
+    // Initialize auth state when the app loads
+    getAuthState()
+  }, [getAuthState])
+  
+  return null
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -57,7 +71,8 @@ const queryClient = new QueryClient({
             variant: 'destructive',
             title: 'Session expired!',
           })
-          useAuthStore.getState().auth.reset()
+          // Update this line to use the new auth store structure
+          useAuthStore.getState().logout()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }
@@ -100,6 +115,7 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
+            <AuthInitializer />
             <RouterProvider router={router} />
           </FontProvider>
         </ThemeProvider>

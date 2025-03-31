@@ -1,55 +1,133 @@
-import Cookies from 'js-cookie'
 import { create } from 'zustand'
+import { sendMessageToBackgroundScript } from '../background'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
-
-interface AuthUser {
-  accountNo: string
+// Define types for the Daptin auth user
+interface DaptinUser {
+  id: string
   email: string
-  role: string[]
   exp: number
+  name: string
+  roles: string[]
+}
+
+interface Customer {
+  reference_id: string
+  [key: string]: any
+}
+
+interface Creator {
+  reference_id: string
+  [key: string]: any
 }
 
 interface AuthState {
-  auth: {
-    user: AuthUser | null
-    setUser: (user: AuthUser | null) => void
-    accessToken: string
-    setAccessToken: (accessToken: string) => void
-    resetAccessToken: () => void
-    reset: () => void
-  }
+  user: DaptinUser | null
+  token: string | null
+  customer: Customer | null
+  creator: Creator | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  error: string | null
+  
+  // Auth actions
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  getAuthState: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>()((set) => {
-  const cookieState = Cookies.get(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
-  return {
-    auth: {
-      user: null,
-      setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
-      accessToken: initToken,
-      setAccessToken: (accessToken) =>
-        set((state) => {
-          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
-          return { ...state, auth: { ...state.auth, accessToken } }
-        }),
-      resetAccessToken: () =>
-        set((state) => {
-          Cookies.remove(ACCESS_TOKEN)
-          return { ...state, auth: { ...state.auth, accessToken: '' } }
-        }),
-      reset: () =>
-        set((state) => {
-          Cookies.remove(ACCESS_TOKEN)
-          return {
-            ...state,
-            auth: { ...state.auth, user: null, accessToken: '' },
-          }
-        }),
-    },
-  }
-})
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  token: null,
+  customer: null,
+  creator: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
 
-// export const useAuth = () => useAuthStore((state) => state.auth)
+  login: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const response = await sendMessageToBackgroundScript({
+        type: 'signIn',
+        email,
+        password
+      });
+      
+      // Get the updated auth state after login
+      await get().getAuthState();
+      
+      set({ isLoading: false });
+    } catch (error) {
+      console.error('Login error:', error);
+      set({ 
+        isLoading: false, 
+        error: error instanceof Error ? error.message : 'Failed to login' 
+      });
+    }
+  },
+  
+  logout: async () => {
+    try {
+      set({ isLoading: true });
+      
+      await sendMessageToBackgroundScript({
+        type: 'signOut'
+      });
+      
+      set({
+        user: null,
+        token: null,
+        customer: null,
+        creator: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      set({ 
+        isLoading: false, 
+        error: error instanceof Error ? error.message : 'Failed to logout' 
+      });
+    }
+  },
+  
+  getAuthState: async () => {
+    try {
+      set({ isLoading: true });
+      
+      const authData = await sendMessageToBackgroundScript({
+        type: 'getAuth'
+      });
+      
+      if (authData && authData.token && authData.user) {
+        set({
+          user: authData.user,
+          token: authData.token,
+          customer: authData.customer || null,
+          creator: authData.creator || null,
+          isAuthenticated: true,
+          isLoading: false
+        });
+      } else {
+        set({
+          user: null,
+          token: null,
+          customer: null,
+          creator: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
+    } catch (error) {
+      console.error('Error getting auth state:', error);
+      set({ 
+        isLoading: false, 
+        error: error instanceof Error ? error.message : 'Failed to get auth state' 
+      });
+    }
+  }
+}));
+
+// Hook for easier access to auth state and actions
+export const useAuth = () => useAuthStore();

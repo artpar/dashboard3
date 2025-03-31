@@ -119,10 +119,10 @@ export async function sendMessageToBackgroundScript(request) {
                     })
                     break
                 case 'signOut':
-                    localStorage.removeItem('DAPTIN', JSON.stringify(daptinUserAuth))
-                    localStorage.removeItem('token', newUserToken2)
+                    localStorage.removeItem('DAPTIN')
+                    localStorage.removeItem('token')
                     daptinUserAuth = {};
-                    resolve();
+                    resolve(null);
                     break;
                 case 'signIn':
                     const signinResponse1 = await daptinClient.actionManager.doAction('user_account', 'signin_100xbot', {
