@@ -13,17 +13,22 @@ let daptinClient: DaptinClient
 export async function reloadToken() {
   if (daptinClient) {
     await daptinClient.worldManager.init()
-    await daptinClient.worldManager.loadModel('workgroup', false)
+    await daptinClient.worldManager.loadModel('workgroup', false);
+    await daptinClient.worldManager.loadModel('customer', false);
+    await daptinClient.worldManager.loadModel('user_account', false);
+    await daptinClient.worldManager.loadModel('usergroup', false);
+    await daptinClient.worldManager.loadModel('world', false);
+    await daptinClient.worldManager.loadModel('action', false);
   }
-  const result = await daptinClient.aggregateClient
-    .entity('user_account')
-    .groupBy('date(created_at)')
-    .count()
-    .max("date(created_at)")
-    .min("date(created_at)")
-    .execute();
+  // const result = await daptinClient.aggregateClient
+  //   .entity('user_account')
+  //   .groupBy('date(created_at)')
+  //   .count()
+  //   .max("date(created_at)")
+  //   .min("date(created_at)")
+  //   .execute();
 
-  console.log('Total users:', result[0].attributes.count);
+  // console.log('Total users:', result[0].attributes.count);
 
   // return new Promise((resolve, reject) => {})
 }
@@ -112,6 +117,7 @@ export function isAuthenticated(): boolean {
   return !!localStorage.getItem('token')
 }
 
+// Configure Axios with backward compatibility for paramsSerializer
 const axiosConfig = {}
 
 daptinClient = new DaptinClient(

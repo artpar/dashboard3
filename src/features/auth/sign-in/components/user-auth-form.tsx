@@ -251,17 +251,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             onComplete={() => setOtpDisabledBtn(false)}
                             onIncomplete={() => setOtpDisabledBtn(true)}
                           >
-                            {Array.from({ length: 7 }, (_, i) => {
-                              if (i === 3)
-                                return <Separator key={i} orientation='vertical' />
-                              return (
-                                <PinInputField
-                                  key={i}
-                                  component={Input}
-                                  className={`${otpForm.getFieldState('otp').invalid ? 'border-red-500' : ''}`}
-                                />
-                              )
-                            })}
+                            {Array.from({ length: 4 }, (_, i) => (
+                              <PinInputField
+                                key={i}
+                                component={Input}
+                                className={`${otpForm.getFieldState('otp').invalid ? 'border-red-500' : ''}`}
+                              />
+                            ))}
                           </PinInput>
                         </FormControl>
                         <FormMessage />

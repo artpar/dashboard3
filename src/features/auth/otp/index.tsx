@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 
 export default function Otp() {
-  const { emailForOtp } = useAuth()
+  const { emailForOtp, requestOtp } = useAuth()
   const navigate = useNavigate()
 
   // Redirect to sign-in if no email is set for OTP
@@ -35,9 +35,15 @@ export default function Otp() {
             Haven't received it?{' '}
             <button
               onClick={() => {
-                // This would trigger a resend OTP action
-                // For now, we'll just show a message
-                alert('A new code has been sent to your email.')
+                if (emailForOtp) {
+                  requestOtp(emailForOtp)
+                    .then(() => {
+                      alert('A new code has been sent to your email.');
+                    })
+                    .catch((error) => {
+                      alert(`Failed to resend code: ${error.message || 'Unknown error'}`);
+                    });
+                }
               }}
               className='hover:text-primary underline underline-offset-4'
             >

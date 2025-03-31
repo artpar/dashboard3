@@ -128,9 +128,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true, error: null, emailForOtp: email })
 
-      // Here you would typically call an API to request an OTP
-      // For now, we'll just set the email for OTP and assume the OTP is sent
-      // This would be replaced with an actual API call when available
+      // Call the API to request an OTP
+      await sendMessageToBackgroundScript({
+        type: 'signInWithEmail',
+        email,
+      })
 
       set({ isLoading: false, authMethod: 'otp' })
       return Promise.resolve()
