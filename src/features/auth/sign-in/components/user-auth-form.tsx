@@ -20,10 +20,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
 import { PasswordInput } from '@/components/password-input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PinInput, PinInputField } from '@/components/pin-input'
+import { Separator } from '@/components/ui/separator'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
-const formSchema = z.object({
+const passwordFormSchema = z.object({
   email: z
     .string()
     .min(1, { message: 'Please enter your email' })
@@ -38,17 +41,36 @@ const formSchema = z.object({
     }),
 })
 
+const otpFormSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: 'Please enter your email' })
+    .email({ message: 'Invalid email address' }),
+  otp: z.string().optional(),
+})
+
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const { login, isLoading, error, isAuthenticated } = useAuth()
+  const { login, requestOtp, loginWithOtp, isLoading, error, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
   const [formError, setFormError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<string>('password')
+  const [otpRequested, setOtpRequested] = useState(false)
+  const [otpDisabledBtn, setOtpDisabledBtn] = useState(true)
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
+    resolver: zodResolver(passwordFormSchema),
     defaultValues: {
       email: '',
       password: '',
+    },
+  })
+
+  const otpForm = useForm<z.infer<typeof otpFormSchema>>({
+    resolver: zodResolver(otpFormSchema),
+    defaultValues: {
+      email: '',
+      otp: '',
     },
   })
 
@@ -68,15 +90,25 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   // Clear form error when form values change
   useEffect(() => {
-    const subscription = form.watch(() => {
+    const passwordSubscription = passwordForm.watch(() => {
       if (formError) {
         setFormError(null)
       }
     })
-    return () => subscription.unsubscribe()
-  }, [form, formError])
+    
+    const otpSubscription = otpForm.watch(() => {
+      if (formError) {
+        setFormError(null)
+      }
+    })
+    
+    return () => {
+      passwordSubscription.unsubscribe()
+      otpSubscription.unsubscribe()
+    }
+  }, [passwordForm, otpForm, formError])
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onPasswordSubmit(data: z.infer<typeof passwordFormSchema>) {
     setFormError(null)
     try {
       await login(data.email, data.password)
@@ -86,89 +118,215 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     }
   }
 
+  async function onOtpRequest(data: z.infer<typeof otpFormSchema>) {
+    setFormError(null)
+    try {
+      await requestOtp(data.email)
+      setOtpRequested(true)
+      toast({
+        title: "OTP Sent",
+        description: `A verification code has been sent to ${data.email}`,
+      })
+    } catch (err: any) {
+      console.error('OTP request error:', err)
+    }
+  }
+
+  async function onOtpSubmit(data: z.infer<typeof otpFormSchema>) {
+    if (!data.otp) {
+      setFormError('Please enter the OTP code')
+      return
+    }
+    
+    setFormError(null)
+    try {
+      await loginWithOtp(data.email, data.otp)
+    } catch (err: any) {
+      console.error('OTP login error:', err)
+    }
+  }
+
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid gap-4'>
-            {formError && (
-              <Alert variant='destructive' className='mb-2'>
-                <AlertCircle className='h-4 w-4' />
-                <AlertTitle>Authentication failed</AlertTitle>
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
-            )}
-
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder='name@example.com' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <div className='flex items-center justify-between'>
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      to='/forgot-password'
-                      className='text-muted-foreground text-sm font-medium hover:opacity-75'
+      <Tabs defaultValue="password" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="password">Password</TabsTrigger>
+          <TabsTrigger value="otp">OTP</TabsTrigger>
+        </TabsList>
+        
+        {formError && (
+          <Alert variant='destructive' className='mt-4 mb-2'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertTitle>Authentication failed</AlertTitle>
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        )}
+        
+        <TabsContent value="password">
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4 mt-4">
+              <FormField
+                control={passwordForm.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder='name@example.com' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name='password'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <div className='flex items-center justify-between'>
+                      <FormLabel>Password</FormLabel>
+                      <Link
+                        to='/forgot-password'
+                        className='text-muted-foreground text-sm font-medium hover:opacity-75'
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <FormControl>
+                      <PasswordInput placeholder='********' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button className='w-full' disabled={isLoading}>
+                {isLoading ? 'Logging in...' : 'Login with Password'}
+              </Button>
+            </form>
+          </Form>
+        </TabsContent>
+        
+        <TabsContent value="otp">
+          <Form {...otpForm}>
+            <form className="space-y-4 mt-4">
+              <FormField
+                control={otpForm.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder='name@example.com' 
+                        {...field} 
+                        disabled={otpRequested && !formError}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {!otpRequested ? (
+                <Button 
+                  type="button"
+                  className='w-full' 
+                  disabled={isLoading || !otpForm.formState.isValid}
+                  onClick={otpForm.handleSubmit(onOtpRequest)}
+                >
+                  {isLoading ? 'Sending...' : 'Send OTP'}
+                </Button>
+              ) : (
+                <>
+                  <FormField
+                    control={otpForm.control}
+                    name='otp'
+                    render={({ field }) => (
+                      <FormItem className='space-y-1'>
+                        <FormLabel>Verification Code</FormLabel>
+                        <FormControl>
+                          <PinInput
+                            {...field}
+                            className='flex h-10 justify-between'
+                            onComplete={() => setOtpDisabledBtn(false)}
+                            onIncomplete={() => setOtpDisabledBtn(true)}
+                          >
+                            {Array.from({ length: 7 }, (_, i) => {
+                              if (i === 3)
+                                return <Separator key={i} orientation='vertical' />
+                              return (
+                                <PinInputField
+                                  key={i}
+                                  component={Input}
+                                  className={`${otpForm.getFieldState('otp').invalid ? 'border-red-500' : ''}`}
+                                />
+                              )
+                            })}
+                          </PinInput>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex flex-col gap-2">
+                    <Button 
+                      type="button"
+                      className='w-full' 
+                      disabled={isLoading || otpDisabledBtn}
+                      onClick={otpForm.handleSubmit(onOtpSubmit)}
                     >
-                      Forgot password?
-                    </Link>
+                      {isLoading ? 'Verifying...' : 'Login with OTP'}
+                    </Button>
+                    
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      className='w-full' 
+                      onClick={() => {
+                        setOtpRequested(false)
+                        otpForm.reset({ email: otpForm.getValues().email, otp: '' })
+                      }}
+                    >
+                      Request new OTP
+                    </Button>
                   </div>
-                  <FormControl>
-                    <PasswordInput placeholder='********' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                </>
               )}
-            />
-            <Button className='mt-2' disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
+            </form>
+          </Form>
+        </TabsContent>
+      </Tabs>
 
-            <div className='relative my-2'>
-              <div className='absolute inset-0 flex items-center'>
-                <span className='w-full border-t' />
-              </div>
-              <div className='relative flex justify-center text-xs uppercase'>
-                <span className='bg-background text-muted-foreground px-2'>
-                  Or continue with
-                </span>
-              </div>
-            </div>
+      <div className='relative my-2'>
+        <div className='absolute inset-0 flex items-center'>
+          <span className='w-full border-t' />
+        </div>
+        <div className='relative flex justify-center text-xs uppercase'>
+          <span className='bg-background text-muted-foreground px-2'>
+            Or continue with
+          </span>
+        </div>
+      </div>
 
-            <div className='flex items-center gap-2'>
-              <Button
-                variant='outline'
-                className='w-full'
-                type='button'
-                disabled={isLoading}
-              >
-                <IconBrandGithub className='h-4 w-4' /> GitHub
-              </Button>
-              <Button
-                variant='outline'
-                className='w-full'
-                type='button'
-                disabled={isLoading}
-              >
-                <IconBrandFacebook className='h-4 w-4' /> Facebook
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
+      <div className='flex items-center gap-2'>
+        <Button
+          variant='outline'
+          className='w-full'
+          type='button'
+          disabled={isLoading}
+        >
+          <IconBrandGithub className='h-4 w-4' /> GitHub
+        </Button>
+        <Button
+          variant='outline'
+          className='w-full'
+          type='button'
+          disabled={isLoading}
+        >
+          <IconBrandFacebook className='h-4 w-4' /> Facebook
+        </Button>
+      </div>
     </div>
   )
 }

@@ -28,11 +28,17 @@ interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
+  authMethod: 'password' | 'otp' | null
+  emailForOtp: string | null
 
   // Auth actions
   login: (email: string, password: string) => Promise<void>
+  loginWithOtp: (email: string, otp: string) => Promise<void>
+  requestOtp: (email: string) => Promise<void>
   logout: () => Promise<void>
   getAuthState: () => Promise<void>
+  setAuthMethod: (method: 'password' | 'otp') => void
+  setEmailForOtp: (email: string) => void
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -43,6 +49,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  authMethod: null,
+  emailForOtp: null,
 
   login: async (email: string, password: string) => {
     try {
@@ -80,6 +88,62 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  loginWithOtp: async (email: string, otp: string) => {
+    try {
+      set({ isLoading: true, error: null })
+
+      const response = await sendMessageToBackgroundScript({
+        type: 'signInWithEmailOtp',
+        email,
+        otp,
+      })
+
+      // Get the updated auth state after login
+      await get().getAuthState()
+
+      set({ isLoading: false, emailForOtp: null })
+    } catch (error) {
+      console.error('OTP login error:', error)
+
+      // Handle structured error responses from the API
+      if (error && typeof error === 'object') {
+        if (error.error || error.message) {
+          set({
+            isLoading: false,
+            error: error.error || error.message,
+          })
+          return
+        }
+      }
+
+      // Fallback for other types of errors
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to login with OTP',
+      })
+    }
+  },
+
+  requestOtp: async (email: string) => {
+    try {
+      set({ isLoading: true, error: null, emailForOtp: email })
+
+      // Here you would typically call an API to request an OTP
+      // For now, we'll just set the email for OTP and assume the OTP is sent
+      // This would be replaced with an actual API call when available
+
+      set({ isLoading: false, authMethod: 'otp' })
+      return Promise.resolve()
+    } catch (error) {
+      console.error('Request OTP error:', error)
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to request OTP',
+      })
+      return Promise.reject(error)
+    }
+  },
+
   logout: async () => {
     console.log("Logout invoked")
     try {
@@ -96,6 +160,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         creator: null,
         isAuthenticated: false,
         isLoading: false,
+        authMethod: null,
+        emailForOtp: null,
       })
     } catch (error) {
       console.error('Logout error:', error)
@@ -141,6 +207,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           error instanceof Error ? error.message : 'Failed to get auth state',
       })
     }
+  },
+
+  setAuthMethod: (method) => {
+    set({ authMethod: method, error: null })
+  },
+
+  setEmailForOtp: (email) => {
+    set({ emailForOtp: email })
   },
 }))
 
