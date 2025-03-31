@@ -125,26 +125,76 @@ export async function sendMessageToBackgroundScript(request) {
                     resolve(null);
                     break;
                 case 'signIn':
-                    const signinResponse1 = await daptinClient.actionManager.doAction('user_account', 'signin_100xbot', {
-                        email: request.email, password: request.password,
-                    })
-                    var newUserToken2 = signinResponse1.filter((res) => {
-                        return res.ResponseType === 'client.store.set' && res.Attributes['key'] === 'token'
-                    })[0].Attributes['value']
-                    console.log('Initiate email otp for ', request.email, signinResponse1)
-                    let signinResponseElement1 = signinResponse1[0]
-                    let newUserObject2 = JSON.parse(atob(newUserToken2.split('.')[1]))
-                    let customer2 = signinResponse1.filter((e) => e.ResponseType === 'customer')[0].Attributes[0]
-                    let credit2 = signinResponse1.filter((e) => e.ResponseType === 'credit')[0].Attributes[0]
+                    try {
+                        const signinResponse1 = await daptinClient.actionManager.doAction('user_account', 'signin_100xbot', {
+                            email: request.email, password: request.password,
+                        })
+                        
+                        // Check for error notifications first
+                        const errorNotification = signinResponse1.find(res => 
+                            res.ResponseType === 'client.notify' && 
+                            res.Attributes.type === 'error'
+                        );
+                        
+                        if (errorNotification) {
+                            reject({
+                                message: errorNotification.Attributes.message,
+                                title: errorNotification.Attributes.title || 'Failed',
+                                type: 'error'
+                            });
+                            return;
+                        }
+                        
+                        // If no errors, proceed with normal login flow
+                        const tokenResponse = signinResponse1.find(res => 
+                            res.ResponseType === 'client.store.set' && 
+                            res.Attributes['key'] === 'token'
+                        );
+                        
+                        if (!tokenResponse) {
+                            reject({
+                                message: 'No authentication token received',
+                                title: 'Failed',
+                                type: 'error'
+                            });
+                            return;
+                        }
+                        
+                        var newUserToken2 = tokenResponse.Attributes['value'];
+                        console.log('Initiate email otp for ', request.email, signinResponse1)
+                        let signinResponseElement1 = signinResponse1[0]
+                        let newUserObject2 = JSON.parse(atob(newUserToken2.split('.')[1]))
+                        
+                        const customerResponse = signinResponse1.find(e => e.ResponseType === 'customer');
+                        const creditResponse = signinResponse1.find(e => e.ResponseType === 'credit');
+                        
+                        if (!customerResponse || !creditResponse) {
+                            reject({
+                                message: 'Missing required user data in response',
+                                title: 'Failed',
+                                type: 'error'
+                            });
+                            return;
+                        }
+                        
+                        let customer2 = customerResponse.Attributes[0];
+                        let credit2 = creditResponse.Attributes[0];
 
-                    daptinUserAuth = {
-                        token: newUserToken2, user: newUserObject2, credit: credit2, customer: customer2,
+                        daptinUserAuth = {
+                            token: newUserToken2, user: newUserObject2, credit: credit2, customer: customer2,
+                        }
+
+                        localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
+                        localStorage.setItem('token', newUserToken2)
+                        resolve(signinResponseElement1)
+                    } catch (error) {
+                        console.error('Sign in error:', error);
+                        reject({
+                            message: error.message || 'An unexpected error occurred',
+                            title: 'Failed',
+                            type: 'error'
+                        });
                     }
-
-                    localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
-                    localStorage.setItem('token', newUserToken2)
-                    resolve(signinResponseElement1)
-
                     break
                 case 'createWaitlistEntry':
                     const waitlistResponse = await daptinClient.jsonApi.create('waitlist', {

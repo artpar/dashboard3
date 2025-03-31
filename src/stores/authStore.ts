@@ -60,6 +60,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Handle structured error responses from the API
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          set({ 
+            isLoading: false, 
+            error: error.message
+          });
+          return;
+        }
+      }
+      
+      // Fallback for other types of errors
       set({ 
         isLoading: false, 
         error: error instanceof Error ? error.message : 'Failed to login' 

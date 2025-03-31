@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { useAuth } from '@/stores/authStore'
 import { useToast } from '@/components/ui/use-toast'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -40,6 +42,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { login, isLoading, error, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const [formError, setFormError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,21 +59,29 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     }
   }, [isAuthenticated, navigate])
 
-  // Show error toast if login fails
+  // Update local form error state when auth store error changes
   useEffect(() => {
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication failed',
-        description: error,
-      })
+      setFormError(error)
     }
-  }, [error, toast])
+  }, [error])
+
+  // Clear form error when form values change
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (formError) {
+        setFormError(null)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, formError])
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setFormError(null)
     try {
       await login(data.email, data.password)
-    } catch (err) {
+    } catch (err: any) {
+      // Error is handled by the auth store and will be displayed via the formError state
       console.error('Login error:', err)
     }
   }
@@ -79,7 +90,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     <div className={cn('grid gap-6', className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid gap-2'>
+          <div className='grid gap-4'>
+            {formError && (
+              <Alert variant="destructive" className="mb-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Authentication failed</AlertTitle>
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+            
             <FormField
               control={form.control}
               name='email'
