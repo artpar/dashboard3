@@ -154,6 +154,6 @@
     @apply overflow-x-hidden;
   }
   body {
-    @apply min-h-svh w-full bg-background text-foreground;
+    @apply bg-background text-foreground min-h-svh w-full;
   }
 }

@@ -4,7 +4,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { AlertCircle } from 'lucide-react'
+import { useAuth } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -15,11 +18,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { PasswordInput } from '@/components/password-input'
-import { useAuth } from '@/stores/authStore'
 import { useToast } from '@/components/ui/use-toast'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle } from 'lucide-react'
+import { PasswordInput } from '@/components/password-input'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -92,13 +92,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-4'>
             {formError && (
-              <Alert variant="destructive" className="mb-2">
-                <AlertCircle className="h-4 w-4" />
+              <Alert variant='destructive' className='mb-2'>
+                <AlertCircle className='h-4 w-4' />
                 <AlertTitle>Authentication failed</AlertTitle>
                 <AlertDescription>{formError}</AlertDescription>
               </Alert>
             )}
-            
+
             <FormField
               control={form.control}
               name='email'
@@ -121,7 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     <FormLabel>Password</FormLabel>
                     <Link
                       to='/forgot-password'
-                      className='text-sm font-medium text-muted-foreground hover:opacity-75'
+                      className='text-muted-foreground text-sm font-medium hover:opacity-75'
                     >
                       Forgot password?
                     </Link>
@@ -142,7 +142,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <span className='w-full border-t' />
               </div>
               <div className='relative flex justify-center text-xs uppercase'>
-                <span className='bg-background px-2 text-muted-foreground'>
+                <span className='bg-background text-muted-foreground px-2'>
                   Or continue with
                 </span>
               </div>

@@ -1,4 +1,5 @@
 import { StrictMode } from 'react'
+import { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
 import {
@@ -16,17 +17,15 @@ import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
-import { useEffect } from 'react'
-
 // Create a component to initialize auth state
 function AuthInitializer() {
   const { getAuthState } = useAuthStore()
-  
+
   useEffect(() => {
     // Initialize auth state when the app loads
     getAuthState()
   }, [getAuthState])
-  
+
   return null
 }
 
