@@ -29,6 +29,15 @@ function AuthInitializer() {
   return null
 }
 
+// Function to check if token is expired
+const isTokenExpired = (user: any) => {
+  if (!user || !user.exp) return true
+  
+  // exp is in seconds, Date.now() is in milliseconds
+  const currentTime = Math.floor(Date.now() / 1000)
+  return user.exp < currentTime
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -69,11 +78,14 @@ const queryClient = new QueryClient({
           toast({
             variant: 'destructive',
             title: 'Session expired!',
+            description: 'Please sign in again to continue.',
           })
-          // Update this line to use the new auth store structure
-          useAuthStore.getState().logout()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/sign-in', search: { redirect } })
+          // Properly access the logout function from the store
+          const authStore = useAuthStore.getState()
+          authStore.logout().then(() => {
+            const redirect = `${router.history.location.href}`
+            router.navigate({ to: '/sign-in', search: { redirect } })
+          })
         }
         if (error.response?.status === 500) {
           toast({
@@ -83,6 +95,11 @@ const queryClient = new QueryClient({
           router.navigate({ to: '/500' })
         }
         if (error.response?.status === 403) {
+          toast({
+            variant: 'destructive',
+            title: 'Access Denied',
+            description: 'You do not have permission to access this resource.',
+          })
           // router.navigate("/forbidden", { replace: true });
         }
       }
@@ -105,6 +122,42 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// Create a component to check token expiration periodically
+function TokenExpirationChecker() {
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const authStore = useAuthStore.getState()
+      const { user, isAuthenticated } = authStore
+      
+      if (isAuthenticated && isTokenExpired(user)) {
+        toast({
+          variant: 'destructive',
+          title: 'Session expired!',
+          description: 'Please sign in again to continue.',
+        })
+        
+        authStore.logout().then(() => {
+          const currentPath = router.history.location.href
+          router.navigate({ 
+            to: '/sign-in', 
+            search: { redirect: currentPath } 
+          })
+        })
+      }
+    }
+    
+    // Check on mount
+    checkTokenExpiration()
+    
+    // Set up interval to check periodically (every minute)
+    const interval = setInterval(checkTokenExpiration, 60000)
+    
+    return () => clearInterval(interval)
+  }, [])
+  
+  return null
+}
+
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
@@ -115,6 +168,7 @@ if (!rootElement.innerHTML) {
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
             <AuthInitializer />
+            <TokenExpirationChecker />
             <RouterProvider router={router} />
           </FontProvider>
         </ThemeProvider>

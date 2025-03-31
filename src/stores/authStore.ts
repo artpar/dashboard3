@@ -81,6 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    console.log("Logout invoked")
     try {
       set({ isLoading: true })
 
