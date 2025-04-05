@@ -1,3 +1,5 @@
+// src/features/users/index.tsx
+import { useEffect } from 'react'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -8,12 +10,18 @@ import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
 import UsersProvider from './context/users-context'
-import { userListSchema } from './data/schema'
-import { users } from './data/users'
+import { useUsersStore } from '@/stores/usersStore'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Users() {
-  // Parse user list
-  const userList = userListSchema.parse(users)
+  const { users, isLoading, error, fetchUsers } = useUsersStore()
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   return (
     <UsersProvider>
@@ -35,8 +43,24 @@ export default function Users() {
           </div>
           <UsersPrimaryButtons />
         </div>
+
+        {error && (
+          <Alert variant='destructive' className='mb-4'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
-          <UsersTable data={userList} columns={columns} />
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : (
+            <UsersTable data={users} columns={columns} />
+          )}
         </div>
       </Main>
 
