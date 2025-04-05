@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { sendMessageToBackgroundScript } from '@/background'
+import { Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,13 +16,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 const profileFormSchema = z.object({
   username: z
@@ -48,19 +43,19 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
-}
-
 export default function ProfileForm() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: {
+      username: '',
+      email: '',
+      bio: '',
+      urls: [{ value: '' }],
+    },
     mode: 'onChange',
   })
 
@@ -69,15 +64,113 @@ export default function ProfileForm() {
     control: form.control,
   })
 
-  function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const authData = await sendMessageToBackgroundScript({
+          type: 'getAuth',
+        })
+        console.log('authData', authData)
+
+        if (authData && authData.user) {
+          // Get more detailed creator profile if available
+          let userAccount = authData.user
+
+          setUserProfile({ ...authData })
+
+          // Set form values
+          form.reset({
+            username: userAccount?.name || '',
+            email: userAccount?.email || '',
+            bio: userAccount?.bio || 'I own a computer.',
+            urls: userAccount?.urls
+              ? JSON.parse(userAccount.urls).map((url: string) => ({
+                  value: url,
+                }))
+              : [{ value: 'https://example.com' }],
+          })
+        }
+      } catch (err) {
+        console.error('Error fetching user profile:', err)
+        setError('Failed to load profile data. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUserProfile()
+  }, [form])
+
+  async function onSubmit(data: ProfileFormValues) {
+    setIsLoading(true)
+    try {
+      // Prepare the payload
+      const payload = {
+        creator_id: userProfile?.creatorProfile?.reference_id,
+        customer_id: userProfile?.customer?.reference_id,
+        name: data.username,
+        bio: data.bio,
+        urls: JSON.stringify(data.urls.map((url) => url.value)),
+      }
+
+      // Determine which API to call based on whether creator profile exists
+      const apiType = userProfile?.creatorProfile?.reference_id
+        ? 'updateCreatorInfo'
+        : 'addCreatorProfile'
+
+      const response = await sendMessageToBackgroundScript({
+        type: apiType,
+        payload,
+      })
+
+      toast({
+        title: 'Profile updated successfully',
+        description: 'Your profile information has been updated.',
+      })
+
+      // Update local state with new data
+      setUserProfile({
+        ...userProfile,
+        creatorProfile: response,
+      })
+    } catch (error: any) {
+      console.error('Error updating profile:', error)
+      toast({
+        title: 'Failed to update profile',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isLoading && !userProfile) {
+    return (
+      <div className='flex h-64 items-center justify-center'>
+        <Loader2 className='text-primary h-8 w-8 animate-spin' />
+        <span className='ml-2'>Loading profile data...</span>
+      </div>
+    )
+  }
+
+  if (error && !userProfile) {
+    return (
+      <div className='rounded-md border border-red-300 bg-red-50 p-4 text-red-800'>
+        <h3 className='font-semibold'>Error</h3>
+        <p>{error}</p>
+        <Button
+          variant='outline'
+          className='mt-2'
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -90,11 +183,11 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder='shadcn' {...field} />
+                <Input placeholder='Enter your name' {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                pseudonym.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -106,22 +199,12 @@ export default function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
-              {JSON.stringify(field)}
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                  <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                  <SelectItem value='m@support.com'>m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <Input disabled {...field} />
+              </FormControl>
               <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/'>email settings</Link>.
+                This is your verified email address. Contact support to change
+                it.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -180,7 +263,16 @@ export default function ProfileForm() {
         {/*    Add URL*/}
         {/*  </Button>*/}
         {/*</div>*/}
-        <Button type='submit'>Update profile</Button>
+        <Button type='submit' disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              Updating...
+            </>
+          ) : (
+            'Update profile'
+          )}
+        </Button>
       </form>
     </Form>
   )
