@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { User } from '../data/schema'
+import { useUsersStore } from '@/stores/usersStore'
 
 interface Props {
   open: boolean
@@ -17,29 +18,42 @@ interface Props {
 
 export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
   const [value, setValue] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const { deleteUser } = useUsersStore()
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (value.trim() !== currentRow.username) return
 
-    onOpenChange(false)
-    toast({
-      title: 'The following user has been deleted:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>
-            {JSON.stringify(currentRow, null, 2)}
-          </code>
-        </pre>
-      ),
-    })
+    try {
+      setIsDeleting(true)
+      await deleteUser(currentRow.id)
+      
+      onOpenChange(false)
+      toast({
+        title: 'User deleted',
+        description: `${currentRow.firstName} ${currentRow.lastName} has been permanently removed.`,
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsDeleting(false)
+      setValue('')
+    }
   }
 
   return (
     <ConfirmDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) setValue('')
+        onOpenChange(isOpen)
+      }}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== currentRow.username}
+      disabled={value.trim() !== currentRow.username || isDeleting}
       title={
         <span className='text-destructive'>
           <IconAlertTriangle
@@ -68,6 +82,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder='Enter username to confirm deletion.'
+              disabled={isDeleting}
             />
           </Label>
 
@@ -79,7 +94,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
           </Alert>
         </div>
       }
-      confirmText='Delete'
+      confirmText={isDeleting ? 'Deleting...' : 'Delete'}
       destructive
     />
   )
