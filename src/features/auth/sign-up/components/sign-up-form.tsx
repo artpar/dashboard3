@@ -1,9 +1,13 @@
-import { HTMLAttributes, useState } from 'react'
+import { HTMLAttributes, useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { AlertCircle } from 'lucide-react'
+import { useAuth } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -14,12 +18,16 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
 import { PasswordInput } from '@/components/password-input'
 
 type SignUpFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z
   .object({
+    name: z
+      .string()
+      .min(1, { message: 'Please enter your name' }),
     email: z
       .string()
       .min(1, { message: 'Please enter your email' })
@@ -40,32 +48,85 @@ const formSchema = z
   })
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
+  const { signup, isLoading, error, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const [formError, setFormError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate({ to: '/' })
+    }
+  }, [isAuthenticated, navigate])
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+  // Update local form error state when auth store error changes
+  useEffect(() => {
+    if (error) {
+      setFormError(error)
+    }
+  }, [error])
+
+  // Clear form error when form values change
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (formError) {
+        setFormError(null)
+      }
+    })
+    
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [form, formError])
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    setFormError(null)
+    try {
+      await signup(data.name, data.email, data.password)
+      // If signup is successful, the user will be redirected by the isAuthenticated effect
+    } catch (err: any) {
+      // Error is handled by the auth store and will be displayed via the formError state
+      console.error('Signup error:', err)
+    }
   }
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
+      {formError && (
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertTitle>Registration failed</AlertTitle>
+          <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='John Doe' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='email'
@@ -106,8 +167,20 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               )}
             />
             <Button className='mt-2' disabled={isLoading}>
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
+
+            <div className="text-center mt-2">
+              <span className="text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Link
+                  to='/sign-in'
+                  className='text-primary font-medium hover:underline'
+                >
+                  Sign in
+                </Link>
+              </span>
+            </div>
 
             <div className='relative my-2'>
               <div className='absolute inset-0 flex items-center'>

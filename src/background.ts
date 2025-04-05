@@ -1049,6 +1049,55 @@ export async function sendMessageToBackgroundScript(request) {
 
           break
         case 'signUp':
+          try {
+            // Validate required parameters
+            if (!request.email || !request.password || !request.name) {
+              console.error('Missing required parameters for signup')
+              reject({ 
+                message: 'Missing required parameters: name, email, and password are required',
+                type: 'error'
+              })
+              return
+            }
+
+            // Call the signup API
+            const signupResponse = await daptinClient.actionManager.doAction(
+              'user_account',
+              'signup',
+              {
+                name: request.name,
+                email: request.email,
+                password: request.password,
+                passwordConfirm: request.password,
+              }
+            )
+
+            // Check for error notifications
+            const errorNotification = signupResponse.find(
+              (res) =>
+                res.ResponseType === 'client.notify' &&
+                res.Attributes.type === 'error'
+            )
+
+            if (errorNotification) {
+              reject({
+                message: errorNotification.Attributes.message,
+                title: errorNotification.Attributes.title || 'Failed',
+                type: 'error',
+              })
+              return
+            }
+
+            // If successful, resolve with the response
+            resolve(signupResponse)
+          } catch (error) {
+            console.error('Signup error:', error)
+            reject({
+              message: error.message || 'An unexpected error occurred during signup',
+              title: 'Failed',
+              type: 'error',
+            })
+          }
           break
         case 'getMemoryReplies':
           try {

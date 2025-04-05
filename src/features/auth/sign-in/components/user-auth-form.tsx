@@ -294,6 +294,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         </TabsContent>
       </Tabs>
 
+      <div className="text-center mt-2">
+        <span className="text-sm text-muted-foreground">
+          Don't have an account?{' '}
+          <Link
+            to='/sign-up'
+            className='text-primary font-medium hover:underline'
+          >
+            Sign up
+          </Link>
+        </span>
+      </div>
+
       <div className='relative my-2'>
         <div className='absolute inset-0 flex items-center'>
           <span className='w-full border-t' />

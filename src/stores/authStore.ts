@@ -39,6 +39,7 @@ interface AuthState {
   getAuthState: () => Promise<void>
   setAuthMethod: (method: 'password' | 'otp') => void
   setEmailForOtp: (email: string) => void
+  signup: (name: string, email: string, password: string) => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -143,6 +144,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to request OTP',
       })
       return Promise.reject(error)
+    }
+  },
+
+  signup: async (name: string, email: string, password: string) => {
+    try {
+      set({ isLoading: true, error: null })
+
+      // Call the API to sign up
+      await sendMessageToBackgroundScript({
+        type: 'signUp',
+        name,
+        email,
+        password,
+      })
+
+      // After successful signup, automatically log the user in
+      await get().login(email, password)
+      
+      set({ isLoading: false })
+    } catch (error) {
+      console.error('Signup error:', error)
+      
+      // Handle structured error responses from the API
+      if (error && typeof error === 'object') {
+        if (error.error || error.message) {
+          set({
+            isLoading: false,
+            error: error.error || error.message,
+          })
+          return
+        }
+      }
+      
+      // Fallback for other types of errors
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to sign up',
+      })
     }
   },
 
