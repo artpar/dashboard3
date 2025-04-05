@@ -33,14 +33,11 @@ const formSchema = z
   .object({
     firstName: z.string().min(1, { message: 'First Name is required.' }),
     lastName: z.string().min(1, { message: 'Last Name is required.' }),
-    username: z.string().min(1, { message: 'Username is required.' }),
-    phoneNumber: z.string().min(1, { message: 'Phone number is required.' }),
     email: z
       .string()
       .min(1, { message: 'Email is required.' })
       .email({ message: 'Email is invalid.' }),
     password: z.string().transform((pwd) => pwd.trim()),
-    role: z.string().min(1, { message: 'Role is required.' }),
     confirmPassword: z.string().transform((pwd) => pwd.trim()),
     isEdit: z.boolean(),
   })
@@ -99,7 +96,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const isEdit = !!currentRow
   const { createUser, updateUser } = useUsersStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
@@ -112,10 +109,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
       : {
           firstName: '',
           lastName: '',
-          username: '',
           email: '',
-          role: '',
-          phoneNumber: '',
           password: '',
           confirmPassword: '',
           isEdit,
@@ -125,20 +119,16 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const onSubmit = async (values: UserForm) => {
     try {
       setIsSubmitting(true)
-      
+
       if (isEdit && currentRow) {
         // Update existing user
         await updateUser(currentRow.id, {
           firstName: values.firstName,
           lastName: values.lastName,
-          username: values.username,
           email: values.email,
-          phoneNumber: values.phoneNumber,
-          role: values.role,
-          // Only include password if it was changed
           ...(values.password ? { password: values.password } : {})
         })
-        
+
         toast({
           title: "User updated",
           description: `${values.firstName} ${values.lastName}'s information has been updated successfully.`,
@@ -148,20 +138,17 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
         await createUser({
           firstName: values.firstName,
           lastName: values.lastName,
-          username: values.username,
           email: values.email,
-          phoneNumber: values.phoneNumber,
-          role: values.role,
           password: values.password,
           status: 'active', // Default to active for new users
         })
-        
+
         toast({
           title: "User created",
           description: `${values.firstName} ${values.lastName} has been added successfully.`,
         })
       }
-      
+
       form.reset()
       onOpenChange(false)
     } catch (error) {
@@ -240,25 +227,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='username'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Username
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='john_doe'
-                        className='col-span-4'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name='email'
@@ -278,47 +247,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='phoneNumber'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Phone Number
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='+123456789'
-                        className='col-span-4'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='role'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Role
-                    </FormLabel>
-                    <SelectDropdown
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                      placeholder='Select a role'
-                      className='col-span-4'
-                      items={userTypes.map(({ label, value }) => ({
-                        label,
-                        value,
-                      }))}
-                    />
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name='password'
@@ -362,8 +291,8 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
           </Form>
         </div>
         <DialogFooter>
-          <Button 
-            type='submit' 
+          <Button
+            type='submit'
             form='user-form'
             disabled={isSubmitting}
           >

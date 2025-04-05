@@ -22,12 +22,12 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
   const { deleteUser } = useUsersStore()
 
   const handleDelete = async () => {
-    if (value.trim() !== currentRow.username) return
+    if (value.trim() !== currentRow.email) return
 
     try {
       setIsDeleting(true)
       await deleteUser(currentRow.id)
-      
+
       onOpenChange(false)
       toast({
         title: 'User deleted',
@@ -53,7 +53,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
         onOpenChange(isOpen)
       }}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== currentRow.username || isDeleting}
+      disabled={value.trim() !== currentRow.email || isDeleting}
       title={
         <span className='text-destructive'>
           <IconAlertTriangle
@@ -67,21 +67,19 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
         <div className='space-y-4'>
           <p className='mb-2'>
             Are you sure you want to delete{' '}
-            <span className='font-bold'>{currentRow.username}</span>?
+            <span className='font-bold'>{currentRow.email}</span>?
             <br />
             This action will permanently remove the user with the role of{' '}
-            <span className='font-bold'>
-              {currentRow.role.toUpperCase()}
-            </span>{' '}
+            {' '}
             from the system. This cannot be undone.
           </p>
 
           <Label className='my-2'>
-            Username:
+            Email:
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder='Enter username to confirm deletion.'
+              placeholder='Enter email to confirm deletion.'
               disabled={isDeleting}
             />
           </Label>
@@ -89,7 +87,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
           <Alert variant='destructive'>
             <AlertTitle>Warning!</AlertTitle>
             <AlertDescription>
-              Please be carefull, this operation can not be rolled back.
+              Please be careful, this operation can not be rolled back.
             </AlertDescription>
           </Alert>
         </div>
