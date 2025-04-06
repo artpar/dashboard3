@@ -116,6 +116,92 @@ export const EntityDataProvider: React.FC<{
 
             // Parse column information from schema
             try {
+              // Check if world_schema_json is available
+              if (schemaData.world_schema_json) {
+                try {
+                  // Parse the schema JSON from the backend
+                  const parsedSchema = JSON.parse(schemaData.world_schema_json);
+                  
+                  // Extract columns from the parsed schema
+                  if (parsedSchema && parsedSchema.Columns) {
+                    const normalizedColumns = parsedSchema.Columns
+                      .filter((col: any) => 
+                        !['permission', 'id', 'version'].includes(col.ColumnName.toLowerCase())
+                      )
+                      .map((col: any) => ({
+                        key: col.ColumnName,
+                        name: col.Name || col.ColumnName
+                          .split('_')
+                          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' '),
+                        type: col.ColumnType,
+                        isNullable: col.IsNullable,
+                        isUnique: col.IsUnique,
+                        isPrimaryKey: col.IsPrimaryKey,
+                        isForeignKey: col.IsForeignKey,
+                        defaultValue: col.DefaultValue,
+                        dataType: col.DataType,
+                        columnType: col.ColumnType,
+                        relationName: col.ForeignKeyData?.KeyName,
+                        options: col.Options,
+                        columnDescription: col.ColumnDescription,
+                      }));
+                    
+                    setColumns(normalizedColumns);
+                    
+                    // Set relations from the parsed schema
+                    if (parsedSchema.Relations) {
+                      const entityRelations = parsedSchema.Relations.filter(
+                        (relation: any) => relation.Subject === entityName || relation.Object === entityName
+                      );
+                      setRelations(entityRelations);
+                    }
+                    
+                    // Continue with fetching actions
+                    try {
+                      const actionsResponse = await daptinClient.jsonApi.findAll('action', {
+                        query: JSON.stringify([
+                          {
+                            column: 'on_type',
+                            operator: 'eq',
+                            value: entityName,
+                          },
+                        ]),
+                      });
+
+                      if (actionsResponse.data && actionsResponse.data.length > 0) {
+                        setAvailableActions(actionsResponse.data);
+                      }
+                    } catch (actionError) {
+                      console.warn('Error fetching actions:', actionError);
+                    }
+                    console.log("Schema parsed[" + entityName + "]", normalizedColumns)
+                    // Skip the additional relations fetch since we got them from the schema
+                    // We need to fetch and return the data instead of just returning
+                    const response = await daptinClient.jsonApi.findAll(entityName, {
+                      'page[size]': pageSize.toString(),
+                      'page[number]': currentPage.toString(),
+                      sort: '-created_at',
+                      query: parseFilters(),
+                    });
+                    
+                    if (response.errors && response.errors.length) {
+                      throw new Error(response.errors[0].detail || `Failed to fetch ${entityName} data`);
+                    }
+                    
+                    // Calculate total pages
+                    const totalItems = response.meta?.total || response.data.length;
+                    setTotalPages(Math.ceil(totalItems / pageSize));
+                    
+                    return response.data;
+                  }
+                } catch (jsonParseError) {
+                  console.error('Error parsing world_schema_json:', jsonParseError);
+                  // Fall back to the existing approach if parsing fails
+                }
+              }
+              
+              // If world_schema_json is not available or parsing failed, continue with the existing approach
               // Extract column information directly from the world table's columns_info JSON
               const columnsInfo = schemaData.columns_info || {};
 

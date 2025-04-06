@@ -326,23 +326,24 @@ export const EntityDataTable: React.FC = () => {
                               View Relations
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
-                              {relations.map((relation) => (
-                                <DropdownMenuItem
-                                  key={relation.reference_id}
-                                  onClick={() => {
-                                    // Would navigate to related entity
-                                    // For example, if viewing a customer, could navigate to their orders
-                                    console.log(
-                                      `View relation: ${relation.subject} -> ${relation.relation} -> ${relation.object}`
-                                    )
-                                    console.log(
-                                      `Item ID: ${item.reference_id || item.id}`
-                                    )
-                                  }}
-                                >
-                                  {relation.object}
-                                </DropdownMenuItem>
-                              ))}
+                              {JSON.stringify(relations, null, 2)}
+                              {/*{relations.map((relation) => (*/}
+                              {/*  <DropdownMenuItem*/}
+                              {/*    key={relation.reference_id}*/}
+                              {/*    onClick={() => {*/}
+                              {/*      // Would navigate to related entity*/}
+                              {/*      // For example, if viewing a customer, could navigate to their orders*/}
+                              {/*      console.log(*/}
+                              {/*        `View relation: ${relation.subject} -> ${relation.relation} -> ${relation.object}`*/}
+                              {/*      )*/}
+                              {/*      console.log(*/}
+                              {/*        `Item ID: ${item.reference_id || item.id}`*/}
+                              {/*      )*/}
+                              {/*    }}*/}
+                              {/*  >*/}
+                              {/*    {relation.object}*/}
+                              {/*  </DropdownMenuItem>*/}
+                              {/*))}*/}
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
                         </>
