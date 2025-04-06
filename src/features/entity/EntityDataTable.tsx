@@ -1,12 +1,29 @@
-import React from 'react';
-import { format } from 'date-fns';
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useEntityData } from './EntityContext';
+import React from 'react'
+import { format } from 'date-fns'
+import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useEntityData } from './EntityContext'
 
 export const EntityDataTable: React.FC = () => {
   const {
@@ -17,37 +34,43 @@ export const EntityDataTable: React.FC = () => {
     setShowDeleteDialog,
     currentPage,
     pageSize,
-  } = useEntityData();
+  } = useEntityData()
 
   // Function to format cell value based on type
   const formatCellValue = (item: any, column: any) => {
-    const value = item[column.key];
+    const value = item[column.key]
 
     if (value === null || value === undefined) {
-      return '-';
+      return '-'
     }
 
     // Handle different column types
     if (column.key === 'created_at' || column.key === 'updated_at') {
       try {
-        return format(new Date(value), 'PPP');
+        return format(new Date(value), 'PPP')
       } catch (e) {
-        return value;
+        return value
       }
     }
 
     // Boolean values
     if (typeof value === 'boolean') {
       return value ? (
-        <Badge variant="outline" className="bg-green-100">Yes</Badge>
+        <Badge variant='outline' className='bg-green-100'>
+          Yes
+        </Badge>
       ) : (
-        <Badge variant="outline" className="bg-red-100">No</Badge>
-      );
+        <Badge variant='outline' className='bg-red-100'>
+          No
+        </Badge>
+      )
     }
 
     // Status-like fields with common status values
     if (
-      (column.key === 'status' || column.key.includes('status') || column.key.endsWith('_status')) &&
+      (column.key === 'status' ||
+        column.key.includes('status') ||
+        column.key.endsWith('_status')) &&
       typeof value === 'string'
     ) {
       const statusColors: { [key: string]: string } = {
@@ -60,13 +83,16 @@ export const EntityDataTable: React.FC = () => {
         failed: 'bg-red-100 text-red-800',
         paid: 'bg-green-100 text-green-800',
         unpaid: 'bg-red-100 text-red-800',
-      };
+      }
 
       return (
-        <Badge variant="outline" className={statusColors[value.toLowerCase()] || 'bg-gray-100'}>
+        <Badge
+          variant='outline'
+          className={statusColors[value.toLowerCase()] || 'bg-gray-100'}
+        >
           {value}
         </Badge>
-      );
+      )
     }
 
     // Handle long text
@@ -77,12 +103,12 @@ export const EntityDataTable: React.FC = () => {
             <TooltipTrigger asChild>
               <span>{value.substring(0, 50)}...</span>
             </TooltipTrigger>
-            <TooltipContent className="max-w-md">
+            <TooltipContent className='max-w-md'>
               <p>{value}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      );
+      )
     }
 
     // JSON or objects
@@ -93,53 +119,59 @@ export const EntityDataTable: React.FC = () => {
             <TooltipTrigger asChild>
               <span>[Object]</span>
             </TooltipTrigger>
-            <TooltipContent className="max-w-md">
-              <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
+            <TooltipContent className='max-w-md'>
+              <pre className='text-xs'>{JSON.stringify(value, null, 2)}</pre>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      );
+      )
     }
 
     // Default case
-    return value.toString();
-  };
+    return value.toString()
+  }
 
   // Handle edit action
   const handleEdit = (item: any) => {
-    setSelectedItem(item);
-    setShowEditDialog(true);
-  };
+    setSelectedItem(item)
+    setShowEditDialog(true)
+  }
 
   // Handle delete action
   const handleDelete = (item: any) => {
-    setSelectedItem(item);
-    setShowDeleteDialog(true);
-  };
+    setSelectedItem(item)
+    setShowDeleteDialog(true)
+  }
 
   // Get visible columns - limiting to keep UI clean
   const visibleColumns = columns
-    .filter(col => !['reference_id', 'permission', 'created_by', 'updated_by'].includes(col.key))
-    .slice(0, 5); // Show first 5 columns by default
+    .filter(
+      (col) =>
+        !['reference_id', 'permission', 'created_by', 'updated_by'].includes(
+          col.key
+        )
+    )
+    .slice(0, 5) // Show first 5 columns by default
 
   return (
-    <div className="rounded-md border">
+    <div className='rounded-md border'>
       <Table>
         <TableHeader>
           <TableRow>
             {visibleColumns.map((column) => (
-              <TableHead key={column.key}>
-                {column.name}
-              </TableHead>
+              <TableHead key={column.key}>{column.name}</TableHead>
             ))}
             <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={visibleColumns.length + 2} className="text-center py-6 text-muted-foreground">
+              <TableCell
+                colSpan={visibleColumns.length + 2}
+                className='text-muted-foreground py-6 text-center'
+              >
                 No data found
               </TableCell>
             </TableRow>
@@ -154,21 +186,24 @@ export const EntityDataTable: React.FC = () => {
                 <TableCell>
                   {formatCellValue(item, { key: 'created_at' })}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className='text-right'>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
+                      <Button variant='ghost' size='icon'>
+                        <MoreHorizontal className='h-4 w-4' />
+                        <span className='sr-only'>Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align='end'>
                       <DropdownMenuItem onClick={() => handleEdit(item)}>
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className='mr-2 h-4 w-4' />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(item)} className="text-red-600">
-                        <Trash2 className="mr-2 h-4 w-4" />
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(item)}
+                        className='text-red-600'
+                      >
+                        <Trash2 className='mr-2 h-4 w-4' />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -180,7 +215,7 @@ export const EntityDataTable: React.FC = () => {
         </TableBody>
       </Table>
     </div>
-  );
-};
+  )
+}
 
-export default EntityDataTable;
+export default EntityDataTable
