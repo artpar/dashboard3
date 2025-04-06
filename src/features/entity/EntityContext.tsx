@@ -14,6 +14,7 @@ interface EntityContextType {
   createItem: (item: any) => Promise<any>;
   updateItem: (id: string, item: any) => Promise<any>;
   deleteItem: (id: string) => Promise<any>;
+  executeAction: (actionName: string, payload: any) => Promise<any>;
   selectedItem: any;
   setSelectedItem: (item: any) => void;
   currentPage: number;
@@ -32,6 +33,8 @@ interface EntityContextType {
   showFilterDialog: boolean;
   setShowFilterDialog: (show: boolean) => void;
   columns: any[];
+  availableActions: any[];
+  relations: any[];
   refresh: () => void;
 }
 
@@ -76,6 +79,10 @@ export const EntityDataProvider: React.FC<{
     return filterQuery.length > 0 ? JSON.stringify(filterQuery) : undefined;
   };
 
+  // State to store available actions
+  const [availableActions, setAvailableActions] = useState<any[]>([]);
+  const [relations, setRelations] = useState<any[]>([]);
+
   // Fetch entity data
   const {
     data: queryData,
@@ -88,6 +95,7 @@ export const EntityDataProvider: React.FC<{
       try {
         // First, try to get the schema (world table) to understand the entity structure
         if (!schema) {
+          // Fetch schema information from world entity
           const worldResponse = await daptinClient.jsonApi.findAll('world', {
             query: JSON.stringify([
               {
@@ -103,23 +111,36 @@ export const EntityDataProvider: React.FC<{
           }
 
           if (worldResponse.data && worldResponse.data.length > 0) {
-            setSchema(worldResponse.data[0]);
+            const schemaData = worldResponse.data[0];
+            setSchema(schemaData);
 
-            // Fetch column info and normalize it
+            // Parse column information from schema
             try {
-              const columnsResponse = await daptinClient.jsonApi.findAll('column', {
-                query: JSON.stringify([
-                  {
-                    column: 'table_name',
-                    operator: 'eq',
-                    value: entityName,
-                  },
-                ]),
-                sort: 'column_position',
-              });
+              // Extract column information directly from the world table's columns_info JSON
+              const columnsInfo = schemaData.columns_info || {};
 
-              if (columnsResponse.data) {
-                const normalizedColumns = columnsResponse.data
+              // Also fetch detailed column information if available
+              let columnsResponse;
+              try {
+                columnsResponse = await daptinClient.jsonApi.findAll('column', {
+                  query: JSON.stringify([
+                    {
+                      column: 'table_name',
+                      operator: 'eq',
+                      value: entityName,
+                    },
+                  ]),
+                  sort: 'column_position',
+                });
+              } catch (err) {
+                console.log('Column info not available, using schema info only');
+              }
+
+              let normalizedColumns = [];
+
+              if (columnsResponse && columnsResponse.data && columnsResponse.data.length > 0) {
+                // Use detailed column information when available
+                normalizedColumns = columnsResponse.data
                   .filter((col: any) =>
                     !['permission', 'id', 'version'].includes(col.column_name.toLowerCase())
                   )
@@ -135,14 +156,79 @@ export const EntityDataProvider: React.FC<{
                     isPrimaryKey: col.is_primary_key,
                     isForeignKey: col.is_foreign_key,
                     defaultValue: col.default_value,
+                    dataType: col.data_type,
+                    validations: col.validations,
+                    conformations: col.conformations,
+                    columnType: col.column_type,
+                    relationName: col.relation_name,
                   }));
-
-                setColumns(normalizedColumns);
+              } else {
+                // Fall back to schema columns_info
+                normalizedColumns = Object.entries(columnsInfo)
+                  .filter(([key]) => !['permission', 'id', 'version'].includes(key.toLowerCase()))
+                  .map(([key, info]: [string, any]) => ({
+                    key,
+                    name: key
+                      .split('_')
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(' '),
+                    type: info.columnType || 'string',
+                    isNullable: info.isNullable,
+                    isUnique: info.isUnique,
+                    isPrimaryKey: key === 'id',
+                    isForeignKey: info.isForeignKey,
+                    defaultValue: info.defaultValue,
+                    dataType: info.dataType,
+                    columnType: info.columnType,
+                    relationName: info.relationName,
+                    options: info.options,
+                  }));
               }
+
+              setColumns(normalizedColumns);
+
+              // Fetch available actions for this entity
+              try {
+                const actionsResponse = await daptinClient.jsonApi.findAll('action', {
+                  query: JSON.stringify([
+                    {
+                      column: 'on_type',
+                      operator: 'eq',
+                      value: entityName,
+                    },
+                  ]),
+                });
+
+                if (actionsResponse.data && actionsResponse.data.length > 0) {
+                  setAvailableActions(actionsResponse.data);
+                }
+              } catch (actionError) {
+                console.warn('Error fetching actions:', actionError);
+              }
+
+              // Fetch relations for this entity
+              try {
+                const relationsResponse = await daptinClient.jsonApi.findAll('relation', {
+                  query: JSON.stringify([
+                    {
+                      column: 'subject',
+                      operator: 'eq',
+                      value: entityName,
+                    },
+                  ]),
+                });
+
+                if (relationsResponse.data && relationsResponse.data.length > 0) {
+                  setRelations(relationsResponse.data);
+                }
+              } catch (relationError) {
+                console.warn('Error fetching relations:', relationError);
+              }
+
             } catch (columnsError) {
-              console.error('Error fetching columns:', columnsError);
-              // Fall back to using schema data if column info can't be fetched
-              const schemaColumns = Object.keys(worldResponse.data[0].columns_info || {})
+              console.error('Error processing schema information:', columnsError);
+              // Fall back to basic schema extraction
+              const schemaColumns = Object.keys(columnsInfo || {})
                 .filter(key => !['permission', 'id', 'version'].includes(key.toLowerCase()))
                 .map(key => ({
                   key,
@@ -287,6 +373,42 @@ export const EntityDataProvider: React.FC<{
     refetch();
   };
 
+  // Execute custom action on an entity
+  const executeAction = async (actionName: string, payload: any) => {
+    try {
+      // Check if the action exists
+      const action = availableActions.find(a => a.name === actionName);
+      if (!action) {
+        throw new Error(`Action '${actionName}' not found for entity '${entityName}'`);
+      }
+
+      // Execute the action
+      const response = await daptinClient.actionManager.doAction(
+        entityName,
+        actionName,
+        payload
+      );
+
+      // Force refresh data after action
+      await refetch();
+
+      toast({
+        title: 'Success',
+        description: `Action ${actionName} executed successfully`,
+      });
+
+      return response;
+    } catch (error) {
+      console.error(`Error executing action ${actionName}:`, error);
+      toast({
+        variant: 'destructive',
+        title: `Failed to execute ${actionName}`,
+        description: error instanceof Error ? error.message : 'An error occurred',
+      });
+      throw error;
+    }
+  };
+
   const contextValue: EntityContextType = {
     entityName,
     data,
@@ -297,6 +419,7 @@ export const EntityDataProvider: React.FC<{
     createItem,
     updateItem,
     deleteItem,
+    executeAction,
     selectedItem,
     setSelectedItem,
     currentPage,
@@ -315,6 +438,8 @@ export const EntityDataProvider: React.FC<{
     showFilterDialog,
     setShowFilterDialog,
     columns,
+    availableActions,
+    relations,
     refresh,
   };
 
