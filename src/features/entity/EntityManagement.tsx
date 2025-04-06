@@ -189,22 +189,23 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {availableActions
-                    .filter(action => action.instance_optional)
-                    .map(action => (
-                      <DropdownMenuItem
-                        key={action.name}
-                        onClick={() => {
-                          // Handle action click - this would need a custom dialog
-                          // For demonstration, we'll just console log
-                          console.log(`Executing action: ${action.name}`);
-                          // In a real implementation, you'd show a dialog to collect inputs
-                          // Then call executeAction(action.name, inputs)
-                        }}
-                      >
-                        {action.label || action.name}
-                      </DropdownMenuItem>
-                    ))}
+                  {JSON.stringify(availableActions, null, 2)}
+                  {/*{availableActions*/}
+                  {/*  .filter(action => action.instance_optional)*/}
+                  {/*  .map(action => (*/}
+                  {/*    <DropdownMenuItem*/}
+                  {/*      key={action.name}*/}
+                  {/*      onClick={() => {*/}
+                  {/*        // Handle action click - this would need a custom dialog*/}
+                  {/*        // For demonstration, we'll just console log*/}
+                  {/*        console.log(`Executing action: ${action.name}`);*/}
+                  {/*        // In a real implementation, you'd show a dialog to collect inputs*/}
+                  {/*        // Then call executeAction(action.name, inputs)*/}
+                  {/*      }}*/}
+                  {/*    >*/}
+                  {/*      {action.label || action.name}*/}
+                  {/*    </DropdownMenuItem>*/}
+                  {/*  ))}*/}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -268,7 +269,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
               {Array.from({length: Math.min(5, totalPages)}, (_, i) => {
                 const pageNum = i + 1;
                 return (
-                  <PaginationItem key={pageNum}>
+                  <PaginationItem key={`page-${pageNum}`}>
                     <PaginationLink
                       onClick={() => setCurrentPage(pageNum)}
                       isActive={currentPage === pageNum}

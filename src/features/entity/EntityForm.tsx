@@ -39,18 +39,23 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   const basicColumns = columns.filter(col =>
     !col.key.includes('_id') &&
     !col.key.includes('permission') &&
-    !['id', 'reference_id', 'created_at', 'updated_at', 'version'].includes(col.key)
+    !['id', 'reference_id', 'created_at', 'updated_at', 'version'].includes(col.key) &&
+    !col.excludeFromApi &&
+    col.type !== 'file.*' // File columns go to advanced tab
   ).slice(0, 10); // First 10 basic columns
 
   const relationshipColumns = columns.filter(col =>
-    col.key.includes('_id') &&
-    !['id', 'reference_id', 'created_by', 'updated_by'].includes(col.key)
+    (col.key.includes('_id') || col.isForeignKey) &&
+    !['id', 'reference_id', 'created_by', 'updated_by'].includes(col.key) &&
+    !col.excludeFromApi
   );
 
   const advancedColumns = columns.filter(col =>
     !basicColumns.includes(col) &&
     !relationshipColumns.includes(col) &&
-    !['id', 'reference_id', 'created_at', 'updated_at', 'version', 'permission'].includes(col.key)
+    !['id', 'reference_id', 'created_at', 'updated_at', 'version', 'permission'].includes(col.key) &&
+    !col.excludeFromApi &&
+    (col.type === 'file.*' || !col.key.includes('_id'))
   );
 
   // Initialize form data with current values when editing
@@ -137,8 +142,62 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
     const value = formData[key] !== undefined ? formData[key] : '';
     const hasError = !!errors[key];
 
+    // Handle foreign keys with special selectors when possible
+    if (column.isForeignKey && column.foreignKeyData && column.foreignKeyData.KeyName) {
+      // This would ideally show a selector with options from the related entity
+      // For now, we'll show a simple input with a helper text
+      return (
+        <div className="space-y-1">
+          <Input
+            id={key}
+            value={value || ''}
+            onChange={(e) => handleChange(key, e.target.value)}
+            className={hasError ? 'border-red-500' : ''}
+            placeholder={`Enter ${column.foreignKeyData.Namespace}.${column.foreignKeyData.KeyName} ID`}
+          />
+          <p className="text-xs text-muted-foreground">
+            References {column.foreignKeyData.Namespace}
+          </p>
+        </div>
+      );
+    }
+
+    // File inputs
+    if (column.type && (column.type.startsWith('file.') || column.type === 'file')) {
+      // Get allowed file extensions from column type (e.g., file.png|jpg|jpeg)
+      const fileTypeMatch = column.type.match(/file\.(.*)/);
+      const fileTypes = fileTypeMatch ? fileTypeMatch[1] : '';
+      const acceptValue = fileTypes ?
+        fileTypes.split('|').map((ext: string) => `.${ext}`).join(',') :
+        '';
+
+      return (
+        <div className="space-y-1">
+          <Input
+            id={key}
+            type="file"
+            onChange={(e) => {
+              // File handling would typically involve converting to base64 or similar
+              // For demo purposes, we'll just store the file name
+              if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                handleChange(key, file.name); // In production, handle the actual file upload
+              }
+            }}
+            accept={acceptValue}
+            className={hasError ? 'border-red-500' : ''}
+          />
+          {column.foreignKeyData && (
+            <p className="text-xs text-muted-foreground">
+              Stored in {column.foreignKeyData.DataSource}/{column.foreignKeyData.Namespace}/{column.foreignKeyData.KeyName}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     // Standard text input for most types
-    if (['string', 'label', 'varchar', 'char', 'name', 'email', 'url', 'password'].includes(column.type)) {
+    if (['string', 'label', 'varchar', 'char', 'name', 'email', 'url', 'password', 'alias'].includes(column.type)) {
       const inputType =
         column.type === 'email' ? 'email' :
           column.type === 'password' ? 'password' :
@@ -151,6 +210,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           value={value || ''}
           onChange={(e) => handleChange(key, e.target.value)}
           className={hasError ? 'border-red-500' : ''}
+          placeholder={column.columnDescription || ''}
         />
       );
     }
@@ -164,14 +224,17 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           onChange={(e) => handleChange(key, e.target.value)}
           className={hasError ? 'border-red-500' : ''}
           rows={4}
+          placeholder={column.columnDescription || ''}
         />
       );
     }
 
     // Numeric inputs
     if (['int', 'integer', 'number', 'float', 'double', 'decimal', 'measurement'].includes(column.type) ||
-      (typeof column.type === 'string' && column.type.startsWith('int(')) ||
-      (typeof column.type === 'string' && column.type.startsWith('decimal('))) {
+      (typeof column.dataType === 'string' && column.dataType.startsWith('int(')) ||
+      (typeof column.dataType === 'string' && column.dataType.startsWith('decimal(')) ||
+      (typeof column.dataType === 'string' && column.dataType === 'smallint') ||
+      (typeof column.dataType === 'string' && column.dataType === 'INTEGER')) {
       return (
         <Input
           id={key}
@@ -179,12 +242,14 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           value={value || ''}
           onChange={(e) => handleChange(key, e.target.value === '' ? '' : Number(e.target.value))}
           className={hasError ? 'border-red-500' : ''}
+          placeholder={column.columnDescription || ''}
         />
       );
     }
 
     // Date picker for date types
-    if (['date', 'datetime', 'timestamp'].includes(column.type)) {
+    if (['date', 'datetime', 'timestamp'].includes(column.type) ||
+      (typeof column.dataType === 'string' && column.dataType === 'timestamp')) {
       return (
         <Popover>
           <PopoverTrigger asChild>
@@ -222,7 +287,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
             onCheckedChange={(checked) => handleChange(key, checked)}
           />
           <Label htmlFor={key} className="cursor-pointer">
-            {checked ? 'Yes' : 'No'}
+            {value ? 'Yes' : 'No'}
           </Label>
         </div>
       );
@@ -249,21 +314,6 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       );
     }
 
-    // Foreign key / relationship inputs
-    if (column.isForeignKey && column.key.endsWith('_id')) {
-      // We would ideally fetch options for this relationship
-      // For now, fallback to a simple input for the ID
-      return (
-        <Input
-          id={key}
-          value={value || ''}
-          onChange={(e) => handleChange(key, e.target.value)}
-          className={hasError ? 'border-red-500' : ''}
-          placeholder="Enter ID"
-        />
-      );
-    }
-
     // Default fallback for any other types
     return (
       <Input
@@ -271,6 +321,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
         value={value || ''}
         onChange={(e) => handleChange(key, e.target.value)}
         className={hasError ? 'border-red-500' : ''}
+        placeholder={column.columnDescription || ''}
       />
     );
   };
