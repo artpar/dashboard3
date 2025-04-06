@@ -39,6 +39,12 @@ const AuthenticatedWorkgroupsIndexLazyImport = createFileRoute(
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
 )()
+const AuthenticatedUsergroupsIndexLazyImport = createFileRoute(
+  '/_authenticated/usergroups/',
+)()
+const AuthenticatedUseraccountsIndexLazyImport = createFileRoute(
+  '/_authenticated/user_accounts/',
+)()
 const AuthenticatedTasksIndexLazyImport = createFileRoute(
   '/_authenticated/tasks/',
 )()
@@ -189,6 +195,28 @@ const AuthenticatedUsersIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/users/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedUsergroupsIndexLazyRoute =
+  AuthenticatedUsergroupsIndexLazyImport.update({
+    id: '/usergroups/',
+    path: '/usergroups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/usergroups/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedUseraccountsIndexLazyRoute =
+  AuthenticatedUseraccountsIndexLazyImport.update({
+    id: '/user_accounts/',
+    path: '/user_accounts/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/user_accounts/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const AuthenticatedTasksIndexLazyRoute =
@@ -473,6 +501,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/user_accounts/': {
+      id: '/_authenticated/user_accounts/'
+      path: '/user_accounts'
+      fullPath: '/user_accounts'
+      preLoaderRoute: typeof AuthenticatedUseraccountsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/usergroups/': {
+      id: '/_authenticated/usergroups/'
+      path: '/usergroups'
+      fullPath: '/usergroups'
+      preLoaderRoute: typeof AuthenticatedUsergroupsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
@@ -527,6 +569,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedMemoriesIndexLazyRoute: typeof AuthenticatedMemoriesIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
+  AuthenticatedUseraccountsIndexLazyRoute: typeof AuthenticatedUseraccountsIndexLazyRoute
+  AuthenticatedUsergroupsIndexLazyRoute: typeof AuthenticatedUsergroupsIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
   AuthenticatedWorkgroupsIndexLazyRoute: typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
@@ -541,6 +585,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedMemoriesIndexLazyRoute: AuthenticatedMemoriesIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
+  AuthenticatedUseraccountsIndexLazyRoute:
+    AuthenticatedUseraccountsIndexLazyRoute,
+  AuthenticatedUsergroupsIndexLazyRoute: AuthenticatedUsergroupsIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
   AuthenticatedWorkgroupsIndexLazyRoute: AuthenticatedWorkgroupsIndexLazyRoute,
 }
@@ -572,6 +619,8 @@ export interface FileRoutesByFullPath {
   '/memories': typeof AuthenticatedMemoriesIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
+  '/user_accounts': typeof AuthenticatedUseraccountsIndexLazyRoute
+  '/usergroups': typeof AuthenticatedUsergroupsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/workgroups': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
@@ -598,6 +647,8 @@ export interface FileRoutesByTo {
   '/memories': typeof AuthenticatedMemoriesIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
+  '/user_accounts': typeof AuthenticatedUseraccountsIndexLazyRoute
+  '/usergroups': typeof AuthenticatedUsergroupsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/workgroups': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
@@ -628,6 +679,8 @@ export interface FileRoutesById {
   '/_authenticated/memories/': typeof AuthenticatedMemoriesIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
+  '/_authenticated/user_accounts/': typeof AuthenticatedUseraccountsIndexLazyRoute
+  '/_authenticated/usergroups/': typeof AuthenticatedUsergroupsIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/workgroups/': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
@@ -658,6 +711,8 @@ export interface FileRouteTypes {
     | '/memories'
     | '/settings/'
     | '/tasks'
+    | '/user_accounts'
+    | '/usergroups'
     | '/users'
     | '/workgroups'
   fileRoutesByTo: FileRoutesByTo
@@ -683,6 +738,8 @@ export interface FileRouteTypes {
     | '/memories'
     | '/settings'
     | '/tasks'
+    | '/user_accounts'
+    | '/usergroups'
     | '/users'
     | '/workgroups'
   id:
@@ -711,6 +768,8 @@ export interface FileRouteTypes {
     | '/_authenticated/memories/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
+    | '/_authenticated/user_accounts/'
+    | '/_authenticated/usergroups/'
     | '/_authenticated/users/'
     | '/_authenticated/workgroups/'
   fileRoutesById: FileRoutesById
@@ -778,6 +837,8 @@ export const routeTree = rootRoute
         "/_authenticated/help-center/",
         "/_authenticated/memories/",
         "/_authenticated/tasks/",
+        "/_authenticated/user_accounts/",
+        "/_authenticated/usergroups/",
         "/_authenticated/users/",
         "/_authenticated/workgroups/"
       ]
@@ -869,6 +930,14 @@ export const routeTree = rootRoute
     },
     "/_authenticated/tasks/": {
       "filePath": "_authenticated/tasks/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/user_accounts/": {
+      "filePath": "_authenticated/user_accounts/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/usergroups/": {
+      "filePath": "_authenticated/usergroups/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/users/": {

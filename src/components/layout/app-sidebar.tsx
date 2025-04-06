@@ -86,6 +86,16 @@ const AppSidebar = () => {
       icon: <Lightbulb size={18} />,
     },
     {
+      title: 'User accounts',
+      href: '/user_accounts',
+      icon: <Users size={18} />,
+    },
+    {
+      title: 'User groups',
+      href: '/usergroups',
+      icon: <Users size={18} />,
+    },
+    {
       title: 'Workgroups',
       href: '/workgroups',
       icon: <Building size={18} />,
