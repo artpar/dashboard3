@@ -31,8 +31,7 @@ import { useState } from 'react'
 
 const formSchema = z
   .object({
-    firstName: z.string().min(1, { message: 'First Name is required.' }),
-    lastName: z.string().min(1, { message: 'Last Name is required.' }),
+    name: z.string().min(1, { message: 'First Name is required.' }),
     email: z
       .string()
       .min(1, { message: 'Email is required.' })
@@ -107,8 +106,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
           isEdit,
         }
       : {
-          firstName: '',
-          lastName: '',
+          name: '',
           email: '',
           password: '',
           confirmPassword: '',
@@ -123,21 +121,19 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
       if (isEdit && currentRow) {
         // Update existing user
         await updateUser(currentRow.id, {
-          firstName: values.firstName,
-          lastName: values.lastName,
+          name: values.name,
           email: values.email,
           ...(values.password ? { password: values.password } : {})
         })
 
         toast({
           title: "User updated",
-          description: `${values.firstName} ${values.lastName}'s information has been updated successfully.`,
+          description: `${values.name}'s information has been updated successfully.`,
         })
       } else {
         // Create new user
         await createUser({
-          firstName: values.firstName,
-          lastName: values.lastName,
+          name: values.name,
           email: values.email,
           password: values.password,
           status: 'active', // Default to active for new users
@@ -145,7 +141,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
 
         toast({
           title: "User created",
-          description: `${values.firstName} ${values.lastName} has been added successfully.`,
+          description: `${values.name} has been added successfully.`,
         })
       }
 
@@ -189,7 +185,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
             >
               <FormField
                 control={form.control}
-                name='firstName'
+                name='name'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-right'>
@@ -198,26 +194,6 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                     <FormControl>
                       <Input
                         placeholder='John'
-                        className='col-span-4'
-                        autoComplete='off'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='lastName'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Last Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Doe'
                         className='col-span-4'
                         autoComplete='off'
                         {...field}

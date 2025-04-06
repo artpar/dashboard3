@@ -10,7 +10,7 @@ let USER: any = null
 
 let daptinClient: DaptinClient
 
-export async function reloadToken() {
+async function reloadToken() {
   if (daptinClient) {
     await daptinClient.worldManager.init()
     await daptinClient.worldManager.loadModel('workgroup', false);
@@ -19,6 +19,10 @@ export async function reloadToken() {
     await daptinClient.worldManager.loadModel('usergroup', false);
     await daptinClient.worldManager.loadModel('world', false);
     await daptinClient.worldManager.loadModel('action', false);
+    await daptinClient.worldManager.loadModel('memory', false);
+    await daptinClient.worldManager.loadModel('rpatask', false);
+    await daptinClient.worldManager.loadModel('article', false);
+    await daptinClient.worldManager.loadModel('creator', false);
   }
   // const result = await daptinClient.aggregateClient
   //   .entity('user_account')
@@ -130,5 +134,5 @@ daptinClient = new DaptinClient(
   },
   axiosConfig
 )
-
+daptinClient.reloadToken = reloadToken;
 export { daptinClient }

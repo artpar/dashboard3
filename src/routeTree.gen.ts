@@ -33,6 +33,9 @@ const authForgotPasswordLazyImport = createFileRoute(
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
 )()
+const AuthenticatedWorkgroupsIndexLazyImport = createFileRoute(
+  '/_authenticated/workgroups/',
+)()
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
 )()
@@ -42,11 +45,17 @@ const AuthenticatedTasksIndexLazyImport = createFileRoute(
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
+const AuthenticatedMemoriesIndexLazyImport = createFileRoute(
+  '/_authenticated/memories/',
+)()
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
+)()
+const AuthenticatedArticlesIndexLazyImport = createFileRoute(
+  '/_authenticated/articles/',
 )()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
@@ -162,6 +171,17 @@ const auth500Route = auth500Import.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthenticatedWorkgroupsIndexLazyRoute =
+  AuthenticatedWorkgroupsIndexLazyImport.update({
+    id: '/workgroups/',
+    path: '/workgroups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/workgroups/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedUsersIndexLazyRoute =
   AuthenticatedUsersIndexLazyImport.update({
     id: '/users/',
@@ -189,6 +209,15 @@ const AuthenticatedSettingsIndexLazyRoute =
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedMemoriesIndexLazyRoute =
+  AuthenticatedMemoriesIndexLazyImport.update({
+    id: '/memories/',
+    path: '/memories/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/memories/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedHelpCenterIndexLazyRoute =
   AuthenticatedHelpCenterIndexLazyImport.update({
     id: '/help-center/',
@@ -207,6 +236,15 @@ const AuthenticatedChatsIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/chats/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedArticlesIndexLazyRoute =
+  AuthenticatedArticlesIndexLazyImport.update({
+    id: '/articles/',
+    path: '/articles/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/articles/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
@@ -393,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/articles/': {
+      id: '/_authenticated/articles/'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof AuthenticatedArticlesIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
@@ -405,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/help-center'
       fullPath: '/help-center'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/memories/': {
+      id: '/_authenticated/memories/'
+      path: '/memories'
+      fullPath: '/memories'
+      preLoaderRoute: typeof AuthenticatedMemoriesIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/': {
@@ -426,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/workgroups/': {
+      id: '/_authenticated/workgroups/'
+      path: '/workgroups'
+      fullPath: '/workgroups'
+      preLoaderRoute: typeof AuthenticatedWorkgroupsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
   }
@@ -463,10 +522,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
+  AuthenticatedArticlesIndexLazyRoute: typeof AuthenticatedArticlesIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
+  AuthenticatedMemoriesIndexLazyRoute: typeof AuthenticatedMemoriesIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
+  AuthenticatedWorkgroupsIndexLazyRoute: typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -474,10 +536,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
+  AuthenticatedArticlesIndexLazyRoute: AuthenticatedArticlesIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
+  AuthenticatedMemoriesIndexLazyRoute: AuthenticatedMemoriesIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
+  AuthenticatedWorkgroupsIndexLazyRoute: AuthenticatedWorkgroupsIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -501,11 +566,14 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/articles': typeof AuthenticatedArticlesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/memories': typeof AuthenticatedMemoriesIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workgroups': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -524,11 +592,14 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/articles': typeof AuthenticatedArticlesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/memories': typeof AuthenticatedMemoriesIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workgroups': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -551,11 +622,14 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
+  '/_authenticated/articles/': typeof AuthenticatedArticlesIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/_authenticated/memories/': typeof AuthenticatedMemoriesIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
+  '/_authenticated/workgroups/': typeof AuthenticatedWorkgroupsIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -578,11 +652,14 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/articles'
     | '/chats'
     | '/help-center'
+    | '/memories'
     | '/settings/'
     | '/tasks'
     | '/users'
+    | '/workgroups'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -600,11 +677,14 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/articles'
     | '/chats'
     | '/help-center'
+    | '/memories'
     | '/settings'
     | '/tasks'
     | '/users'
+    | '/workgroups'
   id:
     | '__root__'
     | '/_authenticated'
@@ -625,11 +705,14 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/apps/'
+    | '/_authenticated/articles/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/memories/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_authenticated/workgroups/'
   fileRoutesById: FileRoutesById
 }
 
@@ -690,10 +773,13 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/apps/",
+        "/_authenticated/articles/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
+        "/_authenticated/memories/",
         "/_authenticated/tasks/",
-        "/_authenticated/users/"
+        "/_authenticated/users/",
+        "/_authenticated/workgroups/"
       ]
     },
     "/(auth)/500": {
@@ -761,12 +847,20 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/apps/index.lazy.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/articles/": {
+      "filePath": "_authenticated/articles/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {
       "filePath": "_authenticated/help-center/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/memories/": {
+      "filePath": "_authenticated/memories/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {
@@ -779,6 +873,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/users/": {
       "filePath": "_authenticated/users/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/workgroups/": {
+      "filePath": "_authenticated/workgroups/index.lazy.tsx",
       "parent": "/_authenticated"
     }
   }

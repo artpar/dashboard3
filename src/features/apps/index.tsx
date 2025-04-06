@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   IconAdjustmentsHorizontal,
   IconSortAscendingLetters,
@@ -20,6 +20,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { apps } from './data/apps'
+import { daptinClientReady, daptinClientReadyPromise } from '@/background'
+import { Loader2 } from 'lucide-react'
 
 const appText = new Map<string, string>([
   ['all', 'All Apps'],
@@ -31,6 +33,16 @@ export default function Apps() {
   const [sort, setSort] = useState('ascending')
   const [appType, setAppType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [isLoading, setIsLoading] = useState(!daptinClientReady)
+
+  useEffect(() => {
+    // If daptinClient is not ready, wait for it to be ready
+    if (!daptinClientReady) {
+      daptinClientReadyPromise.then(() => {
+        setIsLoading(false)
+      })
+    }
+  }, [])
 
   const filteredApps = apps
     .sort((a, b) =>
@@ -46,6 +58,27 @@ export default function Apps() {
           : true
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  // Show loading state if daptinClient is not ready
+  if (isLoading) {
+    return (
+      <>
+        <Header>
+          <Search />
+          <div className='ml-auto flex items-center gap-4'>
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
+        </Header>
+        <Main fixed>
+          <div className="flex flex-col items-center justify-center h-[70vh]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-2 text-muted-foreground">Loading application...</p>
+          </div>
+        </Main>
+      </>
+    )
+  }
 
   return (
     <>

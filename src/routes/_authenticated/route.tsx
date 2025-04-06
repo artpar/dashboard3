@@ -1,11 +1,12 @@
-import Cookies from 'js-cookie'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { cn } from '@/lib/utils'
-import { SearchProvider } from '@/context/search-context'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/app-sidebar'
-import SkipToMain from '@/components/skip-to-main'
-import { AuthGuard } from '@/components/auth-guard'
+import Cookies from 'js-cookie';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { cn } from '@/lib/utils';
+import { SearchProvider } from '@/context/search-context';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AuthGuard } from '@/components/auth-guard';
+import AppSidebar from '@/components/layout/app-sidebar'
+import SkipToMain from '@/components/skip-to-main';
+
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent,
@@ -28,7 +29,7 @@ function RouteComponent() {
               'transition-[width] duration-200 ease-linear',
               'flex h-svh flex-col',
               'group-data-[scroll-locked=1]/body:h-full',
-              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh'
+              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh p-4'
             )}
           >
             <Outlet />

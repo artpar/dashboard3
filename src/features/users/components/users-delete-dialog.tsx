@@ -31,7 +31,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
       onOpenChange(false)
       toast({
         title: 'User deleted',
-        description: `${currentRow.firstName} ${currentRow.lastName} has been permanently removed.`,
+        description: `${currentRow.name} has been permanently removed.`,
       })
     } catch (error) {
       toast({

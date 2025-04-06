@@ -1,5 +1,28 @@
-import { daptinClient, reloadToken } from './daptin'
-reloadToken();
+import { daptinClient } from './daptin'
+
+// Add a loading state to track when daptinClient and models have been loaded
+export let daptinClientReady = false;
+
+// Create a promise that will resolve when daptinClient is ready
+export const daptinClientReadyPromise = new Promise<void>((resolve) => {
+  // Initialize daptinClient and load models
+  const initDaptinClient = async () => {
+    try {
+      await daptinClient.reloadToken();
+      daptinClientReady = true;
+      console.log('Daptin client and models loaded successfully');
+      resolve();
+    } catch (error) {
+      console.error('Failed to initialize daptinClient:', error);
+      // Even if there's an error, we should resolve the promise to avoid hanging the app
+      daptinClientReady = false;
+      resolve();
+    }
+  };
+
+  // Start initialization
+  initDaptinClient();
+});
 
 let daptinUserAuth = {}
 try {
@@ -1053,7 +1076,7 @@ export async function sendMessageToBackgroundScript(request) {
             // Validate required parameters
             if (!request.email || !request.password || !request.name) {
               console.error('Missing required parameters for signup')
-              reject({ 
+              reject({
                 message: 'Missing required parameters: name, email, and password are required',
                 type: 'error'
               })
@@ -1427,3 +1450,19 @@ export async function sendMessageToBackgroundScript(request) {
     }
   })
 }
+
+// Initialize function that can be awaited before app renders
+export async function initializeDaptinClient() {
+  try {
+    console.log('Initializing daptinClient and loading models...');
+    await daptinClient.reloadToken();
+    console.log('Daptin client and models loaded successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize daptinClient:', error);
+    return false;
+  }
+}
+
+// Initialize immediately when this module is imported
+initializeDaptinClient();

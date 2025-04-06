@@ -38,13 +38,9 @@ export const useUsersStore = create<UsersState>((set) => ({
       // Transform the API response to match our User schema
       const transformedUsers = response.data.map((user: any) => ({
         id: user.id,
-        firstName: user.name?.split(' ')[0] || '',
-        lastName: user.name?.split(' ').slice(1).join(' ') || '',
-        username: user.username || user.email.split('@')[0],
+        name: user.name || '',
         email: user.email,
-        phoneNumber: user.phone_number || '',
         status: user.confirmed ? 'active' : 'inactive',
-        role: user.permissions?.includes('admin') ? 'admin' : 'manager',
         createdAt: new Date(user.created_at),
         updatedAt: new Date(user.updated_at),
       }))
@@ -68,10 +64,8 @@ export const useUsersStore = create<UsersState>((set) => ({
 
       // Map the user data to the format expected by the API
       const apiUserData = {
-        name: `${userData.firstName} ${userData.lastName}`.trim(),
+        name: userData.name,
         email: userData.email,
-        username: userData.username,
-        phone_number: userData.phoneNumber,
         confirmed: userData.status === 'active',
         ...(userData.password ? { password: userData.password } : {})
       }
@@ -113,14 +107,12 @@ export const useUsersStore = create<UsersState>((set) => ({
       const updateData: Record<string, any> = {}
 
       // Only update fields that have changed
-      if (userData.firstName !== undefined || userData.lastName !== undefined) {
-        const firstName = userData.firstName !== undefined ? userData.firstName : currentUser.name?.split(' ')[0] || ''
-        const lastName = userData.lastName !== undefined ? userData.lastName : currentUser.name?.split(' ').slice(1).join(' ') || ''
-        updateData.name = `${firstName} ${lastName}`.trim()
+      if (userData.name !== undefined) {
+        const name = userData.name !== undefined ? userData.name : currentUser.name?.split(' ')[0] || ''
+        updateData.name = `${name}`.trim()
       }
 
       if (userData.email !== undefined) updateData.email = userData.email
-      if (userData.username !== undefined) updateData.username = userData.username
       if (userData.status !== undefined) updateData.confirmed = userData.status === 'active'
       if (userData.password) updateData.password = userData.password
 
