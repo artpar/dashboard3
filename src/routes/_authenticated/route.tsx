@@ -26,7 +26,7 @@ function RouteComponent() {
             <div
               id='content'
               className={cn(
-                'ml-auto w-full max-w-full',
+                'ml-auto',
                 'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
                 'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
                 'transition-[width] duration-200 ease-linear',

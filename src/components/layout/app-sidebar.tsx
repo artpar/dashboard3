@@ -140,14 +140,13 @@ const AppSidebar = () => {
   return (
     <div
       className={cn(
-        'bg-background flex h-screen flex-col border-r w-full overflow-hidden',
+        'bg-background flex h-screen w-full flex-col overflow-hidden border-r',
         isExpanded ? 'w-64' : 'w-14'
       )}
     >
-      <div className='flex flex-col h-full'>
-
+      <div className='flex h-full flex-col'>
         {/* Logo & Toggle */}
-        <div className='flex h-14 items-center border-b px-3 py-4 flex-shrink-0'>
+        <div className='flex h-14 flex-shrink-0 items-center border-b px-3 py-4'>
           {isExpanded ? (
             <h2 className='flex-1 text-lg font-semibold'>100x Bot</h2>
           ) : (
@@ -171,7 +170,6 @@ const AppSidebar = () => {
 
         {/* Main navigation */}
         <ScrollArea>
-          <div>
             {isExpanded && (
               <div className='mb-2'>
                 <Search />
@@ -339,7 +337,10 @@ const AppSidebar = () => {
                           to={`/memories/${memory.reference_id}`}
                           className='hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium transition-colors'
                           onClick={(e) =>
-                            handleNavigate(e, `/memories/${memory.reference_id}`)
+                            handleNavigate(
+                              e,
+                              `/memories/${memory.reference_id}`
+                            )
                           }
                         >
                           <Lightbulb size={12} />
@@ -363,7 +364,10 @@ const AppSidebar = () => {
                           to={`/workgroups/${group.reference_id}`}
                           className='hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium transition-colors'
                           onClick={(e) =>
-                            handleNavigate(e, `/workgroups/${group.reference_id}`)
+                            handleNavigate(
+                              e,
+                              `/workgroups/${group.reference_id}`
+                            )
                           }
                         >
                           <Building size={12} />
@@ -382,19 +386,20 @@ const AppSidebar = () => {
                   )}
               </div>
             )}
-          </div>
         </ScrollArea>
       </div>
 
       {/* User section */}
-      <div className='mt-auto flex items-center border-t p-3'>
+      <div
+        className={cn(
+          'absolute bottom-0 left-0 mt-auto flex w-64 items-center border-t bg-white p-3',
+          isExpanded ? 'w-64' : 'w-14'
+        )}
+      >
         {isExpanded ? (
           <>
             <div className='min-w-0 flex-1'>
               <p className='truncate font-medium'>{user?.name || 'Guest'}</p>
-              <p className='text-muted-foreground truncate text-xs'>
-                {customer?.credit || 0} credits
-              </p>
             </div>
             <Link
               to='/settings/account'

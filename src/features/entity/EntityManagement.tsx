@@ -1,7 +1,6 @@
 import React from 'react'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -113,8 +112,8 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Main className="flex flex-col h-full w-full overflow-hidden">
-        <div className="flex-shrink-0">
+      <Main className='flex h-full w-full flex-col overflow-hidden'>
+        <div className='flex-shrink-0'>
           <EntityHeader
             title={title || ''}
             description={description || ''}
@@ -127,23 +126,17 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
         </div>
 
         {/* Main content with data table */}
-        <div className="flex-grow overflow-auto">
-          <Card className='mb-6'>
-            <CardContent className='p-0'>
-              {isLoading ? (
-                <div className='space-y-4 p-6'>
-                  <Skeleton className='h-10 w-full' />
-                  <Skeleton className='h-64 w-full' />
-                </div>
-              ) : (
-                <EntityDataTable />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {isLoading ? (
+          <div className='space-y-4 p-6'>
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-64 w-full' />
+          </div>
+        ) : (
+          <EntityDataTable />
+        )}
 
         {/* Fixed pagination at the bottom */}
-        <div className="flex-shrink-0 mt-auto">
+        <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-4'>
           <EntityPagination
             currentPage={currentPage}
             totalPages={totalPages}
