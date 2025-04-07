@@ -9,11 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 import { EntityDataProvider } from './EntityContext'
 import EntityForm from './components/EntityForm'
@@ -84,13 +80,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
   if (error) {
     return (
       <>
-        <Header>
-          <Search />
-          <div className='ml-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
         <Main>
           <div className='mb-6'>
             <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>

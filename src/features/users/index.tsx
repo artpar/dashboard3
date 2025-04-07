@@ -1,19 +1,16 @@
 // src/features/users/index.tsx
 import { useEffect } from 'react'
-import { Header } from '@/components/layout/header'
+import { AlertCircle } from 'lucide-react'
+import { useUsersStore } from '@/stores/usersStore'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { columns } from './components/users-columns'
 import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
 import UsersProvider from './context/users-context'
-import { useUsersStore } from '@/stores/usersStore'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+
 
 export default function Users() {
   const { users, isLoading, error, fetchUsers } = useUsersStore()
@@ -25,14 +22,6 @@ export default function Users() {
 
   return (
     <UsersProvider>
-      <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
@@ -54,9 +43,9 @@ export default function Users() {
 
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
           {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-64 w-full" />
+            <div className='space-y-4'>
+              <Skeleton className='h-10 w-full' />
+              <Skeleton className='h-64 w-full' />
             </div>
           ) : (
             <UsersTable data={users} columns={columns} />
