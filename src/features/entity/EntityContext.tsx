@@ -62,6 +62,17 @@ export const EntityDataProvider: React.FC<{
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Reset state when entityName changes
+  useEffect(() => {
+    setSchema(null);
+    setColumns([]);
+    setData([]);
+    setSelectedItem(null);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setFilters({});
+  }, [entityName]);
+
   // Parse filter query format for daptin
   const parseFilters = () => {
     if (Object.keys(filters).length === 0) return undefined;
@@ -351,7 +362,18 @@ export const EntityDataProvider: React.FC<{
         throw err;
       }
     },
+    // Add these options to ensure fresh data when navigating
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    enabled: !!entityName,
   });
+
+  // Force a refetch when the component mounts or entityName changes
+  useEffect(() => {
+    if (entityName) {
+      refetch();
+    }
+  }, [entityName, refetch]);
 
   // Update data state when query data changes
   useEffect(() => {

@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { format } from 'date-fns'
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
+import { ChevronDown, Edit, Eye, MoreHorizontal, Settings, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu'
 import {
   Table,
@@ -29,6 +30,9 @@ import {
 } from '@/components/ui/tooltip'
 import { useEntityData } from './EntityContext'
 
+// Define special columns that should be displayed in a compact way
+const AUDIT_COLUMNS = ['reference_id', 'created_at', 'updated_at', 'permission', 'user_account_id', 'created_by', 'updated_by']
+
 export const EntityDataTable: React.FC = () => {
   const {
     data,
@@ -43,6 +47,23 @@ export const EntityDataTable: React.FC = () => {
     executeAction,
   } = useEntityData()
 
+  // State for column visibility
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
+    // By default, show all columns except audit columns
+    return columns
+      .filter(col => !AUDIT_COLUMNS.includes(col.key))
+      .map(col => col.key)
+  })
+
+  // Toggle column visibility
+  const toggleColumnVisibility = (columnKey: string) => {
+    setVisibleColumns(prev => 
+      prev.includes(columnKey)
+        ? prev.filter(key => key !== columnKey)
+        : [...prev, columnKey]
+    )
+  }
+
   // Function to format cell value based on type
   const formatCellValue = (item: any, column: any) => {
     const value = item[column.key]
@@ -51,10 +72,51 @@ export const EntityDataTable: React.FC = () => {
       return '-'
     }
 
+    // Special compact formatting for audit columns
+    if (AUDIT_COLUMNS.includes(column.key)) {
+      // Format dates in a more compact way
+      if (column.key === 'created_at' || column.key === 'updated_at') {
+        try {
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(value), 'MM/dd/yy')}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{format(new Date(value), 'PPP p')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )
+        } catch (e) {
+          return <span className="text-xs text-muted-foreground">{value}</span>
+        }
+      }
+
+      // For reference IDs and other audit columns
+      if (typeof value === 'string') {
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xs text-muted-foreground">
+                  {value.length > 8 ? `${value.substring(0, 8)}...` : value}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{value}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      }
+    }
+
     // Handle different column types
     if (
-      column.key === 'created_at' ||
-      column.key === 'updated_at' ||
       column.type === 'datetime' ||
       column.dataType === 'timestamp'
     ) {
@@ -222,25 +284,60 @@ export const EntityDataTable: React.FC = () => {
     setShowDeleteDialog(true)
   }
 
-  // Get visible columns - limiting to keep UI clean
-  const visibleColumns = columns
-    .filter(
-      (col) =>
-        !['reference_id', 'permission', 'created_by', 'updated_by'].includes(
-          col.key
-        )
-    )
-    .slice(0, 5) // Show first 5 columns by default
+  // Handle view details action
+  const handleViewDetails = (item: any) => {
+    // Show a modal with all details including audit columns
+    setSelectedItem(item)
+    // This would typically open a view dialog
+    console.log('View details for:', item)
+  }
+
+  // Get filtered columns based on visibility state
+  const filteredColumns = columns.filter(col => visibleColumns.includes(col.key))
+
+  // Get audit columns that we want to show in a compact way
+  const auditColumnsToShow = columns.filter(col => 
+    AUDIT_COLUMNS.includes(col.key) && 
+    // Only show created_at and reference_id by default in the compact section
+    ['created_at', 'reference_id'].includes(col.key)
+  )
 
   return (
     <div className='rounded-md border'>
+      <div className="flex justify-end p-2 border-b">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Columns
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {columns.map(column => (
+              <DropdownMenuCheckboxItem
+                key={column.key}
+                checked={visibleColumns.includes(column.key)}
+                onCheckedChange={() => toggleColumnVisibility(column.key)}
+              >
+                {column.name}
+                {AUDIT_COLUMNS.includes(column.key) && (
+                  <span className="ml-2 text-xs text-muted-foreground">(Audit)</span>
+                )}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
-            {visibleColumns.map((column) => (
+            {filteredColumns.map((column) => (
               <TableHead key={column.key}>{column.name}</TableHead>
             ))}
-            <TableHead>Created At</TableHead>
+            <TableHead className="text-xs text-muted-foreground">
+              Audit Info
+            </TableHead>
             <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -248,7 +345,7 @@ export const EntityDataTable: React.FC = () => {
           {data.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={visibleColumns.length + 2}
+                colSpan={filteredColumns.length + 2}
                 className='text-muted-foreground py-6 text-center'
               >
                 No data found
@@ -257,13 +354,22 @@ export const EntityDataTable: React.FC = () => {
           ) : (
             data.map((item, index) => (
               <TableRow key={item.id || item.reference_id || index}>
-                {visibleColumns.map((column) => (
+                {filteredColumns.map((column) => (
                   <TableCell key={column.key}>
                     {formatCellValue(item, column)}
                   </TableCell>
                 ))}
-                <TableCell>
-                  {formatCellValue(item, { key: 'created_at' })}
+                <TableCell className="text-xs">
+                  <div className="flex flex-col gap-1">
+                    {auditColumnsToShow.map(column => (
+                      <div key={column.key} className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {column.key === 'reference_id' ? 'ID:' : 'Created:'}
+                        </span>
+                        {formatCellValue(item, column)}
+                      </div>
+                    ))}
+                  </div>
                 </TableCell>
                 <TableCell className='text-right'>
                   <DropdownMenu>
@@ -274,6 +380,12 @@ export const EntityDataTable: React.FC = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
+                      {/* View details option */}
+                      <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                        <Eye className='mr-2 h-4 w-4' />
+                        View Details
+                      </DropdownMenuItem>
+                      
                       {/* Standard CRUD operations */}
                       <DropdownMenuItem onClick={() => handleEdit(item)}>
                         <Edit className='mr-2 h-4 w-4' />
@@ -287,36 +399,6 @@ export const EntityDataTable: React.FC = () => {
                         Delete
                       </DropdownMenuItem>
 
-                      {/* Instance-specific actions from entity schema */}
-                      {/*{availableActions*/}
-                      {/*  .filter((action) => !action.instance_optional)*/}
-                      {/*  .map((action) => (*/}
-                      {/*    <DropdownMenuItem*/}
-                      {/*      key={action.name}*/}
-                      {/*      onClick={() => {*/}
-                      {/*        // In a real implementation, you'd show a dialog to collect inputs*/}
-                      {/*        // and then execute the action*/}
-                      {/*        console.log(*/}
-                      {/*          `Executing action: ${action.name} on item:`,*/}
-                      {/*          item*/}
-                      {/*        )*/}
-                      {/*        // Sample implementation - would need proper UI*/}
-                      {/*        if (*/}
-                      {/*          window.confirm(*/}
-                      {/*            `Execute ${action.label || action.name}?`*/}
-                      {/*          )*/}
-                      {/*        ) {*/}
-                      {/*          executeAction(action.name, {*/}
-                      {/*            ...action.defaults,*/}
-                      {/*            reference_id: item.reference_id || item.id,*/}
-                      {/*          }).catch((e) => console.error(e))*/}
-                      {/*        }*/}
-                      {/*      }}*/}
-                      {/*    >*/}
-                      {/*      {action.label || action.name}*/}
-                      {/*    </DropdownMenuItem>*/}
-                      {/*  ))}*/}
-
                       {/* Relations as submenus */}
                       {relations.length > 0 && (
                         <>
@@ -327,23 +409,6 @@ export const EntityDataTable: React.FC = () => {
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
                               {JSON.stringify(relations, null, 2)}
-                              {/*{relations.map((relation) => (*/}
-                              {/*  <DropdownMenuItem*/}
-                              {/*    key={relation.reference_id}*/}
-                              {/*    onClick={() => {*/}
-                              {/*      // Would navigate to related entity*/}
-                              {/*      // For example, if viewing a customer, could navigate to their orders*/}
-                              {/*      console.log(*/}
-                              {/*        `View relation: ${relation.subject} -> ${relation.relation} -> ${relation.object}`*/}
-                              {/*      )*/}
-                              {/*      console.log(*/}
-                              {/*        `Item ID: ${item.reference_id || item.id}`*/}
-                              {/*      )*/}
-                              {/*    }}*/}
-                              {/*  >*/}
-                              {/*    {relation.object}*/}
-                              {/*  </DropdownMenuItem>*/}
-                              {/*))}*/}
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
                         </>
