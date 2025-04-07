@@ -8,7 +8,7 @@ import {
   FileText,
   GalleryVerticalEnd,
   LayoutDashboard,
-  Lightbulb,
+  Lightbulb, User, UserRound,
   Users,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -53,7 +53,7 @@ export const sidebarData: SidebarData = {
         {
           title: 'User accounts',
           url: '/user_accounts',
-          icon: Users,
+          icon: User,
         },
         {
           title: 'User groups',
@@ -76,9 +76,9 @@ export const sidebarData: SidebarData = {
           icon: ClipboardList,
         },
         {
-          title: 'Users',
-          url: '/users',
-          icon: Users,
+          title: 'Customer',
+          url: '/customers',
+          icon: UserRound,
         },
       ],
     },

@@ -1,18 +1,11 @@
 import React from 'react'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Main } from '@/components/layout/main'
+import EntityEditorDialog from '@/features/entity/components/dialogs/EntityEditDialog.tsx'
 import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 import { EntityDataProvider } from './EntityContext'
-import EntityForm from './components/EntityForm'
 import EntityHeader from './components/EntityHeader'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
@@ -72,6 +65,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
     showFilterDialog,
     setShowFilterDialog,
     filters,
+    schema,
     setFilters,
     availableActions,
   } = useEntityData()
@@ -138,38 +132,13 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
         </div>
 
         {/* Create/Edit Dialog */}
-        <Dialog
-          open={showCreateDialog || showEditDialog}
-          onOpenChange={(open) => {
-            if (!open) {
-              setShowCreateDialog(false)
-              setShowEditDialog(false)
-            }
-          }}
-        >
-          <DialogContent className='max-h-[80vh] max-w-2xl overflow-y-auto'>
-            <DialogHeader>
-              <DialogTitle>
-                {showCreateDialog
-                  ? `Create New ${entityName}`
-                  : `Edit ${entityName}`}
-              </DialogTitle>
-              <DialogDescription>
-                {showCreateDialog
-                  ? `Fill out the form below to create a new ${entityName}.`
-                  : `Update the ${entityName} information.`}
-              </DialogDescription>
-            </DialogHeader>
-
-            <EntityForm
-              mode={showCreateDialog ? 'create' : 'edit'}
-              onClose={() => {
-                setShowCreateDialog(false)
-                setShowEditDialog(false)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <EntityEditorDialog
+          entityName={entityName}
+          setShowCreateDialog={setShowCreateDialog}
+          setShowEditDialog={setShowEditDialog}
+          showCreateDialog={showCreateDialog}
+          showEditDialog={showEditDialog}
+        ></EntityEditorDialog>
 
         {/* Delete Confirmation Dialog */}
         <EntityDeleteDialog />
@@ -178,7 +147,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
         <EntityFilterDialog
           open={showFilterDialog}
           onClose={() => setShowFilterDialog(false)}
-          columns={[]} // This should be passed from EntityContext
           filters={filters}
           onApplyFilters={setFilters}
         />

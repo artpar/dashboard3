@@ -4,6 +4,7 @@ import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 import { useEntityColumns } from '../../hooks/useEntityColumns'
 import EntityTableBody from './EntityTableBody'
 import EntityTableHeader from './EntityTableHeader'
+import { FerrisWheel } from 'lucide-react'
 
 /**
  * Main data table component that displays entity records
@@ -80,7 +81,9 @@ export const EntityDataTable: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='text-right'>Actions</TableHead>
+              <TableHead className='w-12'>
+                <FerrisWheel />
+              </TableHead>
               {filteredColumns.map((column) => (
                 <TableHead key={column.ColumnName}>{column.ColumnName}</TableHead>
               ))}

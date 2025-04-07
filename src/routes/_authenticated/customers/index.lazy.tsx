@@ -1,16 +1,16 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { EntityManagementComponent } from '@/features/entity'
 
-function EntityManagementForArticle() {
+function EntityManagementForCustomer() {
   return (
     <EntityManagementComponent
-      entityName="article"
-      title="Articles"
-      description="Article management"
+      entityName="customer"
+      title="Customers"
+      description="Customer management"
     ></EntityManagementComponent>
   )
 }
 
 export const Route = createLazyFileRoute('/_authenticated/customers/')({
-  component: EntityManagementForArticle,
+  component: EntityManagementForCustomer,
 })

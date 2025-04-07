@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { NavGroup } from '@/components/layout/nav-group';
 import { Search } from '@/components/search.tsx';
 import { sidebarData } from './data/sidebar-data';
+import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
+import { SidebarHeader } from '@/components/ui/sidebar.tsx'
 
 
 const AppSidebar = () => {
@@ -94,27 +96,9 @@ const AppSidebar = () => {
     >
       <div className='flex h-full flex-col'>
         {/* Logo & Toggle */}
-        <div className='flex h-14 flex-shrink-0 items-center border-b px-3 py-4'>
-          {isExpanded ? (
-            <h2 className='flex-1 text-lg font-semibold'>100x Bot</h2>
-          ) : (
-            <div className='flex w-full justify-center'>
-              <Sparkles size={20} />
-            </div>
-          )}
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='ml-auto'
-          >
-            {isExpanded ? (
-              <ChevronRight size={16} />
-            ) : (
-              <ChevronRight size={16} className='rotate-180' />
-            )}
-          </Button>
-        </div>
+        <SidebarHeader>
+          <TeamSwitcher teams={sidebarData.teams} />
+        </SidebarHeader>
 
         {/* Main navigation */}
         <ScrollArea>
