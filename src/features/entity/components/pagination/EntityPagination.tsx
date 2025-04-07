@@ -39,7 +39,7 @@ export const EntityPagination: React.FC<EntityPaginationProps> = ({
                                                                     onPageSizeChange,
                                                                   }) => {
   return (
-    <div className="flex items-start justify-end">
+    <div className="flex justify-between">
 
       <Pagination>
         <PaginationContent>

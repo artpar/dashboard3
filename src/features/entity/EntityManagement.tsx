@@ -15,6 +15,7 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 import { EntityDataProvider } from './EntityContext'
 import EntityForm from './components/EntityForm'
 import EntityHeader from './components/EntityHeader'
@@ -22,7 +23,6 @@ import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
 import EntityPagination from './components/pagination/EntityPagination'
 import EntityDataTable from './components/table/EntityDataTable'
-import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 
 interface EntityManagementProps {
   entityName: string
@@ -79,7 +79,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
     filters,
     setFilters,
     availableActions,
-  } = useEntityData();
+  } = useEntityData()
 
   // Early return for error state
   if (error) {
@@ -113,14 +113,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Header>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-
       <Main>
         <EntityHeader
           title={title || ''}
@@ -145,17 +137,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
             )}
           </CardContent>
         </Card>
-
-        {/* Pagination */}
-        <EntityPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={data?.length || 0}
-          isLoading={isLoading}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
-        />
 
         {/* Create/Edit Dialog */}
         <Dialog
@@ -203,6 +184,17 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
           onApplyFilters={setFilters}
         />
       </Main>
+
+      {/* Pagination */}
+      <EntityPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={data?.length || 0}
+        isLoading={isLoading}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </>
   )
 }

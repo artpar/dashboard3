@@ -11,7 +11,7 @@ const Pagination = ({
   <nav
     role="navigation"
     aria-label="pagination"
-    className={cn("flex mx-auto justify-start", className)}
+    className={cn("flex justify-start", className)}
     {...props}
   />
 )

@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Lightbulb,
   Plus,
-  Search,
   Settings,
   Sparkles,
   Users,
@@ -18,9 +17,9 @@ import {
 import { useAuthStore } from '@/stores/authStore.ts'
 import { cn } from '@/lib/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
-import { Input } from '@/components/ui/input.tsx'
 import { ScrollArea } from '@/components/ui/scroll-area.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
+import { Search } from '@/components/search.tsx'
 
 const AppSidebar = () => {
   const { user, customer } = useAuthStore()
@@ -169,17 +168,10 @@ const AppSidebar = () => {
       </div>
 
       {/* Main navigation */}
-      <ScrollArea className='flex-1'>
-        <div className='px-3 py-2'>
+      <ScrollArea>
           {isExpanded && (
-            <div className='relative mb-2'>
-              <Search className='text-muted-foreground absolute top-2.5 left-2 h-4 w-4' />
-              <Input
-                placeholder='Search...'
-                className='h-9 pl-8'
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className='mb-2'>
+              <Search />
             </div>
           )}
 
@@ -387,7 +379,6 @@ const AppSidebar = () => {
                 )}
             </div>
           )}
-        </div>
       </ScrollArea>
 
       {/* User section */}

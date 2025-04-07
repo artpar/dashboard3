@@ -32,9 +32,8 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 }) => {
   return (
     <div className='mb-6 flex flex-col items-start justify-between space-y-4'>
-      <div>
+      <div className='flex items-center space-x-4'>
         <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
-        <p className='text-muted-foreground'>{description}</p>
       </div>
       <div className='flex space-x-2'>
         <Button onClick={onCreateNew}>
@@ -73,8 +72,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-
-
       </div>
     </div>
   )
