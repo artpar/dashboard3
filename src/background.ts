@@ -1,28 +1,5 @@
 import { daptinClient } from './daptin'
 
-// Add a loading state to track when daptinClient and models have been loaded
-export let daptinClientReady = false;
-
-// Create a promise that will resolve when daptinClient is ready
-export const daptinClientReadyPromise = new Promise<void>((resolve) => {
-  // Initialize daptinClient and load models
-  const initDaptinClient = async () => {
-    try {
-      await daptinClient.reloadToken();
-      daptinClientReady = true;
-      console.log('Daptin client and models loaded successfully');
-      resolve();
-    } catch (error) {
-      console.error('Failed to initialize daptinClient:', error);
-      // Even if there's an error, we should resolve the promise to avoid hanging the app
-      daptinClientReady = false;
-      resolve();
-    }
-  };
-
-  // Start initialization
-  initDaptinClient();
-});
 
 let daptinUserAuth = {}
 try {
@@ -1464,5 +1441,3 @@ export async function initializeDaptinClient() {
   }
 }
 
-// Initialize immediately when this module is imported
-initializeDaptinClient();

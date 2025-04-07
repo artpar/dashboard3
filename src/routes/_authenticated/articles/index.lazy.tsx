@@ -1,6 +1,16 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
-import ArticlesManager from '@/features/articlesManager.tsx'
+import { EntityManagementComponent } from '@/features/entity'
+
+function EntityManagementForArticle() {
+  return (
+    <EntityManagementComponent
+      entityName='article'
+      title='Articles'
+      description='Article management'
+    ></EntityManagementComponent>
+  )
+}
 
 export const Route = createLazyFileRoute('/_authenticated/articles/')({
-  component: ArticlesManager,
+  component: EntityManagementForArticle,
 })

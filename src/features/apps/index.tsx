@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   IconAdjustmentsHorizontal,
   IconSortAscendingLetters,
   IconSortDescendingLetters,
 } from '@tabler/icons-react'
+import { daptinClientReady, daptinClientReadyPromise } from '@/background'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -20,8 +22,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { apps } from './data/apps'
-import { daptinClientReady, daptinClientReadyPromise } from '@/background'
-import { Loader2 } from 'lucide-react'
 
 const appText = new Map<string, string>([
   ['all', 'All Apps'],
@@ -71,9 +71,9 @@ export default function Apps() {
           </div>
         </Header>
         <Main fixed>
-          <div className="flex flex-col items-center justify-center h-[70vh]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="mt-2 text-muted-foreground">Loading application...</p>
+          <div className='flex h-[70vh] flex-col items-center justify-center'>
+            <Loader2 className='text-primary h-8 w-8 animate-spin' />
+            <p className='text-muted-foreground mt-2'>Loading application...</p>
           </div>
         </Main>
       </>

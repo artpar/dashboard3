@@ -1,4 +1,4 @@
-import { StrictMode, useState, useEffect } from 'react'
+import { StrictMode, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
 import {
@@ -6,18 +6,17 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { DaptinInitializer } from '@/daptinInitializer.tsx'
 import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
+import ErrorBoundary from './components/ui/error-boundary'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
 import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
-import ErrorBoundary from './components/ui/error-boundary'
-import { initializeDaptinClient } from './background'
-import { Loader2 } from 'lucide-react'
 
 // Create a component to initialize auth state
 function AuthInitializer() {
@@ -142,7 +141,7 @@ function TokenExpirationChecker() {
           const currentPath = router.history.location.href
           router.navigate({
             to: '/sign-in',
-            search: { redirect: currentPath }
+            search: { redirect: currentPath },
           })
         })
       }
@@ -160,66 +159,14 @@ function TokenExpirationChecker() {
   return null
 }
 
-// Create a component to initialize daptin client
-function DaptinInitializer({ children }: { children: React.ReactNode }) {
-  const [isInitialized, setIsInitialized] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const success = await initializeDaptinClient()
-        if (success) {
-          setIsInitialized(true)
-        } else {
-          setError('Failed to initialize Daptin client')
-        }
-      } catch (err) {
-        console.error('Error initializing Daptin client:', err)
-        setError('An unexpected error occurred while initializing Daptin client')
-      }
-    }
-
-    initialize()
-  }, [])
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen p-4">
-        <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg max-w-md">
-          <h2 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Initialization Error</h2>
-          <p className="text-red-600 dark:text-red-300">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!isInitialized) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-lg">Initializing application...</p>
-      </div>
-    )
-  }
-
-  return <>{children}</>
-}
-
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
-    <StrictMode>
-      <ErrorBoundary>
-        <DaptinInitializer>
+    <DaptinInitializer>
+      <StrictMode>
+        <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
               <FontProvider>
@@ -229,8 +176,8 @@ if (!rootElement.innerHTML) {
               </FontProvider>
             </ThemeProvider>
           </QueryClientProvider>
-        </DaptinInitializer>
-      </ErrorBoundary>
-    </StrictMode>
+        </ErrorBoundary>
+      </StrictMode>
+    </DaptinInitializer>
   )
 }
