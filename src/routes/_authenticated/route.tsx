@@ -19,7 +19,7 @@ function RouteComponent() {
       <SearchProvider>
         <SidebarProvider defaultOpen={defaultOpen}>
           <SkipToMain />
-          <div className="flex h-screen overflow-hidden">
+          <div className="flex overflow-hidden">
             <div className="flex-shrink-0">
               <AppSidebar />
             </div>
@@ -30,7 +30,7 @@ function RouteComponent() {
                 'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
                 'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
                 'transition-[width] duration-200 ease-linear',
-                'flex h-screen overflow-hidden',
+                'flex h-screen w-screen overflow-hidden',
                 'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh p-2'
               )}
             >

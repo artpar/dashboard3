@@ -113,7 +113,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Main className="flex flex-col h-full overflow-hidden">
+      <Main className="flex flex-col h-full w-full overflow-hidden">
         <div className="flex-shrink-0">
           <EntityHeader
             title={title || ''}

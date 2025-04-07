@@ -349,7 +349,7 @@ export const EntityDataProvider: React.FC<{
   const executeAction = async (actionName: string, payload: any) => {
     try {
       // Check if the action exists
-      const action = availableActions.find((a) => a.name === actionName)
+      const action = availableActions.find((a) => a.action_name === actionName)
       if (!action) {
         throw new Error(
           `Action '${actionName}' not found for entity '${entityName}'`
