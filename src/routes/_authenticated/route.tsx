@@ -28,8 +28,8 @@ function RouteComponent() {
               'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
               'transition-[width] duration-200 ease-linear',
               'flex h-svh flex-col',
-              'group-data-[scroll-locked=1]/body:h-full',
-              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh p-4'
+              'h-full',
+              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh p-2'
             )}
           >
             <Outlet />

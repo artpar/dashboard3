@@ -68,7 +68,7 @@ export const EntityDataTable: React.FC = () => {
   // If columns are not yet loaded or we're loading data, show a loading state
   if (isLoading || columnsLoading || localColumns.length === 0) {
     return (
-      <div className="rounded-md border p-4 text-center">
+      <div className="rounded-md border p-2 text-center">
         <p className="text-muted-foreground">
           {isLoading ? 'Loading data...' :
            columnsLoading ? 'Loading table structure...' :
