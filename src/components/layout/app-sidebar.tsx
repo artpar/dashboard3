@@ -140,14 +140,14 @@ const AppSidebar = () => {
   return (
     <div
       className={cn(
-        'bg-background flex h-full flex-col border-r w-full',
+        'bg-background flex h-screen flex-col border-r w-full overflow-hidden',
         isExpanded ? 'w-64' : 'w-14'
       )}
     >
-      <div className='flex flex-col'>
+      <div className='flex flex-col h-full'>
 
         {/* Logo & Toggle */}
-        <div className='flex h-14 items-center border-b px-3 py-4'>
+        <div className='flex h-14 items-center border-b px-3 py-4 flex-shrink-0'>
           {isExpanded ? (
             <h2 className='flex-1 text-lg font-semibold'>100x Bot</h2>
           ) : (

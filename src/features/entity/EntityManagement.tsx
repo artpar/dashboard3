@@ -113,30 +113,47 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Main>
-        <EntityHeader
-          title={title || ''}
-          description={description || ''}
-          availableActions={availableActions}
-          onRefresh={refresh}
-          onCreateNew={() => setShowCreateDialog(true)}
-          onShowFilters={() => setShowFilterDialog(true)}
-          entityName={entityName}
-        />
+      <Main className="flex flex-col h-full overflow-hidden">
+        <div className="flex-shrink-0">
+          <EntityHeader
+            title={title || ''}
+            description={description || ''}
+            availableActions={availableActions}
+            onRefresh={refresh}
+            onCreateNew={() => setShowCreateDialog(true)}
+            onShowFilters={() => setShowFilterDialog(true)}
+            entityName={entityName}
+          />
+        </div>
 
         {/* Main content with data table */}
-        <Card className='mb-6'>
-          <CardContent className='p-0'>
-            {isLoading ? (
-              <div className='space-y-4 p-6'>
-                <Skeleton className='h-10 w-full' />
-                <Skeleton className='h-64 w-full' />
-              </div>
-            ) : (
-              <EntityDataTable />
-            )}
-          </CardContent>
-        </Card>
+        <div className="flex-grow overflow-auto">
+          <Card className='mb-6'>
+            <CardContent className='p-0'>
+              {isLoading ? (
+                <div className='space-y-4 p-6'>
+                  <Skeleton className='h-10 w-full' />
+                  <Skeleton className='h-64 w-full' />
+                </div>
+              ) : (
+                <EntityDataTable />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Fixed pagination at the bottom */}
+        <div className="flex-shrink-0 mt-auto">
+          <EntityPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={data?.length || 0}
+            isLoading={isLoading}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </div>
 
         {/* Create/Edit Dialog */}
         <Dialog
@@ -184,17 +201,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
           onApplyFilters={setFilters}
         />
       </Main>
-
-      {/* Pagination */}
-      <EntityPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalItems={data?.length || 0}
-        isLoading={isLoading}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
     </>
   )
 }
