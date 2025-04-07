@@ -1,0 +1,126 @@
+import React from 'react'
+import { IconHelp, IconSettings, IconTool } from '@tabler/icons-react'
+import {
+  AudioWaveform,
+  Building,
+  ClipboardList,
+  Command,
+  FileText,
+  GalleryVerticalEnd,
+  LayoutDashboard,
+  Lightbulb,
+  Users,
+} from 'lucide-react'
+import { type SidebarData } from '../types'
+
+export const sidebarData: SidebarData = {
+  user: {
+    name: 'satnaing',
+    email: 'satnaingdev@gmail.com',
+    avatar: '/avatars/shadcn.jpg',
+  },
+  teams: [
+    {
+      name: 'Shadcn Admin',
+      logo: Command,
+      plan: 'Vite + ShadcnUI',
+    },
+    {
+      name: 'Acme Inc',
+      logo: GalleryVerticalEnd,
+      plan: 'Enterprise',
+    },
+    {
+      name: 'Acme Corp.',
+      logo: AudioWaveform,
+      plan: 'Startup',
+    },
+  ],
+  navGroups: [
+    {
+      title: 'General',
+      items: [
+        {
+          title: 'Dashboard',
+          url: '/',
+          icon: LayoutDashboard,
+        },
+        {
+          title: 'Memories',
+          url: '/memories',
+          icon: Lightbulb,
+        },
+        {
+          title: 'User accounts',
+          url: '/user_accounts',
+          icon: Users,
+        },
+        {
+          title: 'User groups',
+          url: '/usergroups',
+          icon: Users,
+        },
+        {
+          title: 'Workgroups',
+          url: '/workgroups',
+          icon: Building,
+        },
+        {
+          title: 'Articles',
+          url: '/articles',
+          icon: FileText,
+        },
+        {
+          title: 'Tasks',
+          url: '/tasks',
+          icon: ClipboardList,
+        },
+        {
+          title: 'Users',
+          url: '/users',
+          icon: Users,
+        },
+      ],
+    },
+    {
+      title: 'Other',
+      items: [
+        {
+          title: 'Settings',
+          icon: IconSettings,
+          items: [
+            // {
+            //   title: 'Profile',
+            //   url: '/settings',
+            //   icon: IconUserCog,
+            // },
+            {
+              title: 'Account',
+              url: '/settings/account',
+              icon: IconTool,
+            }, // {
+            //   title: 'Appearance',
+            //   url: '/settings/appearance',
+            //   icon: IconPalette,
+            // },
+            // {
+            //   title: 'Notifications',
+            //   url: '/settings/notifications',
+            //   icon: IconNotification,
+            // },
+            // {
+            //   title: 'Display',
+            //   url: '/settings/display',
+            //   icon: IconBrowserCheck,
+            // },
+          ],
+        },
+        {
+          title: 'Help Center',
+          url: '/help-center',
+          icon: IconHelp,
+        },
+      ],
+    },
+  ],
+}

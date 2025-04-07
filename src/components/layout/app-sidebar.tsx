@@ -1,25 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { sendMessageToBackgroundScript } from '@/background.ts'
-import {
-  Building,
-  ChevronDown,
-  ChevronRight,
-  ClipboardList,
-  FileText,
-  LayoutDashboard,
-  Lightbulb,
-  Plus,
-  Settings,
-  Sparkles,
-  Users,
-} from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore.ts'
-import { cn } from '@/lib/utils.ts'
-import { Button } from '@/components/ui/button.tsx'
-import { ScrollArea } from '@/components/ui/scroll-area.tsx'
-import { Separator } from '@/components/ui/separator.tsx'
-import { Search } from '@/components/search.tsx'
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
+import { sendMessageToBackgroundScript } from '@/background.ts';
+import { Building, ChevronDown, ChevronRight, Lightbulb, Plus, Settings, Sparkles } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore.ts';
+import { cn } from '@/lib/utils.ts';
+import { Button } from '@/components/ui/button.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
+import { NavGroup } from '@/components/layout/nav-group';
+import { Search } from '@/components/search.tsx';
+import { sidebarData } from './data/sidebar-data';
+
 
 const AppSidebar = () => {
   const { user, customer } = useAuthStore()
@@ -73,61 +64,18 @@ const AppSidebar = () => {
     fetchSidebarData()
   }, [searchQuery])
 
-  const mainNavItems = [
-    {
-      title: 'Dashboard',
-      href: '/',
-      icon: <LayoutDashboard size={18} />,
-    },
-    {
-      title: 'Memories',
-      href: '/memories',
-      icon: <Lightbulb size={18} />,
-    },
-    {
-      title: 'User accounts',
-      href: '/user_accounts',
-      icon: <Users size={18} />,
-    },
-    {
-      title: 'User groups',
-      href: '/usergroups',
-      icon: <Users size={18} />,
-    },
-    {
-      title: 'Workgroups',
-      href: '/workgroups',
-      icon: <Building size={18} />,
-    },
-    {
-      title: 'Articles',
-      href: '/articles',
-      icon: <FileText size={18} />,
-    },
-    {
-      title: 'Tasks',
-      href: '/tasks',
-      icon: <ClipboardList size={18} />,
-    },
-    {
-      title: 'Users',
-      href: '/users',
-      icon: <Users size={18} />,
-    },
-  ]
-
   const isActive = (href) => {
     return currentPath === href || currentPath.startsWith(`${href}/`)
   }
 
   const filteredMemories = memories.filter(
-    (memory) =>
+    (memory: { title }) =>
       !searchQuery ||
       memory.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const filteredWorkgroups = workgroups.filter(
-    (group) =>
+    (group : {name}) =>
       !searchQuery ||
       group.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -177,22 +125,8 @@ const AppSidebar = () => {
           )}
 
           <nav className='mb-4 space-y-1'>
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  'hover:bg-accent hover:text-accent-foreground flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive(item.href)
-                    ? 'bg-accent text-accent-foreground'
-                    : 'transparent',
-                  !isExpanded && 'justify-center'
-                )}
-                onClick={(e) => handleNavigate(e, item.href)}
-              >
-                {item.icon}
-                {isExpanded && <span>{item.title}</span>}
-              </Link>
+            {sidebarData.navGroups.map((props) => (
+              <NavGroup key={props.title} {...props} />
             ))}
           </nav>
 

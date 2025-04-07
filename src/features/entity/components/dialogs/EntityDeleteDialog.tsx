@@ -1,65 +1,86 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useEntityData } from '@/features/entity';
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useEntityData } from '@/features/entity/hooks/useEntityData';
 
 /**
- * Component for entity deletion confirmation
+ * Dialog for confirming entity deletion
  */
-export const EntityDeleteDialog: React.FC = () => {
+const EntityDeleteDialog: React.FC = () => {
   const {
     entityName,
     selectedItem,
     showDeleteDialog,
     setShowDeleteDialog,
     deleteItem,
-  } = useEntityData()
+  } = useEntityData();
 
-  const [isDeleting, setIsDeleting] = React.useState(false)
-
+  // Handle the deletion confirmation
   const handleDelete = async () => {
-    if (!selectedItem) return
-
-    setIsDeleting(true)
+    if (!selectedItem?.reference_id) {
+      console.error('Cannot delete: Missing item reference ID');
+      setShowDeleteDialog(false);
+      return;
+    }
 
     try {
-      await deleteItem(selectedItem.id || selectedItem.reference_id)
-      setShowDeleteDialog(false)
+      await deleteItem(selectedItem.reference_id);
+      setShowDeleteDialog(false);
     } catch (error) {
-      console.error('Delete error:', error)
-    } finally {
-      setIsDeleting(false)
+      console.error('Delete error:', error);
     }
-  }
+  };
+
+  // Determine the display identifier (name, title, or ID) to show in confirmation
+  const getDisplayIdentifier = () => {
+    if (!selectedItem) return '';
+
+    // Try to find a descriptive field
+    const nameFields = ['name', 'title', 'label', 'email', 'username'];
+
+    for (const field of nameFields) {
+      if (selectedItem[field]) {
+        return selectedItem[field];
+      }
+    }
+
+    // Fall back to ID if no descriptive field is found
+    return selectedItem.reference_id || selectedItem.id || 'this item';
+  };
 
   return (
     <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Are you sure you want to delete this {entityName}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the {entityName}
-            {selectedItem?.name && <span> "{selectedItem.name}"</span>}
-            {selectedItem?.title && <span> "{selectedItem.title}"</span>}.
+            You are about to delete <span className="font-semibold">{getDisplayIdentifier()}</span>.
             <br />
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={isDeleting}
-            className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+            className="bg-red-600 text-white hover:bg-red-700"
           >
-            {isDeleting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
-}
+  );
+};
 
-export default EntityDeleteDialog
+export default EntityDeleteDialog;

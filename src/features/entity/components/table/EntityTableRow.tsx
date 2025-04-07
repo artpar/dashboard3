@@ -31,6 +31,13 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = ({
                                                               }) => {
   return (
     <TableRow key={item.id || item.reference_id || index}>
+      <EntityTableActions
+        item={item}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onViewDetails={onViewDetails}
+        relations={relations}
+      />
       {columns.map((column) => (
         <EntityTableCell
           key={column.ColumnName}
@@ -44,13 +51,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = ({
         auditColumns={auditColumns}
       />
 
-      <EntityTableActions
-        item={item}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onViewDetails={onViewDetails}
-        relations={relations}
-      />
+
     </TableRow>
   );
 };

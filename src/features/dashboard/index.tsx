@@ -161,7 +161,7 @@ const Dashboard = () => {
   ]
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 w-full'>
       {/* User welcome section */}
       <Card>
         <CardHeader className='pb-2'>

@@ -67,7 +67,7 @@ export function UsersTable({ columns, data }: DataTableProps) {
   })
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 flex flex-col'>
       <DataTableToolbar table={table} />
       <div className='rounded-md border'>
         <Table>

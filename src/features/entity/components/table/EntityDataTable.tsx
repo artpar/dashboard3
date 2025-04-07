@@ -80,13 +80,13 @@ export const EntityDataTable: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className='text-right'>Actions</TableHead>
               {filteredColumns.map((column) => (
-                <TableHead key={column.ColumnName}>{column.Name}</TableHead>
+                <TableHead key={column.ColumnName}>{column.ColumnName}</TableHead>
               ))}
               <TableHead className='text-muted-foreground text-xs'>
                 Audit Info
               </TableHead>
-              <TableHead className='text-right'>Actions</TableHead>
             </TableRow>
           </TableHeader>
 

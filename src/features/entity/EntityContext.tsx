@@ -1,9 +1,8 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { daptinClient } from '@/daptin';
-import { useToast } from '@/hooks/use-toast';
-import { ColumnDefinition } from './hooks/useEntityColumns';
-
+import React, { createContext, useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { daptinClient } from '@/daptin'
+import { useToast } from '@/hooks/use-toast'
+import { ColumnDefinition } from './hooks/useEntityColumns'
 
 // Define the entity data context type
 interface EntityContextType {
@@ -125,7 +124,7 @@ export const EntityDataProvider: React.FC<{
 
                 // Extract columns from the parsed schema
                 if (parsedSchema && parsedSchema.Columns) {
-                  normalizedColumns = parsedSchema.Columns;
+                  normalizedColumns = parsedSchema.Columns
 
                   console.log('Setting columns:', normalizedColumns.length)
                   setColumns(normalizedColumns)
@@ -145,7 +144,7 @@ export const EntityDataProvider: React.FC<{
                     const actionsResponse = await daptinClient.jsonApi.findAll(
                       'action',
                       {
-                        "world_id": schemaData.reference_id
+                        world_id: schemaData.reference_id,
                       }
                     )
 
@@ -232,8 +231,7 @@ export const EntityDataProvider: React.FC<{
         console.error(`Error fetching ${entityName} data:`, err)
         throw err
       }
-    },
-    // Add these options to ensure fresh data when navigating
+    }, // Add these options to ensure fresh data when navigating
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     enabled: !!entityName && !columnsLoading,

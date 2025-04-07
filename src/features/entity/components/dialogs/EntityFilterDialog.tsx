@@ -1,205 +1,181 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { X } from 'lucide-react';
-import { ColumnDefinition } from '../hooks/useEntityColumns';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { FilterX, Search } from 'lucide-react';
+import { ColumnDefinition } from '@/features/entity/hooks/useEntityColumns';
+import { useEntityData } from '@/features/entity/hooks/useEntityData';
+import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters';
 
 interface EntityFilterDialogProps {
   open: boolean;
   onClose: () => void;
-  columns: ColumnDefinition[];
   filters: Record<string, any>;
   onApplyFilters: (filters: Record<string, any>) => void;
 }
 
 /**
- * Component for filtering entity data
+ * Dialog for configuring entity filters
  */
-export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
-                                                                        open,
-                                                                        onClose,
-                                                                        columns,
-                                                                        filters,
-                                                                        onApplyFilters,
-                                                                      }) => {
-  const [localFilters, setLocalFilters] = useState<Record<string, any>>(filters);
+const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
+                                                                 open,
+                                                                 onClose,
+                                                                 filters,
+                                                                 onApplyFilters,
+                                                               }) => {
+  // Get columns from context
+  const { columns } = useEntityData();
 
-  // Reset local filters when dialog opens
+  // Local state for filter values
+  const [filterValues, setFilterValues] = useState<Record<string, any>>(filters || {});
+
+  // Reset local state when filters prop changes
   useEffect(() => {
-    if (open) {
-      setLocalFilters({ ...filters });
-    }
-  }, [open, filters]);
+    setFilterValues(filters || {});
+  }, [filters]);
 
-  // Handle input change
-  const handleFilterChange = (key: string, value: any) => {
-    setLocalFilters(prev => ({
+  // Filter out audit columns and get filterable columns
+  const filterableColumns = columns.filter(
+    (column) => !AUDIT_COLUMNS.includes(column.ColumnName)
+  );
+
+  // Handle filter value changes
+  const handleFilterChange = (columnName: string, value: any) => {
+    setFilterValues((prev) => ({
       ...prev,
-      [key]: value
+      [columnName]: value,
     }));
-  };
-
-  // Clear a single filter
-  const clearFilter = (key: string) => {
-    setLocalFilters(prev => {
-      const newFilters = { ...prev };
-      delete newFilters[key];
-      return newFilters;
-    });
-  };
-
-  // Clear all filters
-  const clearAllFilters = () => {
-    setLocalFilters({});
   };
 
   // Apply filters and close dialog
   const handleApply = () => {
-    onApplyFilters(localFilters);
+    onApplyFilters(filterValues);
     onClose();
   };
 
-  // Get filterable columns (exclude audit columns and certain types)
-  const filterableColumns = columns.filter(col =>
-    !['id', 'reference_id', 'created_at', 'updated_at', 'permission'].includes(col.ColumnName)
-  );
+  // Clear all filters
+  const handleClearAll = () => {
+    setFilterValues({});
+  };
+
+  // Render the appropriate filter input based on column type
+  const renderFilterInput = (column: ColumnDefinition) => {
+    const value = filterValues[column.ColumnName] || '';
+
+    switch (column.ColumnType) {
+      case 'boolean':
+      case 'checkbox':
+        return (
+          <Select
+            value={value !== '' ? value.toString() : ''}
+            onValueChange={(val) => {
+              if (val === '') {
+                handleFilterChange(column.ColumnName, '');
+              } else {
+                handleFilterChange(column.ColumnName, val === 'true');
+              }
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Any value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Any value</SelectItem>
+              <SelectItem value="true">Yes</SelectItem>
+              <SelectItem value="false">No</SelectItem>
+            </SelectContent>
+          </Select>
+        );
+
+      case 'enum':
+        return (
+          <Select
+            value={value.toString()}
+            onValueChange={(val) => handleFilterChange(column.ColumnName, val)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Any value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Any value</SelectItem>
+              {column.Options?.map((option) => (
+                <SelectItem key={option.Value} value={option.Value}>
+                  {option.Label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'measurement':
+      case 'int':
+      case 'integer':
+      case 'number':
+        return (
+          <Input
+            type="number"
+            value={value}
+            onChange={(e) => handleFilterChange(column.ColumnName, e.target.value)}
+            placeholder="Filter by value"
+          />
+        );
+
+      // Default to text input for other types
+      default:
+        return (
+          <Input
+            value={value}
+            onChange={(e) => handleFilterChange(column.ColumnName, e.target.value)}
+            placeholder="Filter by value"
+          />
+        );
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Filter Data</DialogTitle>
-          <DialogDescription>
-            Set criteria to filter the data table.
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" /> Filters
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          {Object.keys(localFilters).length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {Object.entries(localFilters).map(([key, value]) => {
-                if (value !== undefined && value !== '') {
-                  const column = columns.find(col => col.ColumnName === key);
-                  return (
-                    <div
-                      key={key}
-                      className="flex items-center bg-muted px-2 py-1 rounded-md text-sm"
-                    >
-                      <span>{column?.name || key}: {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 ml-1"
-                        onClick={() => clearFilter(key)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  );
-                }
-                return null;
-              })}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground text-xs"
-                onClick={clearAllFilters}
-              >
-                Clear all
-              </Button>
-            </div>
-          )}
-
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4">
-            {filterableColumns.map(column => (
-              <div key={column.ColumnName} className="grid grid-cols-4 items-center gap-2">
-                <Label htmlFor={`filter-${column.ColumnName}`} className="text-right">
-                  {column.name}
-                </Label>
-
-                {(() => {
-                  // Render appropriate input based on column type
-
-                  // Boolean columns
-                  if (column.type === 'boolean' || column.type === 'checkbox') {
-                    return (
-                      <div className="col-span-3 flex items-center space-x-2">
-                        <Switch
-                          id={`filter-${column.ColumnName}`}
-                          checked={!!localFilters[column.ColumnName]}
-                          onCheckedChange={(checked) => handleFilterChange(column.ColumnName, checked)}
-                        />
-                        <Label htmlFor={`filter-${column.ColumnName}`}>
-                          {localFilters[column.ColumnName] ? 'Yes' : 'No'}
-                        </Label>
-                      </div>
-                    );
-                  }
-
-                  // Enum/select columns
-                  if (column.type === 'enum' && column.options) {
-                    return (
-                      <div className="col-span-3">
-                        <Select
-                          value={localFilters[column.ColumnName] || ''}
-                          onValueChange={(value) => handleFilterChange(column.ColumnName, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={`Select ${column.name}`} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Any</SelectItem>
-                            {column.options.map((option: any) => (
-                              <SelectItem key={option.value} value={option.value.toString()}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    );
-                  }
-
-                  // Default text input for other types
-                  return (
-                    <Input
-                      id={`filter-${column.ColumnName}`}
-                      className="col-span-3"
-                      placeholder={`Filter by ${column.name}`}
-                      value={localFilters[column.ColumnName] || ''}
-                      onChange={(e) => handleFilterChange(column.ColumnName, e.target.value)}
-                    />
-                  );
-                })()}
+        <div className="max-h-[60vh] overflow-y-auto py-4">
+          <div className="space-y-6">
+            {filterableColumns.map((column) => (
+              <div key={column.ColumnName} className="space-y-2">
+                <Label htmlFor={column.ColumnName}>{column.Name || column.ColumnName}</Label>
+                {renderFilterInput(column)}
               </div>
             ))}
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
+        <Separator />
+
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleClearAll}
+            className="gap-1"
+          >
+            <FilterX className="h-4 w-4" />
+            Clear All
           </Button>
-          <Button onClick={handleApply}>
-            Apply Filters
-          </Button>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleApply}>
+              Apply Filters
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

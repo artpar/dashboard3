@@ -41,7 +41,7 @@ export const EntityTableHeader: React.FC<EntityTableHeaderProps> = ({
               checked={visibleColumns.includes(column.ColumnName)}
               onCheckedChange={() => toggleColumnVisibility(column.ColumnName)}
             >
-              {column.name}
+              {column.Name}
               {AUDIT_COLUMNS.includes(column.ColumnName) && (
                 <span className='text-muted-foreground ml-2 text-xs'>
                   (Audit)
