@@ -22,7 +22,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-
+import { useEntityColumns } from '@/features/entity/hooks/useEntityColumns.tsx'
 import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
 
 interface EntityFormProps {
@@ -40,30 +40,36 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   const [activeTab, setActiveTab] = useState('basic')
 
   // Group columns for tab organization
-  const basicColumns = columns
+  const [localColumns, setLocalColumns] = React.useState(columns || [])
+
+  // Update local columns when columns from context change and are not empty
+  useEffect(() => {
+    if (columns && columns.length > 0) {
+      console.log(`Updating local columns for ${entityName}:`, columns.length)
+      setLocalColumns(columns)
+    }
+  }, [columns, entityName])
+
+  const {
+    visibleColumns,
+    filteredColumns,
+    auditColumnsToShow,
+    toggleColumnVisibility,
+  } = useEntityColumns(localColumns)
+
+  const relationshipColumns = columns
     .filter(
       (col) =>
-        !col.key.includes('_id') &&
-        !col.key.includes('permission') &&
-        !['id', 'reference_id', 'created_at', 'updated_at', 'version'].includes(
-          col.key
-        ) &&
-        !col.excludeFromApi &&
-        col.type !== 'file.*' // File columns go to advanced tab
+        col.ForeignKeyData &&
+        col.ForeignKeyData.DataSource &&
+        col.ForeignKeyData.DataSource.length > 0
     )
-    .slice(0, 10) // First 10 basic columns
-
-  const relationshipColumns = columns.filter(
-    (col) =>
-      (col.key.includes('_id') || col.isForeignKey) &&
-      !['id', 'reference_id', 'created_by', 'updated_by'].includes(col.key) &&
-      !col.excludeFromApi
-  )
+    .map((col) => col.ColumnName)
 
   const advancedColumns = columns.filter(
     (col) =>
-      !basicColumns.includes(col) &&
-      !relationshipColumns.includes(col) &&
+      !visibleColumns.includes(col.ColumnName) &&
+      !relationshipColumns.includes(col.ColumnName) &&
       ![
         'id',
         'reference_id',
@@ -71,9 +77,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
         'updated_at',
         'version',
         'permission',
-      ].includes(col.key) &&
-      !col.excludeFromApi &&
-      (col.type === 'file.*' || !col.key.includes('_id'))
+      ].includes(col.ColumnName) &&
+      (col.ColumnType === 'file.*' || !col.ColumnName.includes('_id'))
   )
 
   // Initialize form data with current values when editing
@@ -89,9 +94,9 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
             'updated_at',
             'version',
             'permission',
-          ].includes(column.key)
+          ].includes(column.ColumnName)
         ) {
-          initialData[column.key] = selectedItem[column.key]
+          initialData[column.ColumnName] = selectedItem[column.ColumnName]
         }
       })
       setFormData(initialData)
@@ -99,9 +104,9 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       // In create mode, initialize with default values from schema
       const initialData: Record<string, any> = {}
       columns.forEach((column) => {
-        if (column.defaultValue && column.defaultValue !== 'null') {
+        if (column.DefaultValue && column.DefaultValue !== 'null') {
           // Remove quotes if string default value
-          let defaultValue = column.defaultValue
+          let defaultValue = column.DefaultValue
           if (
             typeof defaultValue === 'string' &&
             defaultValue.startsWith("'") &&
@@ -109,9 +114,12 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           ) {
             defaultValue = defaultValue.slice(1, -1)
           }
-          initialData[column.key] = defaultValue
-        } else if (column.type === 'boolean' || column.type === 'checkbox') {
-          initialData[column.key] = false
+          initialData[column.ColumnName] = defaultValue
+        } else if (
+          column.ColumnType === 'boolean' ||
+          column.ColumnType === 'checkbox'
+        ) {
+          initialData[column.ColumnName] = false
         }
       })
       setFormData(initialData)
@@ -128,8 +136,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       const validationErrors: Record<string, string> = {}
       columns.forEach((column) => {
         if (
-          !column.isNullable &&
-          !formData[column.key] &&
+          !column.IsNullable &&
+          !formData[column.ColumnName] &&
           ![
             'id',
             'reference_id',
@@ -137,10 +145,10 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
             'updated_at',
             'version',
             'permission',
-          ].includes(column.key) &&
-          column.defaultValue === undefined
+          ].includes(column.ColumnName) &&
+          column.DefaultValue === undefined
         ) {
-          validationErrors[column.key] = 'This field is required'
+          validationErrors[column.ColumnName] = 'This field is required'
         }
       })
 
@@ -179,7 +187,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
 
   // Render the appropriate input for a column based on its type
   const renderInput = (column: any) => {
-    const key = column.key
+    const key = column.ColumnName
     const value = formData[key] !== undefined ? formData[key] : ''
     const hasError = !!errors[key]
 
@@ -187,7 +195,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
     if (
       column.isForeignKey &&
       column.foreignKeyData &&
-      column.foreignKeyData.KeyName
+      column.foreignKeyData.ColumnNameName
     ) {
       // This would ideally show a selector with options from the related entity
       // For now, we'll show a simple input with a helper text
@@ -198,7 +206,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
             value={value || ''}
             onChange={(e) => handleChange(key, e.target.value)}
             className={hasError ? 'border-red-500' : ''}
-            placeholder={`Enter ${column.foreignKeyData.Namespace}.${column.foreignKeyData.KeyName} ID`}
+            placeholder={`Enter ${column.foreignKeyData.Namespace}.${column.foreignKeyData.ColumnNameName} ID`}
           />
           <p className='text-muted-foreground text-xs'>
             References {column.foreignKeyData.Namespace}
@@ -241,7 +249,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           {column.foreignKeyData && (
             <p className='text-muted-foreground text-xs'>
               Stored in {column.foreignKeyData.DataSource}/
-              {column.foreignKeyData.Namespace}/{column.foreignKeyData.KeyName}
+              {column.foreignKeyData.Namespace}/
+              {column.foreignKeyData.ColumnNameName}
             </p>
           )}
         </div>
@@ -431,54 +440,73 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
         </TabsList>
 
         <TabsContent value='basic' className='space-y-4'>
-          {basicColumns.map((column) => (
-            <div key={column.key} className='space-y-2'>
-              <Label htmlFor={column.key} className='flex items-center'>
-                {column.name}
-                {!column.isNullable && (
-                  <span className='ml-1 text-red-500'>*</span>
-                )}
-              </Label>
-              {renderInput(column)}
-              {errors[column.key] && (
-                <p className='text-sm text-red-500'>{errors[column.key]}</p>
-              )}
-            </div>
-          ))}
-        </TabsContent>
-
-        {relationshipColumns.length > 0 && (
-          <TabsContent value='relationships' className='space-y-4'>
-            {relationshipColumns.map((column) => (
-              <div key={column.key} className='space-y-2'>
-                <Label htmlFor={column.key} className='flex items-center'>
-                  {column.name}
-                  {!column.isNullable && (
+          {localColumns
+            .filter((c) => visibleColumns.includes(c.ColumnName))
+            .map((column) => (
+              <div key={column.ColumnName} className='space-y-2'>
+                <Label
+                  htmlFor={column.ColumnName}
+                  className='flex items-center'
+                >
+                  {column.Name}
+                  {!column.IsNullable && (
                     <span className='ml-1 text-red-500'>*</span>
                   )}
                 </Label>
                 {renderInput(column)}
-                {errors[column.key] && (
-                  <p className='text-sm text-red-500'>{errors[column.key]}</p>
+                {errors[column.ColumnName] && (
+                  <p className='text-sm text-red-500'>
+                    {errors[column.ColumnName]}
+                  </p>
                 )}
               </div>
             ))}
+        </TabsContent>
+
+        {relationshipColumns.length > 0 && (
+          <TabsContent value='relationships' className='space-y-4'>
+            {localColumns
+              .filter((c) => relationshipColumns.includes(c.ColumnName))
+              .map((column) => (
+                <div key={column.ColumnName} className='space-y-2'>
+                  <Label
+                    htmlFor={column.ColumnName}
+                    className='flex items-center'
+                  >
+                    {column.Name}
+                    {!column.IsNullable && (
+                      <span className='ml-1 text-red-500'>*</span>
+                    )}
+                  </Label>
+                  {renderInput(column)}
+                  {errors[column.ColumnName] && (
+                    <p className='text-sm text-red-500'>
+                      {errors[column.ColumnName]}
+                    </p>
+                  )}
+                </div>
+              ))}
           </TabsContent>
         )}
 
         {advancedColumns.length > 0 && (
           <TabsContent value='advanced' className='space-y-4'>
             {advancedColumns.map((column) => (
-              <div key={column.key} className='space-y-2'>
-                <Label htmlFor={column.key} className='flex items-center'>
-                  {column.name}
-                  {!column.isNullable && (
+              <div key={column.ColumnName} className='space-y-2'>
+                <Label
+                  htmlFor={column.ColumnName}
+                  className='flex items-center'
+                >
+                  {column.Name}
+                  {!column.IsNullable && (
                     <span className='ml-1 text-red-500'>*</span>
                   )}
                 </Label>
                 {renderInput(column)}
-                {errors[column.key] && (
-                  <p className='text-sm text-red-500'>{errors[column.key]}</p>
+                {errors[column.ColumnName] && (
+                  <p className='text-sm text-red-500'>
+                    {errors[column.ColumnName]}
+                  </p>
                 )}
               </div>
             ))}

@@ -39,28 +39,7 @@ export const EntityPagination: React.FC<EntityPaginationProps> = ({
                                                                     onPageSizeChange,
                                                                   }) => {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-2">
-        <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(parseInt(value))}
-        >
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Rows per page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">10 rows</SelectItem>
-            <SelectItem value="20">20 rows</SelectItem>
-            <SelectItem value="50">50 rows</SelectItem>
-            <SelectItem value="100">100 rows</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">
-          Showing {isLoading ? '...' : ((currentPage - 1) * pageSize + 1)}-
-          {isLoading ? '...' : Math.min(currentPage * pageSize, totalItems)} of{' '}
-          {isLoading ? '...' : totalItems} items
-        </p>
-      </div>
+    <div className="flex items-start justify-end">
 
       <Pagination>
         <PaginationContent>
@@ -137,6 +116,27 @@ export const EntityPagination: React.FC<EntityPaginationProps> = ({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+      <div className="flex items-center space-x-2">
+        <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => onPageSizeChange(parseInt(value))}
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder="Rows per page" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 rows</SelectItem>
+            <SelectItem value="20">20 rows</SelectItem>
+            <SelectItem value="50">50 rows</SelectItem>
+            <SelectItem value="100">100 rows</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-muted-foreground">
+          Showing {isLoading ? '...' : ((currentPage - 1) * pageSize + 1)}-
+          {isLoading ? '...' : Math.min(currentPage * pageSize, totalItems)} of{' '}
+          {isLoading ? '...' : totalItems} items
+        </p>
+      </div>
     </div>
   );
 };

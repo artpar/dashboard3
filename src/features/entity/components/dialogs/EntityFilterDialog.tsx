@@ -78,7 +78,7 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
 
   // Get filterable columns (exclude audit columns and certain types)
   const filterableColumns = columns.filter(col =>
-    !['id', 'reference_id', 'created_at', 'updated_at', 'permission'].includes(col.key)
+    !['id', 'reference_id', 'created_at', 'updated_at', 'permission'].includes(col.ColumnName)
   );
 
   return (
@@ -96,7 +96,7 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
             <div className="flex flex-wrap gap-2 mb-2">
               {Object.entries(localFilters).map(([key, value]) => {
                 if (value !== undefined && value !== '') {
-                  const column = columns.find(col => col.key === key);
+                  const column = columns.find(col => col.ColumnName === key);
                   return (
                     <div
                       key={key}
@@ -129,8 +129,8 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
 
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4">
             {filterableColumns.map(column => (
-              <div key={column.key} className="grid grid-cols-4 items-center gap-2">
-                <Label htmlFor={`filter-${column.key}`} className="text-right">
+              <div key={column.ColumnName} className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor={`filter-${column.ColumnName}`} className="text-right">
                   {column.name}
                 </Label>
 
@@ -142,12 +142,12 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
                     return (
                       <div className="col-span-3 flex items-center space-x-2">
                         <Switch
-                          id={`filter-${column.key}`}
-                          checked={!!localFilters[column.key]}
-                          onCheckedChange={(checked) => handleFilterChange(column.key, checked)}
+                          id={`filter-${column.ColumnName}`}
+                          checked={!!localFilters[column.ColumnName]}
+                          onCheckedChange={(checked) => handleFilterChange(column.ColumnName, checked)}
                         />
-                        <Label htmlFor={`filter-${column.key}`}>
-                          {localFilters[column.key] ? 'Yes' : 'No'}
+                        <Label htmlFor={`filter-${column.ColumnName}`}>
+                          {localFilters[column.ColumnName] ? 'Yes' : 'No'}
                         </Label>
                       </div>
                     );
@@ -158,8 +158,8 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
                     return (
                       <div className="col-span-3">
                         <Select
-                          value={localFilters[column.key] || ''}
-                          onValueChange={(value) => handleFilterChange(column.key, value)}
+                          value={localFilters[column.ColumnName] || ''}
+                          onValueChange={(value) => handleFilterChange(column.ColumnName, value)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder={`Select ${column.name}`} />
@@ -180,11 +180,11 @@ export const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
                   // Default text input for other types
                   return (
                     <Input
-                      id={`filter-${column.key}`}
+                      id={`filter-${column.ColumnName}`}
                       className="col-span-3"
                       placeholder={`Filter by ${column.name}`}
-                      value={localFilters[column.key] || ''}
-                      onChange={(e) => handleFilterChange(column.key, e.target.value)}
+                      value={localFilters[column.ColumnName] || ''}
+                      onChange={(e) => handleFilterChange(column.ColumnName, e.target.value)}
                     />
                   );
                 })()}

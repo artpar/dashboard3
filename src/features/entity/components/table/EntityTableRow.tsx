@@ -33,7 +33,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = ({
     <TableRow key={item.id || item.reference_id || index}>
       {columns.map((column) => (
         <EntityTableCell
-          key={column.key}
+          key={column.ColumnName}
           item={item}
           column={column}
         />

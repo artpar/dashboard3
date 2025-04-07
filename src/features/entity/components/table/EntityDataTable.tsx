@@ -90,7 +90,7 @@ export const EntityDataTable: React.FC = () => {
         <TableHeader>
           <TableRow>
             {filteredColumns.map((column) => (
-              <TableHead key={column.key}>{column.name}</TableHead>
+              <TableHead key={column.ColumnName}>{column.Name}</TableHead>
             ))}
             <TableHead className="text-muted-foreground text-xs">
               Audit Info

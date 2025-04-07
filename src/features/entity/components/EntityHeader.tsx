@@ -31,12 +31,16 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   entityName,
 }) => {
   return (
-    <div className='mb-6 flex items-center justify-between'>
+    <div className='mb-6 flex flex-col items-start justify-between space-y-4'>
       <div>
         <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
         <p className='text-muted-foreground'>{description}</p>
       </div>
       <div className='flex space-x-2'>
+        <Button onClick={onCreateNew}>
+          <Plus className='mr-2 h-4 w-4' />
+          Add {entityName}
+        </Button>
         <Button variant='outline' size='sm' onClick={onShowFilters}>
           <Filter className='mr-2 h-4 w-4' />
           Filter
@@ -60,7 +64,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <DropdownMenuItem
                   key={action.id}
                   onClick={() => {
-                    console.log(`Execute action: ${action.name}`)
+                    console.log(`Execute action`, action)
                   }}
                 >
                   {action.label || action.name}
@@ -70,10 +74,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           </DropdownMenu>
         )}
 
-        <Button onClick={onCreateNew}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add {entityName}
-        </Button>
+
       </div>
     </div>
   )

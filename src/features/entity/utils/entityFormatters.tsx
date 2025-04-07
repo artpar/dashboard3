@@ -12,9 +12,11 @@ import {
 // Define special columns that should be displayed in a compact way
 export const AUDIT_COLUMNS = [
   'reference_id',
+  'id',
   'created_at',
   'updated_at',
   'permission',
+  'version',
   'user_account_id',
 ]
 

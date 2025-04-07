@@ -2,32 +2,28 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AUDIT_COLUMNS } from '../utils/entityFormatters';
 
 export interface ColumnDefinition {
-  key: string;
-  name: string;
-  type?: string;
-  dataType?: string;
-  isNullable?: boolean;
-  isUnique?: boolean;
-  isPrimaryKey?: boolean;
-  isForeignKey?: boolean;
-  defaultValue?: any;
-  columnType?: string;
-  relationName?: string;
-  foreignKeyData?: any;
-  options?: any[];
-  columnDescription?: string;
+  ColumnName: string;
+  Name: string;
+  ColumnType?: string;
+  DataType?: string;
+  IsNullable?: boolean;
+  IsUnique?: boolean;
+  IsPrimaryKey?: boolean;
+  IsForeignKey?: boolean;
+  DefaultValue?: any;
+  RelationName?: string;
+  ForeignKeyData?: any;
+  Options?: any[];
+  ColumnDescription?: string;
 }
 
 /**
  * Hook for managing column visibility in entity tables
  */
 export function useEntityColumns(columns: ColumnDefinition[]) {
-  // State for column visibility
-  console.log("useEntityColumns called with", columns?.length || 0, "columns");
-  
   // Keep track of the last non-empty columns array
   const [lastValidColumns, setLastValidColumns] = useState<ColumnDefinition[]>([]);
-  
+
   // Update lastValidColumns when we get a non-empty columns array
   useEffect(() => {
     if (columns && columns.length > 0) {
@@ -35,17 +31,17 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
       setLastValidColumns(columns);
     }
   }, [columns]);
-  
+
   // Use either the current columns or the last valid columns
   const effectiveColumns = useMemo(() => {
     return columns && columns.length > 0 ? columns : lastValidColumns;
   }, [columns, lastValidColumns]);
-  
+
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     // By default, show all columns except audit columns
     const initialColumns = effectiveColumns
-      .filter((col) => !AUDIT_COLUMNS.includes(col.key))
-      .map((col) => col.key);
+      .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
+      .map((col) => col.ColumnName);
     console.log("useEntityColumns: Initial visibleColumns:", initialColumns.length);
     return initialColumns;
   });
@@ -54,8 +50,8 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
   useEffect(() => {
     if (effectiveColumns.length > 0) {
       const newVisibleColumns = effectiveColumns
-        .filter((col) => !AUDIT_COLUMNS.includes(col.key))
-        .map((col) => col.key);
+        .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
+        .map((col) => col.ColumnName);
       console.log("useEntityColumns: Updating visibleColumns:", newVisibleColumns.length);
       setVisibleColumns(newVisibleColumns);
     }
@@ -63,15 +59,15 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
 
   // Memo-ize filtered columns to avoid unnecessary recalculations
   const filteredColumns = useMemo(() => {
-    return effectiveColumns.filter((col) => visibleColumns.includes(col.key));
+    return effectiveColumns.filter((col) => visibleColumns.includes(col.ColumnName));
   }, [effectiveColumns, visibleColumns]);
 
   // Get audit columns that we want to show in a compact way
   const auditColumnsToShow = useMemo(() => {
     return effectiveColumns.filter(
       (col) =>
-        AUDIT_COLUMNS.includes(col.key) &&
-        ['created_at', 'reference_id'].includes(col.key)
+        AUDIT_COLUMNS.includes(col.ColumnName) &&
+        ['created_at', 'reference_id'].includes(col.ColumnName)
     );
   }, [effectiveColumns]);
 
@@ -88,14 +84,14 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
   const resetColumnVisibility = useCallback(() => {
     setVisibleColumns(
       effectiveColumns
-        .filter((col) => !AUDIT_COLUMNS.includes(col.key))
-        .map((col) => col.key)
+        .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
+        .map((col) => col.ColumnName)
     );
   }, [effectiveColumns]);
 
   // Show all columns
   const showAllColumns = useCallback(() => {
-    setVisibleColumns(effectiveColumns.map((col) => col.key));
+    setVisibleColumns(effectiveColumns.map((col) => col.ColumnName));
   }, [effectiveColumns]);
 
   return {

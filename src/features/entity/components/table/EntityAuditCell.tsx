@@ -21,9 +21,9 @@ export const EntityAuditCell: React.FC<EntityAuditCellProps> = ({
     <TableCell className='text-xs'>
       <div className='flex flex-col gap-1'>
         {auditColumns.map((column) => (
-          <div key={column.key} className='flex items-center gap-1'>
+          <div key={column.ColumnName} className='flex items-center gap-1'>
             <span className='text-muted-foreground text-xs font-medium'>
-              {column.key === 'reference_id' ? 'ID:' : 'Created:'}
+              {column.ColumnName === 'reference_id' ? 'ID:' : 'Created:'}
             </span>
             {formatCellValue(item, column)}
           </div>

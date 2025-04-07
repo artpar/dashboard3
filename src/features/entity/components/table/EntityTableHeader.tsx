@@ -37,12 +37,12 @@ export const EntityTableHeader: React.FC<EntityTableHeaderProps> = ({
         <DropdownMenuContent align="end" className="w-56">
           {columns.map((column) => (
             <DropdownMenuCheckboxItem
-              key={column.key}
-              checked={visibleColumns.includes(column.key)}
-              onCheckedChange={() => toggleColumnVisibility(column.key)}
+              key={column.ColumnName}
+              checked={visibleColumns.includes(column.ColumnName)}
+              onCheckedChange={() => toggleColumnVisibility(column.ColumnName)}
             >
               {column.name}
-              {AUDIT_COLUMNS.includes(column.key) && (
+              {AUDIT_COLUMNS.includes(column.ColumnName) && (
                 <span className="text-muted-foreground ml-2 text-xs">
                   (Audit)
                 </span>

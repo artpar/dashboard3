@@ -1,8 +1,9 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { daptinClient } from '@/daptin'
-import { useToast } from '@/hooks/use-toast'
-import { ColumnDefinition } from './hooks/useEntityColumns'
+import React, { createContext, useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { daptinClient } from '@/daptin';
+import { useToast } from '@/hooks/use-toast';
+import { ColumnDefinition } from './hooks/useEntityColumns';
+
 
 // Define the entity data context type
 interface EntityContextType {
@@ -116,6 +117,7 @@ export const EntityDataProvider: React.FC<{
           // Parse column information from schema
           try {
             // Check if world_schema_json is available
+            let normalizedColumns: ColumnDefinition[] = []
             if (schemaData.world_schema_json) {
               try {
                 // Parse the schema JSON from the backend
@@ -123,34 +125,7 @@ export const EntityDataProvider: React.FC<{
 
                 // Extract columns from the parsed schema
                 if (parsedSchema && parsedSchema.Columns) {
-                  const normalizedColumns: ColumnDefinition[] =
-                    parsedSchema.Columns.filter(
-                      (col: any) =>
-                        !['permission', 'id', 'version'].includes(
-                          col.ColumnName.toLowerCase()
-                        )
-                    ).map((col: any) => ({
-                      key: col.ColumnName,
-                      name:
-                        col.Name ||
-                        col.ColumnName.split('_')
-                          .map(
-                            (word: string) =>
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                          )
-                          .join(' '),
-                      type: col.ColumnType,
-                      isNullable: col.IsNullable,
-                      isUnique: col.IsUnique,
-                      isPrimaryKey: col.IsPrimaryKey,
-                      isForeignKey: col.IsForeignKey,
-                      defaultValue: col.DefaultValue,
-                      dataType: col.DataType,
-                      columnType: col.ColumnType,
-                      foreignKeyData: col.ForeignKeyData,
-                      options: col.Options,
-                      columnDescription: col.ColumnDescription,
-                    }))
+                  normalizedColumns = parsedSchema.Columns;
 
                   console.log('Setting columns:', normalizedColumns.length)
                   setColumns(normalizedColumns)
@@ -191,103 +166,6 @@ export const EntityDataProvider: React.FC<{
                 )
                 // Fall back to existing approach
               }
-            }
-
-            // If world_schema_json isn't available or parsing failed, try other methods
-            if (columns.length === 0) {
-              // Extract column information directly from the world table's columns_info JSON
-              const columnsInfo = schemaData.columns_info || {}
-
-              let normalizedColumns: ColumnDefinition[] = []
-
-              try {
-                // Try to fetch detailed column information
-                const columnsResponse = await daptinClient.jsonApi.findAll(
-                  'column',
-                  {
-                    query: JSON.stringify([
-                      {
-                        column: 'table_name',
-                        operator: 'eq',
-                        value: entityName,
-                      },
-                    ]),
-                    sort: 'column_position',
-                  }
-                )
-
-                if (columnsResponse.data && columnsResponse.data.length > 0) {
-                  normalizedColumns = columnsResponse.data
-                    .filter(
-                      (col: any) =>
-                        !['permission', 'id', 'version'].includes(
-                          col.column_name.toLowerCase()
-                        )
-                    )
-                    .map((col: any) => ({
-                      key: col.column_name,
-                      name: col.column_name
-                        .split('_')
-                        .map(
-                          (word: string) =>
-                            word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(' '),
-                      type: col.column_type,
-                      isNullable: col.is_nullable,
-                      isUnique: col.is_unique,
-                      isPrimaryKey: col.is_primary_key,
-                      isForeignKey: col.is_foreign_key,
-                      defaultValue: col.default_value,
-                      dataType: col.data_type,
-                      columnType: col.column_type,
-                      foreignKeyData: col.foreignKeyData,
-                      relationName: col.relation_name,
-                      options: col.options,
-                    }))
-                }
-              } catch (columnsError) {
-                console.warn(
-                  'Column info not available, using schema info only'
-                )
-              }
-
-              // If we still don't have columns, fall back to schema's columns_info
-              if (normalizedColumns.length === 0) {
-                normalizedColumns = Object.entries(columnsInfo)
-                  .filter(
-                    ([key]) =>
-                      !['permission', 'id', 'version'].includes(
-                        key.toLowerCase()
-                      )
-                  )
-                  .map(([key, info]: [string, any]) => ({
-                    key,
-                    name: key
-                      .split('_')
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                      )
-                      .join(' '),
-                    type: info.columnType || 'string',
-                    isNullable: info.isNullable,
-                    isUnique: info.isUnique,
-                    isPrimaryKey: key === 'id',
-                    isForeignKey: info.isForeignKey,
-                    defaultValue: info.defaultValue,
-                    dataType: info.dataType,
-                    columnType: info.columnType,
-                    foreignKeyData: info.foreignKeyData,
-                    relationName: info.relationName,
-                    options: info.options,
-                  }))
-              }
-
-              console.log(
-                'Setting columns (fallback):',
-                normalizedColumns.length
-              )
-              setColumns(normalizedColumns)
             }
           } catch (error) {
             console.error('Error processing schema information:', error)

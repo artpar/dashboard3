@@ -21,36 +21,36 @@ export function useEntityFormatters() {
    * Format a cell value based on column type
    */
   const formatCellValue = useCallback((item: any, column: ColumnDefinition) => {
-    const value = item[column.key];
+    const value = item[column.ColumnName];
 
     if (value === null || value === undefined) {
       return '-';
     }
 
     // Handle special audit columns
-    if (AUDIT_COLUMNS.includes(column.key)) {
-      return formatAuditColumn(value, column.key);
+    if (AUDIT_COLUMNS.includes(column.ColumnName)) {
+      return formatAuditColumn(value, column.ColumnName);
     }
 
     // Handle different column types
-    if (column.type === 'datetime' || column.dataType === 'timestamp') {
+    if (column.ColumnType === 'datetime' || column.DataType === 'timestamp') {
       return formatDateValue(value);
     }
 
     // Boolean values
     if (
       typeof value === 'boolean' ||
-      column.type === 'boolean' ||
-      column.type === 'checkbox'
+      column.ColumnType === 'boolean' ||
+      column.ColumnType === 'checkbox'
     ) {
       return formatBooleanValue(value);
     }
 
     // Status-like fields
     if (
-      (column.key === 'status' ||
-        column.key.includes('status') ||
-        column.key.endsWith('_status')) &&
+      (column.ColumnName === 'status' ||
+        column.ColumnName.includes('status') ||
+        column.ColumnName.endsWith('_status')) &&
       typeof value === 'string'
     ) {
       return formatStatusValue(value);
@@ -58,29 +58,29 @@ export function useEntityFormatters() {
 
     // Numeric values
     if (
-      column.type === 'measurement' ||
-      column.type === 'int' ||
-      column.type === 'integer' ||
-      column.type === 'number' ||
-      (column.dataType &&
-        (column.dataType.includes('int') ||
-          column.dataType === 'smallint' ||
-          column.dataType === 'INTEGER'))
+      column.ColumnType === 'measurement' ||
+      column.ColumnType === 'int' ||
+      column.ColumnType === 'integer' ||
+      column.ColumnType === 'number' ||
+      (column.DataType &&
+        (column.DataType.includes('int') ||
+          column.DataType === 'smallint' ||
+          column.DataType === 'INTEGER'))
     ) {
       return formatNumericValue(value);
     }
 
     // File columns
     if (
-      column.type &&
-      (column.type.startsWith('file.') || column.type === 'file.*')
+      column.ColumnType &&
+      (column.ColumnType.startsWith('file.') || column.ColumnType === 'file.*')
     ) {
       return formatFileValue(value);
     }
 
     // Foreign key references
-    if (column.isForeignKey && column.foreignKeyData) {
-      return formatForeignKeyValue(value, column.foreignKeyData.Namespace);
+    if (column.IsForeignKey && column.ForeignKeyData) {
+      return formatForeignKeyValue(value, column.ForeignKeyData.Namespace);
     }
 
     // Long text
