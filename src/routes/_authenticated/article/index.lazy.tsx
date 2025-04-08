@@ -4,13 +4,13 @@ import { EntityManagementComponent } from '@/features/entity'
 function EntityManagementForArticle() {
   return (
     <EntityManagementComponent
-      entityName="customer"
-      title="Customers"
-      description="Customer management"
+      entityName="article"
+      title="Articles"
+      description="Article management"
     ></EntityManagementComponent>
   )
 }
 
-export const Route = createLazyFileRoute('/_authenticated/articles/')({
+export const Route = createLazyFileRoute('/_authenticated/article/')({
   component: EntityManagementForArticle,
 })

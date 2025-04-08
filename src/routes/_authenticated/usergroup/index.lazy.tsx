@@ -11,6 +11,6 @@ function EntityManagementForUserGroup() {
   )
 }
 
-export const Route = createLazyFileRoute('/_authenticated/usergroups/')({
+export const Route = createLazyFileRoute('/_authenticated/usergroup/')({
   component: EntityManagementForUserGroup,
 })

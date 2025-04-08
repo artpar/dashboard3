@@ -2,7 +2,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import Tasks from '@/features/tasks'
 import { EntityManagementComponent } from '@/features/entity'
 
-
 function EntityManagementForRpaTasks() {
   return (
     <EntityManagementComponent
@@ -13,6 +12,6 @@ function EntityManagementForRpaTasks() {
   )
 }
 
-export const Route = createLazyFileRoute('/_authenticated/tasks/')({
+export const Route = createLazyFileRoute('/_authenticated/rpatask/')({
   component: EntityManagementForRpaTasks,
 })

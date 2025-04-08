@@ -26,5 +26,5 @@ export default EntityManagementIndex
 
 // Export the component and all its related parts for flexibility
 export * from './EntityManagement'
-export * from './EntityContext'
+export * from './EntityCollectionContext.tsx'
 export { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'

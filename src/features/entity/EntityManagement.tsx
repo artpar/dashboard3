@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Main } from '@/components/layout/main'
 import EntityEditorDialog from '@/features/entity/components/dialogs/EntityEditDialog.tsx'
 import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
-import { EntityDataProvider } from './EntityContext'
+import { EntityCollectionDataProvider } from './EntityCollectionContext.tsx'
 import EntityHeader from './components/EntityHeader'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
@@ -27,7 +27,7 @@ export const EntityManagementComponent: React.FC<EntityManagementProps> = ({
   description,
 }) => {
   return (
-    <EntityDataProvider entityName={entityName}>
+    <EntityCollectionDataProvider entityName={entityName}>
       <EntityManagementContent
         entityName={entityName}
         title={
@@ -36,7 +36,7 @@ export const EntityManagementComponent: React.FC<EntityManagementProps> = ({
         }
         description={description || `Manage your ${entityName} records`}
       />
-    </EntityDataProvider>
+    </EntityCollectionDataProvider>
   )
 }
 

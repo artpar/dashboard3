@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react'
-import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
-import { useEntityColumns } from '../../hooks/useEntityColumns'
+import React, { useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { FerrisWheel } from 'lucide-react';
+import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx';
+import { useEntityColumns } from '../../hooks/useEntityColumns';
 import EntityTableBody from './EntityTableBody'
-import EntityTableHeader from './EntityTableHeader'
-import { FerrisWheel } from 'lucide-react'
+import EntityTableHeader from './EntityTableHeader';
+
 
 /**
  * Main data table component that displays entity records
@@ -22,7 +24,7 @@ export const EntityDataTable: React.FC = () => {
     entityName,
   } = useEntityData()
   const [localColumns, setLocalColumns] = React.useState(columns || [])
-
+  const navigate = useNavigate()
   // Update local columns when columns from context change and are not empty
   useEffect(() => {
     if (columns && columns.length > 0) {
@@ -52,6 +54,7 @@ export const EntityDataTable: React.FC = () => {
     setSelectedItem(item)
     // This would typically open a view dialog
     console.log('View details for:', item)
+    navigate('/' + entityName + '/$entityId')
   }
 
   // If columns are not yet loaded or we're loading data, show a loading state
@@ -85,7 +88,9 @@ export const EntityDataTable: React.FC = () => {
                 <FerrisWheel />
               </TableHead>
               {filteredColumns.map((column) => (
-                <TableHead key={column.ColumnName}>{column.ColumnName}</TableHead>
+                <TableHead key={column.ColumnName}>
+                  {column.ColumnName}
+                </TableHead>
               ))}
               <TableHead className='text-muted-foreground text-xs'>
                 Audit Info

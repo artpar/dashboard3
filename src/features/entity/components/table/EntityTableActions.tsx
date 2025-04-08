@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { TableCell } from '@/components/ui/table'
+import { useEntityData } from '@/features/entity/hooks/useEntityData'
 
 interface EntityTableActionsProps {
   item: any
@@ -31,6 +33,16 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
   onViewDetails,
   relations,
 }) => {
+  const navigate = useNavigate()
+  const { entityName } = useEntityData()
+
+  const handleViewDetails = () => {
+    const itemId = item.id || item.reference_id
+    navigate({ to: `/${entityName}/$entityId`, params: { entityId: itemId } })
+    // Also call the original handler for any additional logic
+    onViewDetails(item)
+  }
+
   return (
     <TableCell className='w-12 text-left'>
       <DropdownMenu>
@@ -42,7 +54,7 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           {/* View details option */}
-          <DropdownMenuItem onClick={() => onViewDetails(item)}>
+          <DropdownMenuItem onClick={handleViewDetails}>
             <Eye className='mr-2 h-4 w-4' />
             View Details
           </DropdownMenuItem>

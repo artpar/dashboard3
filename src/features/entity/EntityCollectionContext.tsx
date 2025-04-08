@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 import { ColumnDefinition } from './hooks/useEntityColumns'
 
 // Define the entity data context type
-interface EntityContextType {
+interface EntityCollectionContextType {
   entityName: string
   data: any[]
   schema: any
@@ -40,12 +40,12 @@ interface EntityContextType {
 }
 
 // Create the entity context
-export const EntityContext = createContext<EntityContextType | undefined>(
+export const EntityCollectionContext = createContext<EntityCollectionContextType | undefined>(
   undefined
 )
 
 // Create a provider component for the entity context
-export const EntityDataProvider: React.FC<{
+export const EntityCollectionDataProvider: React.FC<{
   children: React.ReactNode
   entityName: string
 }> = ({ children, entityName }) => {
@@ -84,9 +84,9 @@ export const EntityDataProvider: React.FC<{
 
   // Separate effect to fetch schema and columns when entityName changes
   useEffect(() => {
-    console.log('EntityDataProvider.useEffect', entityName)
+    console.log('EntityCollectionDataProvider.useEffect', entityName)
     const fetchSchema = async () => {
-      console.log('EntityDataProvider.fetchSchema', entityName)
+      console.log('EntityCollectionDataProvider.fetchSchema', entityName)
       if (!entityName) return
 
       setColumnsLoading(true)
@@ -382,7 +382,7 @@ export const EntityDataProvider: React.FC<{
     }
   }
 
-  const contextValue: EntityContextType = {
+  const contextValue: EntityCollectionContextType = {
     entityName,
     data,
     schema,
@@ -418,8 +418,8 @@ export const EntityDataProvider: React.FC<{
   }
 
   return (
-    <EntityContext.Provider value={contextValue}>
+    <EntityCollectionContext.Provider value={contextValue}>
       {children}
-    </EntityContext.Provider>
+    </EntityCollectionContext.Provider>
   )
 }

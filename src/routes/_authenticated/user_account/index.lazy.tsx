@@ -11,6 +11,6 @@ function EntityManagementForUserAccount() {
   )
 }
 
-export const Route = createLazyFileRoute('/_authenticated/user_accounts/')({
+export const Route = createLazyFileRoute('/_authenticated/user_account/')({
   component: EntityManagementForUserAccount,
 })

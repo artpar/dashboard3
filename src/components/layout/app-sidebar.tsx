@@ -147,12 +147,12 @@ const AppSidebar = () => {
                       filteredMemories.map((memory) => (
                         <Link
                           key={memory.reference_id}
-                          to={`/memories/${memory.reference_id}`}
+                          to={`/memory/${memory.reference_id}`}
                           className='hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium transition-colors'
                           onClick={(e) =>
                             handleNavigate(
                               e,
-                              `/memories/${memory.reference_id}`
+                              `/memory/${memory.reference_id}`
                             )
                           }
                         >

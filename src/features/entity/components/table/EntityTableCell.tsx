@@ -1,10 +1,7 @@
-import React from 'react';
-import { TableCell } from '@/components/ui/table';
-import NumberColumnViewer from '@/features/entity/columns/viewers/NumberColumnViewer.tsx';
-import { ColumnViewer } from '../../columns/ColumnComponentManager';
+import React from 'react'
+import { TableCell } from '@/components/ui/table'
+import { ColumnViewer } from '@/features/entity/columns'
 import { ColumnDefinition } from '../../hooks/useEntityColumns'
-import { useEntityFormatters } from '../../hooks/useEntityFormatters'
-
 
 interface EntityTableCellProps {
   item: any
@@ -18,14 +15,9 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
   item,
   column,
 }) => {
-  const { formatCellValue } = useEntityFormatters()
-
   return (
     <TableCell>
-      <ColumnViewer
-        column={column}
-        value={item[column.ColumnName]}
-      />
+      <ColumnViewer column={column} value={item[column.ColumnName]} />
     </TableCell>
   )
 }
