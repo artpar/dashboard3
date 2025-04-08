@@ -1,33 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { daptinClient } from '@/daptin';
-import { AlertCircle, ArrowLeft, ChevronRight, Clock, Edit, ExternalLink, FileText, Info, Layers, List, MoreHorizontal, Star, Tag, Trash2, User } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Main } from '@/components/layout/main';
-import { ColumnViewer } from '@/features/entity/columns';
-import { EntityCollectionDataProvider } from './EntityCollectionContext';
-import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog';
-import EntityEditorDialog from './components/dialogs/EntityEditDialog';
-import { useEntityData } from './hooks/useEntityData';
-import { formatDate, formatDateTime } from './utils/entityFormatters';
-
-
-// Field group definition for organizing fields
-interface FieldGroup {
-  id: string
-  title: string
-  icon: React.ReactNode
-  fields: string[]
-}
+import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+import { daptinClient } from '@/daptin'
+import {
+  AlertCircle,
+  ArrowLeft,
+  ChevronRight,
+  Clock,
+  Edit,
+  ExternalLink,
+  FileText,
+  Info,
+  Layers,
+  List,
+  MoreHorizontal,
+  Star,
+  Tag,
+  Trash2,
+  User,
+} from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Main } from '@/components/layout/main'
+import { FieldGroup } from '@/features/entity/FieldGroup.tsx'
+import { getFieldLabel } from '@/features/entity/GetFieldLabel.tsx'
+import { SingleEntityColumnValuesComponent } from '@/features/entity/SingleEntityColumnValuesComponent.tsx'
+import { SingleEntityRelatedRecordsComponent } from '@/features/entity/SingleEntityRelatedRecordsComponent.tsx'
+import { ColumnViewer } from '@/features/entity/columns'
+import { EntityCollectionDataProvider } from './EntityCollectionContext'
+import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
+import EntityEditorDialog from './components/dialogs/EntityEditDialog'
+import { useEntityData } from './hooks/useEntityData'
+import { formatDate, formatDateTime } from './utils/entityFormatters'
 
 interface EntityDetailsContentProps {
   entityName: string
@@ -341,12 +369,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
     return value.toString()
   }
 
-  // Get field label
-  const getFieldLabel = (fieldName: string) => {
-    const column = columns.find((col) => col.ColumnName === fieldName)
-    return column?.Name || fieldName
-  }
-
   // Early return for error state
   if (error) {
     return (
@@ -623,10 +645,17 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                     {group.fields.slice(0, 5).map((fieldName) => (
                       <div key={fieldName} className='space-y-1'>
                         <div className='text-muted-foreground text-sm font-medium'>
-                          {getFieldLabel(fieldName)}
+                          {getFieldLabel(columns, fieldName)}
                         </div>
                         <div className='text-sm'>
-                          {formatFieldValue(fieldName, entityItem[fieldName])}
+                          <ColumnViewer
+                            column={
+                              columns.filter(
+                                (e) => e.ColumnName === fieldName
+                              )[0]
+                            }
+                            value={entityItem[fieldName]}
+                          />
                         </div>
                       </div>
                     ))}
@@ -679,41 +708,11 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='space-y-6'>
-                  {fieldGroups.map((group) => (
-                    <div key={group.id} className='space-y-4'>
-                      <div className='flex items-center space-x-2 font-semibold'>
-                        {group.icon}
-                        <h3>{group.title}</h3>
-                      </div>
-
-                      <div className='rounded-lg border'>
-                        <div className='divide-y'>
-                          {group.fields.map((fieldName, idx) => (
-                            <div
-                              key={fieldName}
-                              className={`flex ${idx % 2 === 0 ? 'bg-muted/50' : ''}`}
-                            >
-                              <div className='w-1/3 px-4 py-3 font-medium'>
-                                {getFieldLabel(fieldName)}
-                              </div>
-                              <div className='w-2/3 px-4 py-3'>
-                                <ColumnViewer
-                                  column={
-                                    columns.filter(
-                                      (e) => e.ColumnName === fieldName
-                                    )[0]
-                                  }
-                                  value={entityItem[fieldName]}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <SingleEntityColumnValuesComponent
+                  fieldGroups={fieldGroups}
+                  columns={columns}
+                  entityItem={entityItem}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -724,44 +723,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               value='relations'
               className='flex flex-col space-y-6 overflow-y-auto pb-6'
             >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Related Records</CardTitle>
-                  <CardDescription>
-                    Records connected to this {entityName}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-6'>
-                    {relations.length === 0 ? (
-                      <p className='text-muted-foreground'>
-                        No relations defined for this entity.
-                      </p>
-                    ) : (
-                      <div className='space-y-4'>
-                        {relations.map((relation, index) => (
-                          <div key={index} className='rounded-lg border p-4'>
-                            <div className='flex items-center justify-between'>
-                              <div className='flex items-center space-x-2'>
-                                <Layers className='text-muted-foreground h-4 w-4' />
-                                <h3 className='font-medium'>
-                                  {relation.Object}
-                                  <span className='text-muted-foreground ml-2 text-sm'>
-                                    ({relation.Relation})
-                                  </span>
-                                </h3>
-                              </div>
-                              <Button variant='outline' size='sm'>
-                                View Related
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <SingleEntityRelatedRecordsComponent
+                entityName={entityName}
+                relations={relations}
+              />
             </TabsContent>
           )}
         </Tabs>
@@ -778,7 +743,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
         {/* Delete Confirmation Dialog */}
         <EntityDeleteDialog onDeleted={handleBack} />
       </Main>
-
     </>
   )
 }

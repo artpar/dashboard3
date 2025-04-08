@@ -46,7 +46,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   useEffect(() => {
     if (columns && columns.length > 0) {
       console.log(`Updating local columns for ${entityName}:`, columns.length)
-      setLocalColumns(columns)
+      setLocalColumns(columns.sort((a, b) => a.ColumnName.localeCompare(b.ColumnName)))
     }
   }, [columns, entityName])
 
@@ -441,7 +441,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
 
         <TabsContent value='basic' className='space-y-4'>
           {localColumns
-            .filter((c) => visibleColumns.includes(c.ColumnName))
+            .sort((a, b) => a.ColumnName.localeCompare(b.ColumnName))
             .map((column) => (
               <div key={column.ColumnName} className='space-y-2'>
                 <Label

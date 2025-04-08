@@ -1,5 +1,6 @@
 // src/components/entity/columns/types.ts
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
+
 
 // Enum of all supported column types
 export enum ColumnType {
@@ -48,68 +49,70 @@ export enum ColumnType {
   // Special types
   ForeignKey = 'foreign-key',
   Id = 'id-col',
-  Permission = 'permission',  // Added the permission type
+  Permission = 'permission', // Added the permission type
 
   // Default type
-  Unknown = 'unknown'
+  Unknown = 'unknown',
 }
-
 
 /**
  * Foreign key data structure
  */
 export interface ForeignKeyData {
-  DataSource: string;
-  Namespace: string;
-  KeyName: string;
+  DataSource: string
+  Namespace: string
+  KeyName: string
 }
 
 // Interface for column definitions
 export interface ColumnDefinition {
-  ColumnName: string;
-  Name: string;
-  ColumnType?: string;
-  DataType?: string;
-  DefaultValue?: any;
-  IsNullable?: boolean;
-  IsUnique?: boolean;
-  IsPrimaryKey?: boolean;
-  IsForeignKey?: boolean;
-  ForeignKeyData?: ForeignKeyData;
-  Options?: ColumnOption[];
-  ColumnDescription?: string;
-  ExcludeFromApi?: boolean;
+  ColumnName: string
+  Name: string
+  ColumnType?: string
+  DataType?: string
+  DefaultValue?: any
+  IsNullable?: boolean
+  IsUnique?: boolean
+  IsPrimaryKey?: boolean
+  IsForeignKey?: boolean
+  ForeignKeyData?: ForeignKeyData
+  Options?: ColumnOption[]
+  ColumnDescription?: string
+  ExcludeFromApi?: boolean
 }
 
 export interface ColumnOption {
-  Value: string;
-  Label: string;
+  Value: string
+  Label: string
 }
 
 // Interface for column viewer component props
 export interface ColumnViewerProps {
-  value: any;
-  column: ColumnDefinition;
-  className?: string;
+  value: any
+  column: ColumnDefinition
+  className?: string
 }
 
 // Interface for column editor component props
 export interface ColumnEditorProps {
-  value: any;
-  column: ColumnDefinition;
-  onChange: (value: any) => void;
-  onBlur?: () => void;
-  className?: string;
-  error?: string;
-  disabled?: boolean;
-  placeholder?: string;
+  value: any
+  column: ColumnDefinition
+  onChange: (value: any) => void
+  onBlur?: () => void
+  className?: string
+  error?: string
+  disabled?: boolean
+  placeholder?: string
 }
 
 // Interface for the component manager to map types to components
 export interface ColumnComponentMap {
-  viewer: React.ComponentType<ColumnViewerProps>;
-  editor: React.ComponentType<ColumnEditorProps>;
+  viewer: React.ComponentType<ColumnViewerProps>
+  editor: React.ComponentType<ColumnEditorProps>
 }
 
 // Map from field type to formatting function
-export type FormatterFunction = (value: any, column?: ColumnDefinition) => ReactNode;
+export type FormatterFunction = (
+  value: any,
+  column?: ColumnDefinition
+) => ReactNode

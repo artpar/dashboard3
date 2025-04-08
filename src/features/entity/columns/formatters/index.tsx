@@ -13,7 +13,17 @@ export const formatText: FormatterFunction = (value) => {
     return '-'
   }
 
-  return String(value)
+  if (value instanceof Object) {
+    return JSON.stringify(value, null, 2)
+  }
+
+  try {
+    const asJson = JSON.parse(value);
+    return JSON.stringify(asJson, null, 2)
+  }catch (ignored) {
+    return String(value)
+  }
+
 }
 
 /**
@@ -23,6 +33,17 @@ export const formatLongText: FormatterFunction = (value) => {
   if (value === null || value === undefined) {
     return '-'
   }
+  if (value instanceof Object) {
+    return JSON.stringify(value, null, 2)
+  }
+
+
+  try {
+    const asJson = JSON.parse(value);
+    return JSON.stringify(asJson, null, 2)
+  }catch (ignored) {
+  }
+
 
   const text = String(value)
   if (text.length <= 100) {
