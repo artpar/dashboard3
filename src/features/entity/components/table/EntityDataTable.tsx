@@ -80,19 +80,19 @@ export const EntityDataTable: React.FC = () => {
         toggleColumnVisibility={toggleColumnVisibility}
       />
 
-      <div className='flex-grow overflow-auto'>
+      <div className='relative flex overflow-y-auto'>
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-white">
             <TableRow>
-              <TableHead className='w-12'>
+              <TableHead className='min-w-12 sticky top-0 bg-white'>
                 <FerrisWheel />
               </TableHead>
               {filteredColumns.map((column) => (
-                <TableHead key={column.ColumnName}>
+                <TableHead className='min-w-16 sticky top-0 bg-white' key={column.ColumnName}>
                   {column.ColumnName}
                 </TableHead>
               ))}
-              <TableHead className='text-muted-foreground text-xs'>
+              <TableHead className='text-muted-foreground text-xs sticky top-0 bg-white'>
                 Audit Info
               </TableHead>
             </TableRow>
@@ -100,6 +100,7 @@ export const EntityDataTable: React.FC = () => {
 
           <EntityTableBody
             data={data}
+            className="overflow-y-auto"
             filteredColumns={filteredColumns}
             auditColumns={auditColumnsToShow}
             relations={relations}

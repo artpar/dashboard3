@@ -8,6 +8,7 @@ interface EntityTableBodyProps {
   filteredColumns: ColumnDefinition[];
   auditColumns: ColumnDefinition[];
   relations: any[];
+  className: string;
   onEdit: (item: any) => void;
   onDelete: (item: any) => void;
   onViewDetails: (item: any) => void;
@@ -21,6 +22,7 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
                                                                   filteredColumns,
                                                                   auditColumns,
                                                                   relations,
+                                                                  className,
                                                                   onEdit,
                                                                   onDelete,
                                                                   onViewDetails,
@@ -28,7 +30,7 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
   // If no data, show empty state
   if (data.length === 0) {
     return (
-      <TableBody>
+      <TableBody className={className}>
         <TableRow>
           <TableCell
             colSpan={filteredColumns.length + 2}
@@ -43,7 +45,7 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
 
   // Otherwise, render rows of data
   return (
-    <TableBody>
+    <TableBody className={className}>
       {data.map((item, index) => (
         <EntityTableRow
           key={item.id || item.reference_id || index}
