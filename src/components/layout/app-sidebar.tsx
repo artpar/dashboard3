@@ -111,7 +111,7 @@ const AppSidebar = () => {
 
 
         {/* Main navigation */}
-        <ScrollArea>
+        <ScrollArea className="pb-16">
 
           <nav className='mb-4 space-y-1'>
             {sidebarData.navGroups.map((props) => (
