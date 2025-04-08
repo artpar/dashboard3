@@ -23,6 +23,7 @@ import { Route as AuthenticatedUsergroupReferenceIdImport } from './routes/_auth
 import { Route as AuthenticatedUseraccountReferenceIdImport } from './routes/_authenticated/user_account/$referenceId'
 import { Route as AuthenticatedMemoryReferenceIdImport } from './routes/_authenticated/memory/$referenceId'
 import { Route as AuthenticatedCustomerReferenceIdImport } from './routes/_authenticated/customer/$referenceId'
+import { Route as AuthenticatedCreatorReferenceIdImport } from './routes/_authenticated/creator/$referenceId'
 import { Route as AuthenticatedArticleReferenceIdImport } from './routes/_authenticated/article/$referenceId'
 
 // Create Virtual Routes
@@ -65,6 +66,9 @@ const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
 )()
 const AuthenticatedCustomerIndexLazyImport = createFileRoute(
   '/_authenticated/customer/',
+)()
+const AuthenticatedCreatorIndexLazyImport = createFileRoute(
+  '/_authenticated/creator/',
 )()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
@@ -271,6 +275,15 @@ const AuthenticatedCustomerIndexLazyRoute =
     import('./routes/_authenticated/customer/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedCreatorIndexLazyRoute =
+  AuthenticatedCreatorIndexLazyImport.update({
+    id: '/creator/',
+    path: '/creator/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/creator/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedChatsIndexLazyRoute =
   AuthenticatedChatsIndexLazyImport.update({
     id: '/chats/',
@@ -375,6 +388,13 @@ const AuthenticatedCustomerReferenceIdRoute =
   AuthenticatedCustomerReferenceIdImport.update({
     id: '/customer/$referenceId',
     path: '/customer/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
+const AuthenticatedCreatorReferenceIdRoute =
+  AuthenticatedCreatorReferenceIdImport.update({
+    id: '/creator/$referenceId',
+    path: '/creator/$referenceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -487,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArticleReferenceIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/creator/$referenceId': {
+      id: '/_authenticated/creator/$referenceId'
+      path: '/creator/$referenceId'
+      fullPath: '/creator/$referenceId'
+      preLoaderRoute: typeof AuthenticatedCreatorReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/customer/$referenceId': {
       id: '/_authenticated/customer/$referenceId'
       path: '/customer/$referenceId'
@@ -569,6 +596,13 @@ declare module '@tanstack/react-router' {
       path: '/chats'
       fullPath: '/chats'
       preLoaderRoute: typeof AuthenticatedChatsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/creator/': {
+      id: '/_authenticated/creator/'
+      path: '/creator'
+      fullPath: '/creator'
+      preLoaderRoute: typeof AuthenticatedCreatorIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/customer/': {
@@ -669,6 +703,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedArticleReferenceIdRoute: typeof AuthenticatedArticleReferenceIdRoute
+  AuthenticatedCreatorReferenceIdRoute: typeof AuthenticatedCreatorReferenceIdRoute
   AuthenticatedCustomerReferenceIdRoute: typeof AuthenticatedCustomerReferenceIdRoute
   AuthenticatedMemoryReferenceIdRoute: typeof AuthenticatedMemoryReferenceIdRoute
   AuthenticatedUseraccountReferenceIdRoute: typeof AuthenticatedUseraccountReferenceIdRoute
@@ -677,6 +712,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedArticleIndexLazyRoute: typeof AuthenticatedArticleIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
+  AuthenticatedCreatorIndexLazyRoute: typeof AuthenticatedCreatorIndexLazyRoute
   AuthenticatedCustomerIndexLazyRoute: typeof AuthenticatedCustomerIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedMemoryIndexLazyRoute: typeof AuthenticatedMemoryIndexLazyRoute
@@ -692,6 +728,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedArticleReferenceIdRoute: AuthenticatedArticleReferenceIdRoute,
+  AuthenticatedCreatorReferenceIdRoute: AuthenticatedCreatorReferenceIdRoute,
   AuthenticatedCustomerReferenceIdRoute: AuthenticatedCustomerReferenceIdRoute,
   AuthenticatedMemoryReferenceIdRoute: AuthenticatedMemoryReferenceIdRoute,
   AuthenticatedUseraccountReferenceIdRoute:
@@ -703,6 +740,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedArticleIndexLazyRoute: AuthenticatedArticleIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
+  AuthenticatedCreatorIndexLazyRoute: AuthenticatedCreatorIndexLazyRoute,
   AuthenticatedCustomerIndexLazyRoute: AuthenticatedCustomerIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedMemoryIndexLazyRoute: AuthenticatedMemoryIndexLazyRoute,
@@ -731,6 +769,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
   '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
@@ -743,6 +782,7 @@ export interface FileRoutesByFullPath {
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/article': typeof AuthenticatedArticleIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/creator': typeof AuthenticatedCreatorIndexLazyRoute
   '/customer': typeof AuthenticatedCustomerIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/memory': typeof AuthenticatedMemoryIndexLazyRoute
@@ -766,6 +806,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
   '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
@@ -778,6 +819,7 @@ export interface FileRoutesByTo {
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/article': typeof AuthenticatedArticleIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/creator': typeof AuthenticatedCreatorIndexLazyRoute
   '/customer': typeof AuthenticatedCustomerIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/memory': typeof AuthenticatedMemoryIndexLazyRoute
@@ -805,6 +847,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/_authenticated/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/_authenticated/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/_authenticated/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
   '/_authenticated/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
@@ -817,6 +860,7 @@ export interface FileRoutesById {
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/article/': typeof AuthenticatedArticleIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
+  '/_authenticated/creator/': typeof AuthenticatedCreatorIndexLazyRoute
   '/_authenticated/customer/': typeof AuthenticatedCustomerIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/memory/': typeof AuthenticatedMemoryIndexLazyRoute
@@ -844,6 +888,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/article/$referenceId'
+    | '/creator/$referenceId'
     | '/customer/$referenceId'
     | '/memory/$referenceId'
     | '/user_account/$referenceId'
@@ -856,6 +901,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/article'
     | '/chats'
+    | '/creator'
     | '/customer'
     | '/help-center'
     | '/memory'
@@ -878,6 +924,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/article/$referenceId'
+    | '/creator/$referenceId'
     | '/customer/$referenceId'
     | '/memory/$referenceId'
     | '/user_account/$referenceId'
@@ -890,6 +937,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/article'
     | '/chats'
+    | '/creator'
     | '/customer'
     | '/help-center'
     | '/memory'
@@ -915,6 +963,7 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/article/$referenceId'
+    | '/_authenticated/creator/$referenceId'
     | '/_authenticated/customer/$referenceId'
     | '/_authenticated/memory/$referenceId'
     | '/_authenticated/user_account/$referenceId'
@@ -927,6 +976,7 @@ export interface FileRouteTypes {
     | '/_authenticated/apps/'
     | '/_authenticated/article/'
     | '/_authenticated/chats/'
+    | '/_authenticated/creator/'
     | '/_authenticated/customer/'
     | '/_authenticated/help-center/'
     | '/_authenticated/memory/'
@@ -996,6 +1046,7 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/article/$referenceId",
+        "/_authenticated/creator/$referenceId",
         "/_authenticated/customer/$referenceId",
         "/_authenticated/memory/$referenceId",
         "/_authenticated/user_account/$referenceId",
@@ -1004,6 +1055,7 @@ export const routeTree = rootRoute
         "/_authenticated/apps/",
         "/_authenticated/article/",
         "/_authenticated/chats/",
+        "/_authenticated/creator/",
         "/_authenticated/customer/",
         "/_authenticated/help-center/",
         "/_authenticated/memory/",
@@ -1063,6 +1115,10 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/article/$referenceId.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/creator/$referenceId": {
+      "filePath": "_authenticated/creator/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/customer/$referenceId": {
       "filePath": "_authenticated/customer/$referenceId.tsx",
       "parent": "/_authenticated"
@@ -1109,6 +1165,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/creator/": {
+      "filePath": "_authenticated/creator/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/customer/": {

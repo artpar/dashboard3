@@ -33,17 +33,20 @@ export const shouldUseTextarea = (value: any): boolean => {
   if (value === null || value === undefined) {
     return false
   }
-  
+
   // Check if it's an object (already JSON)
   if (value instanceof Object) {
     return true
   }
-  
+
   const stringValue = String(value)
-  
+
   // Check if it's valid JSON
   try {
-    JSON.parse(stringValue)
+    const parsedObj = JSON.parse(stringValue)
+    if (typeof parsedObj === "number" || typeof parsedObj === "boolean") {
+      return false;
+    }
     return true
   } catch (ignored) {
     // Not JSON, check line count
@@ -59,7 +62,7 @@ export const formatLongText: FormatterFunction = (value) => {
   if (value === null || value === undefined) {
     return '-'
   }
-  
+
   if (value instanceof Object) {
     return JSON.stringify(value, null, 2)
   }
