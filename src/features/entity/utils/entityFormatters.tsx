@@ -1,13 +1,73 @@
-import { format } from 'date-fns'
-import { Badge } from '@/components/ui/badge'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+// src/features/entity/utils/entityFormatters.ts
+// src/features/entity/utils/entityFormatters.ts
+import { format, isValid, parseISO } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Define special columns that should be displayed in a compact way
+
+/**
+ * Format a date value into a user-friendly date string
+ * @param value The date value to format (string, Date, or timestamp)
+ * @param fallback Optional fallback text if date is invalid
+ * @returns Formatted date string
+ */
+export const formatDate = (
+  value: string | Date | number,
+  fallback: string = '-'
+): string => {
+  try {
+    // Parse the input into a Date object
+    const date =
+      value instanceof Date
+        ? value
+        : typeof value === 'string'
+          ? parseISO(value)
+          : new Date(value)
+
+    // Check if we have a valid date
+    if (!isValid(date)) {
+      return fallback
+    }
+
+    // Format the date (Aug 24, 2023)
+    return format(date, 'MMM d, yyyy')
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return fallback
+  }
+}
+
+/**
+ * Format a date value into a user-friendly date and time string
+ * @param value The date value to format (string, Date, or timestamp)
+ * @param fallback Optional fallback text if date is invalid
+ * @returns Formatted date and time string
+ */
+export const formatDateTime = (
+  value: string | Date | number,
+  fallback: string = '-'
+): string => {
+  try {
+    // Parse the input into a Date object
+    const date =
+      value instanceof Date
+        ? value
+        : typeof value === 'string'
+          ? parseISO(value)
+          : new Date(value)
+
+    // Check if we have a valid date
+    if (!isValid(date)) {
+      return fallback
+    }
+
+    // Format the date and time (Aug 24, 2023, 3:45 PM)
+    return format(date, 'MMM d, yyyy, h:mm a')
+  } catch (error) {
+    console.error('Error formatting date/time:', error)
+    return fallback
+  }
+}
 
 // Define special columns that should be displayed in a compact way
 export const AUDIT_COLUMNS = [
@@ -198,7 +258,7 @@ export const formatObjectValue = (value: object) => {
           <span>[Object]</span>
         </TooltipTrigger>
         <TooltipContent className='max-w-md'>
-          <pre className='text-xs'>{JSON.stringify(value, null, 2)}</pre>
+          <pre className='text-xs'>{JSON.stringify(Object.keys(value), null, 2)}</pre>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
