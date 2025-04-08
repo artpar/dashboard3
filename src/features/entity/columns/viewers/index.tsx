@@ -1,15 +1,14 @@
 // src/components/entity/columns/viewers/index.ts
-import { ColumnDefinition, ColumnType, ColumnViewerProps } from '../types';
-import { getColumnType } from '../utils';
-import BooleanColumnViewer from './BooleanColumnViewer';
-import DateColumnViewer from './DateColumnViewer';
-import FileColumnViewer from './FileColumnViewer';
-import ForeignKeyColumnViewer from './ForeignKeyColumnViewer';
-import JsonColumnViewer from './JsonColumnViewer';
-import NumberColumnViewer from './NumberColumnViewer'
-import TextColumnViewer from './TextColumnViewer';
-import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
 import PermissionColumnViewer from '@/features/entity/columns/viewers/PermissionColumnViewer.tsx'
+import { ColumnDefinition, ColumnType, ColumnViewerProps } from '../types'
+import { getColumnType } from '../utils'
+import BooleanColumnViewer from './BooleanColumnViewer'
+import DateColumnViewer from './DateColumnViewer'
+import FileColumnViewer from './FileColumnViewer'
+import ForeignKeyColumnViewer from './ForeignKeyColumnViewer'
+import JsonColumnViewer from './JsonColumnViewer'
+import NumberColumnViewer from './NumberColumnViewer'
+import TextColumnViewer from './TextColumnViewer'
 
 
 // import ForeignKeyColumnViewer from './ForeignKeyColumnViewer';
@@ -18,7 +17,7 @@ import PermissionColumnViewer from '@/features/entity/columns/viewers/Permission
  * Default column viewer that redirects to appropriate component based on column type
  */
 export const DefaultColumnViewer: React.FC<ColumnViewerProps> = (props) => {
-  const columnType = getColumnType(props.column);
+  const columnType = getColumnType(props.column)
 
   switch (columnType) {
     case ColumnType.Text:
@@ -35,15 +34,15 @@ export const DefaultColumnViewer: React.FC<ColumnViewerProps> = (props) => {
     case ColumnType.Pincode:
     case ColumnType.Continent:
     case ColumnType.Id:
-      return <TextColumnViewer {...props} />;
+      return <TextColumnViewer {...props} />
     case ColumnType.Permission:
-      return <PermissionColumnViewer {...props} />;
+      return <PermissionColumnViewer {...props} />
 
     case ColumnType.DateTime:
     case ColumnType.Date:
     case ColumnType.Time:
     case ColumnType.Timestamp:
-      return <DateColumnViewer {...props} />;
+      return <DateColumnViewer {...props} />
 
     case ColumnType.NumberInt:
     case ColumnType.NumberFloat:
@@ -54,29 +53,30 @@ export const DefaultColumnViewer: React.FC<ColumnViewerProps> = (props) => {
     case ColumnType.Rating100:
     case ColumnType.Latitude:
     case ColumnType.Longitude:
-      return <NumberColumnViewer {...props} />;
+      return <NumberColumnViewer {...props} />
 
     case ColumnType.Boolean:
-      return <BooleanColumnViewer {...props} />;
+      return <BooleanColumnViewer {...props} />
 
     case ColumnType.Json:
-      return <JsonColumnViewer {...props} />;
+      return <JsonColumnViewer {...props} />
 
     case ColumnType.File:
-      return <FileColumnViewer {...props} />;
+      return <FileColumnViewer {...props} />
 
     // case ColumnType.ForeignKey:
     //   return <ForeignKeyColumnViewer {...props} />;
 
     default:
-      return <TextColumnViewer {...props} />;
+      return <TextColumnViewer {...props} />
   }
-};
+}
 
 /**
  * Get the column viewer component for a specific column type
  */
 export function getColumnViewer(columnType: ColumnType) {
+  console.log("GetColumnViewer", columnType)
   switch (columnType) {
     case ColumnType.Text:
     case ColumnType.Content:
@@ -92,13 +92,13 @@ export function getColumnViewer(columnType: ColumnType) {
     case ColumnType.Pincode:
     case ColumnType.Continent:
     case ColumnType.Id:
-      return TextColumnViewer;
+      return TextColumnViewer
 
     case ColumnType.DateTime:
     case ColumnType.Date:
     case ColumnType.Time:
     case ColumnType.Timestamp:
-      return DateColumnViewer;
+      return DateColumnViewer
 
     case ColumnType.NumberInt:
     case ColumnType.NumberFloat:
@@ -109,25 +109,25 @@ export function getColumnViewer(columnType: ColumnType) {
     case ColumnType.Rating100:
     case ColumnType.Latitude:
     case ColumnType.Longitude:
-      return NumberColumnViewer;
+      return NumberColumnViewer
 
     case ColumnType.Boolean:
-      return BooleanColumnViewer;
+      return BooleanColumnViewer
 
     case ColumnType.Json:
-      return JsonColumnViewer;
+      return JsonColumnViewer
 
     case ColumnType.File:
-      return FileColumnViewer;
+      return FileColumnViewer
 
     case ColumnType.ForeignKey:
-      return ForeignKeyColumnViewer;
+      return ForeignKeyColumnViewer
 
     case ColumnType.Permission:
-      return PermissionColumnViewer;
+      return PermissionColumnViewer
 
     default:
-      return TextColumnViewer;
+      return TextColumnViewer
   }
 }
 
@@ -135,8 +135,8 @@ export function getColumnViewer(columnType: ColumnType) {
  * Get the appropriate column viewer component for a specific column
  */
 export function getColumnViewerForColumn(column: ColumnDefinition) {
-  const columnType = getColumnType(column);
-  return getColumnViewer(columnType);
+  const columnType = getColumnType(column)
+  return getColumnViewer(columnType)
 }
 
 export {
@@ -146,4 +146,4 @@ export {
   BooleanColumnViewer,
   JsonColumnViewer,
   FileColumnViewer,
-};
+}

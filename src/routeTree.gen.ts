@@ -18,7 +18,12 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
+import { Route as AuthenticatedWorkgroupReferenceIdImport } from './routes/_authenticated/workgroup/$referenceId'
+import { Route as AuthenticatedUsergroupReferenceIdImport } from './routes/_authenticated/usergroup/$referenceId'
+import { Route as AuthenticatedUseraccountReferenceIdImport } from './routes/_authenticated/user_account/$referenceId'
 import { Route as AuthenticatedMemoryReferenceIdImport } from './routes/_authenticated/memory/$referenceId'
+import { Route as AuthenticatedCustomerReferenceIdImport } from './routes/_authenticated/customer/$referenceId'
+import { Route as AuthenticatedArticleReferenceIdImport } from './routes/_authenticated/article/$referenceId'
 
 // Create Virtual Routes
 
@@ -338,10 +343,45 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
+const AuthenticatedWorkgroupReferenceIdRoute =
+  AuthenticatedWorkgroupReferenceIdImport.update({
+    id: '/workgroup/$referenceId',
+    path: '/workgroup/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
+const AuthenticatedUsergroupReferenceIdRoute =
+  AuthenticatedUsergroupReferenceIdImport.update({
+    id: '/usergroup/$referenceId',
+    path: '/usergroup/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
+const AuthenticatedUseraccountReferenceIdRoute =
+  AuthenticatedUseraccountReferenceIdImport.update({
+    id: '/user_account/$referenceId',
+    path: '/user_account/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
 const AuthenticatedMemoryReferenceIdRoute =
   AuthenticatedMemoryReferenceIdImport.update({
     id: '/memory/$referenceId',
     path: '/memory/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
+const AuthenticatedCustomerReferenceIdRoute =
+  AuthenticatedCustomerReferenceIdImport.update({
+    id: '/customer/$referenceId',
+    path: '/customer/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
+const AuthenticatedArticleReferenceIdRoute =
+  AuthenticatedArticleReferenceIdImport.update({
+    id: '/article/$referenceId',
+    path: '/article/$referenceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -440,11 +480,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/article/$referenceId': {
+      id: '/_authenticated/article/$referenceId'
+      path: '/article/$referenceId'
+      fullPath: '/article/$referenceId'
+      preLoaderRoute: typeof AuthenticatedArticleReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/customer/$referenceId': {
+      id: '/_authenticated/customer/$referenceId'
+      path: '/customer/$referenceId'
+      fullPath: '/customer/$referenceId'
+      preLoaderRoute: typeof AuthenticatedCustomerReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/memory/$referenceId': {
       id: '/_authenticated/memory/$referenceId'
       path: '/memory/$referenceId'
       fullPath: '/memory/$referenceId'
       preLoaderRoute: typeof AuthenticatedMemoryReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/user_account/$referenceId': {
+      id: '/_authenticated/user_account/$referenceId'
+      path: '/user_account/$referenceId'
+      fullPath: '/user_account/$referenceId'
+      preLoaderRoute: typeof AuthenticatedUseraccountReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/usergroup/$referenceId': {
+      id: '/_authenticated/usergroup/$referenceId'
+      path: '/usergroup/$referenceId'
+      fullPath: '/usergroup/$referenceId'
+      preLoaderRoute: typeof AuthenticatedUsergroupReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/workgroup/$referenceId': {
+      id: '/_authenticated/workgroup/$referenceId'
+      path: '/workgroup/$referenceId'
+      fullPath: '/workgroup/$referenceId'
+      preLoaderRoute: typeof AuthenticatedWorkgroupReferenceIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/account': {
@@ -593,7 +668,12 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedArticleReferenceIdRoute: typeof AuthenticatedArticleReferenceIdRoute
+  AuthenticatedCustomerReferenceIdRoute: typeof AuthenticatedCustomerReferenceIdRoute
   AuthenticatedMemoryReferenceIdRoute: typeof AuthenticatedMemoryReferenceIdRoute
+  AuthenticatedUseraccountReferenceIdRoute: typeof AuthenticatedUseraccountReferenceIdRoute
+  AuthenticatedUsergroupReferenceIdRoute: typeof AuthenticatedUsergroupReferenceIdRoute
+  AuthenticatedWorkgroupReferenceIdRoute: typeof AuthenticatedWorkgroupReferenceIdRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedArticleIndexLazyRoute: typeof AuthenticatedArticleIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
@@ -611,7 +691,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedArticleReferenceIdRoute: AuthenticatedArticleReferenceIdRoute,
+  AuthenticatedCustomerReferenceIdRoute: AuthenticatedCustomerReferenceIdRoute,
   AuthenticatedMemoryReferenceIdRoute: AuthenticatedMemoryReferenceIdRoute,
+  AuthenticatedUseraccountReferenceIdRoute:
+    AuthenticatedUseraccountReferenceIdRoute,
+  AuthenticatedUsergroupReferenceIdRoute:
+    AuthenticatedUsergroupReferenceIdRoute,
+  AuthenticatedWorkgroupReferenceIdRoute:
+    AuthenticatedWorkgroupReferenceIdRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedArticleIndexLazyRoute: AuthenticatedArticleIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
@@ -642,7 +730,12 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
+  '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
+  '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -672,7 +765,12 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
+  '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
+  '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -706,7 +804,12 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
+  '/_authenticated/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/_authenticated/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/_authenticated/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
+  '/_authenticated/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
+  '/_authenticated/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -740,7 +843,12 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/article/$referenceId'
+    | '/customer/$referenceId'
     | '/memory/$referenceId'
+    | '/user_account/$referenceId'
+    | '/usergroup/$referenceId'
+    | '/workgroup/$referenceId'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -769,7 +877,12 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/article/$referenceId'
+    | '/customer/$referenceId'
     | '/memory/$referenceId'
+    | '/user_account/$referenceId'
+    | '/usergroup/$referenceId'
+    | '/workgroup/$referenceId'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -801,7 +914,12 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/_authenticated/article/$referenceId'
+    | '/_authenticated/customer/$referenceId'
     | '/_authenticated/memory/$referenceId'
+    | '/_authenticated/user_account/$referenceId'
+    | '/_authenticated/usergroup/$referenceId'
+    | '/_authenticated/workgroup/$referenceId'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -877,7 +995,12 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/article/$referenceId",
+        "/_authenticated/customer/$referenceId",
         "/_authenticated/memory/$referenceId",
+        "/_authenticated/user_account/$referenceId",
+        "/_authenticated/usergroup/$referenceId",
+        "/_authenticated/workgroup/$referenceId",
         "/_authenticated/apps/",
         "/_authenticated/article/",
         "/_authenticated/chats/",
@@ -936,8 +1059,28 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/article/$referenceId": {
+      "filePath": "_authenticated/article/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/customer/$referenceId": {
+      "filePath": "_authenticated/customer/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/memory/$referenceId": {
       "filePath": "_authenticated/memory/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/user_account/$referenceId": {
+      "filePath": "_authenticated/user_account/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/usergroup/$referenceId": {
+      "filePath": "_authenticated/usergroup/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/workgroup/$referenceId": {
+      "filePath": "_authenticated/workgroup/$referenceId.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {

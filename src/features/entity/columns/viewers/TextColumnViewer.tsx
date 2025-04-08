@@ -14,26 +14,25 @@ export const TextColumnViewer: React.FC<ColumnViewerProps> = ({
 }) => {
   const displayValue = formatText(value)
   const stringValue = String(displayValue)
-  
+
   // Use textarea only for JSON or text with more than 8 lines
   if (shouldUseTextarea(value)) {
     return (
       <span className={className}>
         <textarea
-        readOnly
-          className='h-40 min-w-80 w-full rounded border border-black p-2 font-mono text-xs'
+          className='h-40 w-full min-w-80 rounded border border-black p-2 font-mono text-xs'
           defaultValue={stringValue}
           readOnly
         ></textarea>
       </span>
     )
   }
-  
+
   // For shorter content (less than 100 chars), show it completely
   if (stringValue.length < 100) {
     return <div className={className}>{stringValue}</div>
   }
-  
+
   // For medium-length content, show a summary
   return <div className={className}>{stringValue.substring(0, 100)}...</div>
 }
