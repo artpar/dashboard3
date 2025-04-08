@@ -20,10 +20,36 @@ export const formatText: FormatterFunction = (value) => {
   try {
     const asJson = JSON.parse(value);
     return JSON.stringify(asJson, null, 2)
-  }catch (ignored) {
+  } catch (ignored) {
     return String(value)
   }
+}
 
+/**
+ * Determines if text should be displayed in a textarea
+ * based on line count and content type
+ */
+export const shouldUseTextarea = (value: any): boolean => {
+  if (value === null || value === undefined) {
+    return false
+  }
+  
+  // Check if it's an object (already JSON)
+  if (value instanceof Object) {
+    return true
+  }
+  
+  const stringValue = String(value)
+  
+  // Check if it's valid JSON
+  try {
+    JSON.parse(stringValue)
+    return true
+  } catch (ignored) {
+    // Not JSON, check line count
+    const lineCount = stringValue.split('\n').length
+    return lineCount > 8 || stringValue.length > 400
+  }
 }
 
 /**
@@ -33,17 +59,16 @@ export const formatLongText: FormatterFunction = (value) => {
   if (value === null || value === undefined) {
     return '-'
   }
+  
   if (value instanceof Object) {
     return JSON.stringify(value, null, 2)
   }
 
-
   try {
     const asJson = JSON.parse(value);
     return JSON.stringify(asJson, null, 2)
-  }catch (ignored) {
+  } catch (ignored) {
   }
-
 
   const text = String(value)
   if (text.length <= 100) {
