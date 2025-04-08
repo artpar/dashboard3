@@ -125,7 +125,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
               )}
               onClick={() => {
                 console.log("navigate to related", `/${namespace}/${value.reference_id}`)
-                navigate(`/${namespace}/${value.reference_id}`)
+                navigate({ to: `/${namespace}/${value.reference_id}`, params: { entityId: value.reference_id } })
+
               }}
             >
               <span className='mr-1'>{displayName}</span>

@@ -10,6 +10,10 @@ import { ColumnDefinition, ColumnType } from './types';
 export function getColumnType(column: ColumnDefinition): ColumnType {
   if (!column) return ColumnType.Unknown
 
+  if (column.ColumnName === 'reference_id') {
+    return ColumnType.Id
+  }
+
   // Handle special cases
   if (column.IsForeignKey || column.ColumnName.endsWith('_id')) {
     return ColumnType.ForeignKey
@@ -20,13 +24,11 @@ export function getColumnType(column: ColumnDefinition): ColumnType {
     return ColumnType.Permission
   }
 
-
   // Try to map directly first
   const directType = column.ColumnType as ColumnType
   if (Object.values(ColumnType).includes(directType)) {
     return directType
   }
-
 
   // Handle various file types
   if (
