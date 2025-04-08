@@ -387,7 +387,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
   // Loading state
   if (isLoading || !entityItem) {
     return (
-      <Main>
+      <Main className='flex h-full w-full flex-col overflow-hidden'>
         <div className='mb-6 flex items-center'>
           <Button
             variant='ghost'
