@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -456,78 +455,80 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
 
   return (
     <>
-      <Main className='flex h-full w-full flex-col overflow-hidden'>
-        <div className='mb-6 flex items-center justify-between'>
-          <div className='flex items-center space-x-2'>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={handleBack}
-              className='h-8 w-8'
-            >
-              <ArrowLeft className='h-4 w-4' />
-              <span className='sr-only'>Back</span>
-            </Button>
+      <Main className='flex h-screen w-full flex-col overflow-hidden'>
+        <div className='flex-shrink-0'>
+          <div className='flex items-start justify-between space-y-4'>
+            <div className='flex items-center space-x-2'>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={handleBack}
+                className='h-8 w-8'
+              >
+                <ArrowLeft className='h-4 w-4' />
+                <span className='sr-only'>Back</span>
+              </Button>
 
-            <div className='flex items-center'>
-              <div className='breadcrumbs text-muted-foreground text-sm'>
-                <span
-                  className='cursor-pointer hover:underline'
-                  onClick={handleBack}
-                >
-                  {entityName}
-                </span>
-                <ChevronRight className='mx-1 inline h-4 w-4' />
-                <span className='text-foreground font-medium'>Details</span>
+              <div className='flex items-center'>
+                <div className='breadcrumbs text-muted-foreground text-sm'>
+                  <span
+                    className='cursor-pointer hover:underline'
+                    onClick={handleBack}
+                  >
+                    {entityName}
+                  </span>
+                  <ChevronRight className='mx-1 inline h-4 w-4' />
+                  <span className='text-foreground font-medium'>Details</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className='flex space-x-2'>
-            <Button variant='outline' size='sm' onClick={handleEdit}>
-              <Edit className='mr-2 h-4 w-4' />
-              Edit
-            </Button>
+            <div className='flex space-x-2'>
+              <Button variant='outline' size='sm' onClick={handleEdit}>
+                <Edit className='mr-2 h-4 w-4' />
+                Edit
+              </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline' size='icon' className='h-8 w-8'>
-                  <MoreHorizontal className='h-4 w-4' />
-                  <span className='sr-only'>More options</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end' className='w-56'>
-                <DropdownMenuItem onClick={handleEdit}>
-                  <Edit className='mr-2 h-4 w-4' />
-                  Edit details
-                </DropdownMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant='outline' size='icon' className='h-8 w-8'>
+                    <MoreHorizontal className='h-4 w-4' />
+                    <span className='sr-only'>More options</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end' className='w-56'>
+                  <DropdownMenuItem onClick={handleEdit}>
+                    <Edit className='mr-2 h-4 w-4' />
+                    Edit details
+                  </DropdownMenuItem>
 
-                <DropdownMenuItem>
-                  <ExternalLink className='mr-2 h-4 w-4' />
-                  Open in new tab
-                </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <ExternalLink className='mr-2 h-4 w-4' />
+                    Open in new tab
+                  </DropdownMenuItem>
 
-                <DropdownMenuItem>
-                  <Star className='mr-2 h-4 w-4' />
-                  Add to favorites
-                </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Star className='mr-2 h-4 w-4' />
+                    Add to favorites
+                  </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                  <DropdownMenuSeparator />
 
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className='text-red-600'
-                >
-                  <Trash2 className='mr-2 h-4 w-4' />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className='text-red-600'
+                  >
+                    <Trash2 className='mr-2 h-4 w-4' />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
         {/* Entity header with icon/avatar */}
-        <div className='mb-8 flex items-start space-x-4'>
+        <div className='mb-4 flex items-start space-x-4'>
           {getEntityIcon()}
 
           <div className='space-y-1'>
@@ -580,8 +581,12 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
         </div>
 
         {/* Main content with tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-          <TabsList className='mb-4 w-full justify-start'>
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className='flex h-full w-full flex-col overflow-hidden'
+        >
+          <TabsList className='flex w-full justify-start'>
             <TabsTrigger value='overview' className='flex items-center'>
               <FileText className='mr-2 h-4 w-4' />
               Overview
@@ -601,7 +606,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value='overview' className='space-y-6'>
+          <TabsContent
+            value='overview'
+            className='flex flex-col space-y-6 overflow-y-auto pb-6'
+          >
             <div className='grid gap-6 md:grid-cols-2'>
               {fieldGroups.slice(0, 2).map((group) => (
                 <Card key={group.id} className='h-fit'>
@@ -642,7 +650,9 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               {entityItem.description && (
                 <Card className='col-span-full'>
                   <CardHeader className='pb-2'>
-                    <CardTitle className='text-base'>Description</CardTitle>
+                    <CardTitle className='text-base'>
+                      Description [summary]
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className='prose prose-sm max-w-none'>
@@ -657,7 +667,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
           </TabsContent>
 
           {/* Details Tab (All Fields) */}
-          <TabsContent value='details' className='space-y-6'>
+          <TabsContent
+            value='details'
+            className='flex flex-col space-y-6 overflow-y-auto pb-6'
+          >
             <Card>
               <CardHeader>
                 <CardTitle>All Fields</CardTitle>
@@ -666,42 +679,40 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='h-full overflow-scroll pr-4'>
-                  <div className='space-y-6'>
-                    {fieldGroups.map((group) => (
-                      <div key={group.id} className='space-y-4'>
-                        <div className='flex items-center space-x-2 font-semibold'>
-                          {group.icon}
-                          <h3>{group.title}</h3>
-                        </div>
+                <div className='space-y-6'>
+                  {fieldGroups.map((group) => (
+                    <div key={group.id} className='space-y-4'>
+                      <div className='flex items-center space-x-2 font-semibold'>
+                        {group.icon}
+                        <h3>{group.title}</h3>
+                      </div>
 
-                        <div className='rounded-lg border'>
-                          <div className='divide-y'>
-                            {group.fields.map((fieldName, idx) => (
-                              <div
-                                key={fieldName}
-                                className={`flex ${idx % 2 === 0 ? 'bg-muted/50' : ''}`}
-                              >
-                                <div className='w-1/3 px-4 py-3 font-medium'>
-                                  {getFieldLabel(fieldName)}
-                                </div>
-                                <div className='w-2/3 px-4 py-3'>
-                                  <ColumnViewer
-                                    column={
-                                      columns.filter(
-                                        (e) => e.ColumnName === fieldName
-                                      )[0]
-                                    }
-                                    value={entityItem[fieldName]}
-                                  />
-                                </div>
+                      <div className='rounded-lg border'>
+                        <div className='divide-y'>
+                          {group.fields.map((fieldName, idx) => (
+                            <div
+                              key={fieldName}
+                              className={`flex ${idx % 2 === 0 ? 'bg-muted/50' : ''}`}
+                            >
+                              <div className='w-1/3 px-4 py-3 font-medium'>
+                                {getFieldLabel(fieldName)}
                               </div>
-                            ))}
-                          </div>
+                              <div className='w-2/3 px-4 py-3'>
+                                <ColumnViewer
+                                  column={
+                                    columns.filter(
+                                      (e) => e.ColumnName === fieldName
+                                    )[0]
+                                  }
+                                  value={entityItem[fieldName]}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -709,7 +720,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
 
           {/* Relations Tab */}
           {relations.length > 0 && (
-            <TabsContent value='relations' className='space-y-6'>
+            <TabsContent
+              value='relations'
+              className='flex flex-col space-y-6 overflow-y-auto pb-6'
+            >
               <Card>
                 <CardHeader>
                   <CardTitle>Related Records</CardTitle>
@@ -751,19 +765,20 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
             </TabsContent>
           )}
         </Tabs>
+
+        {/* Edit Dialog */}
+        <EntityEditorDialog
+          entityName={entityName}
+          setShowCreateDialog={() => {}}
+          setShowEditDialog={setShowEditDialog}
+          showCreateDialog={false}
+          showEditDialog={showEditDialog}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <EntityDeleteDialog onDeleted={handleBack} />
       </Main>
 
-      {/* Edit Dialog */}
-      <EntityEditorDialog
-        entityName={entityName}
-        setShowCreateDialog={() => {}}
-        setShowEditDialog={setShowEditDialog}
-        showCreateDialog={false}
-        showEditDialog={showEditDialog}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <EntityDeleteDialog onDeleted={handleBack} />
     </>
   )
 }

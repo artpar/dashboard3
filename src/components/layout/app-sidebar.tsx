@@ -1,18 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
-import { sendMessageToBackgroundScript } from '@/background.ts';
-import { Building, ChevronDown, ChevronRight, Lightbulb, Plus, Settings, Sparkles } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore.ts';
-import { cn } from '@/lib/utils.ts';
-import { Button } from '@/components/ui/button.tsx';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
-import { NavGroup } from '@/components/layout/nav-group';
-import { Search } from '@/components/search.tsx';
-import { sidebarData } from './data/sidebar-data';
-import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { sendMessageToBackgroundScript } from '@/background.ts'
+import {
+  Building,
+  ChevronDown,
+  ChevronRight,
+  Lightbulb,
+  Plus,
+  Settings,
+} from 'lucide-react'
+import { useAuthStore } from '@/stores/authStore.ts'
+import { cn } from '@/lib/utils.ts'
+import { Button } from '@/components/ui/button.tsx'
+import { ScrollArea } from '@/components/ui/scroll-area.tsx'
+import { Separator } from '@/components/ui/separator.tsx'
 import { SidebarHeader } from '@/components/ui/sidebar.tsx'
-
+import { NavGroup } from '@/components/layout/nav-group'
+import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
+import { Search } from '@/components/search.tsx'
+import { sidebarData } from './data/sidebar-data'
 
 const AppSidebar = () => {
   const { user, customer } = useAuthStore()
@@ -77,7 +83,7 @@ const AppSidebar = () => {
   )
 
   const filteredWorkgroups = workgroups.filter(
-    (group : {name}) =>
+    (group: { name }) =>
       !searchQuery ||
       group.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -98,15 +104,14 @@ const AppSidebar = () => {
         {/* Logo & Toggle */}
         <SidebarHeader>
           <TeamSwitcher teams={sidebarData.teams} />
+          {isExpanded && (
+            <Search />
+          )}
         </SidebarHeader>
+
 
         {/* Main navigation */}
         <ScrollArea>
-          {isExpanded && (
-            <div className='mb-2'>
-              <Search />
-            </div>
-          )}
 
           <nav className='mb-4 space-y-1'>
             {sidebarData.navGroups.map((props) => (
@@ -150,10 +155,7 @@ const AppSidebar = () => {
                           to={`/memory/${memory.reference_id}`}
                           className='hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium transition-colors'
                           onClick={(e) =>
-                            handleNavigate(
-                              e,
-                              `/memory/${memory.reference_id}`
-                            )
+                            handleNavigate(e, `/memory/${memory.reference_id}`)
                           }
                         >
                           <div className='bg-primary h-1.5 w-1.5 rounded-full'></div>
