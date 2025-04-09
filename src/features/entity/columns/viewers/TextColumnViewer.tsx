@@ -18,13 +18,11 @@ export const TextColumnViewer: React.FC<ColumnViewerProps> = ({
   // Use textarea only for JSON or text with more than 8 lines
   if (shouldUseTextarea(value)) {
     return (
-      <span className={className}>
-        <textarea
-          className='h-40 w-full min-w-80 rounded border border-black p-2 font-mono text-xs'
-          defaultValue={stringValue}
-          readOnly
-        ></textarea>
-      </span>
+      <textarea
+        className='h-40 w-full min-w-80 rounded border border-black p-2 font-mono text-xs'
+        defaultValue={stringValue}
+        readOnly
+      ></textarea>
     )
   }
 

@@ -2,8 +2,8 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import { useToast } from '@/hooks/use-toast'
-import { ColumnDefinition } from './hooks/useEntityColumns'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
+import { ColumnDefinition } from './hooks/useEntityColumns'
 
 // Define the entity data context type
 interface EntityCollectionContextType {
@@ -213,7 +213,7 @@ export const EntityCollectionDataProvider: React.FC<{
         const response = await daptinClient.jsonApi.findAll(entityName, {
           'page[size]': pageSize.toString(),
           'page[number]': currentPage.toString(),
-          "included_relations": "*",
+          included_relations: '*',
           sort: '-created_at',
           query: parseFilters(),
         })
@@ -274,9 +274,12 @@ export const EntityCollectionDataProvider: React.FC<{
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, item }: { id: string; item: any }) => {
+      // Process relationship objects to ensure they have both type and id
+      const processedItem = { ...item }
+
       const response = await daptinClient.jsonApi.update(entityName, {
         id,
-        ...item,
+        ...processedItem,
       })
       if (response.errors && response.errors.length) {
         throw new Error(response.errors[0].detail || 'Failed to update item')

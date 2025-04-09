@@ -18,14 +18,7 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
-import { Route as AuthenticatedWorkgroupReferenceIdImport } from './routes/_authenticated/workgroup/$referenceId'
-import { Route as AuthenticatedUsergroupReferenceIdImport } from './routes/_authenticated/usergroup/$referenceId'
-import { Route as AuthenticatedUseraccountReferenceIdImport } from './routes/_authenticated/user_account/$referenceId'
-import { Route as AuthenticatedRpataskReferenceIdImport } from './routes/_authenticated/rpatask/$referenceId'
-import { Route as AuthenticatedMemoryReferenceIdImport } from './routes/_authenticated/memory/$referenceId'
-import { Route as AuthenticatedCustomerReferenceIdImport } from './routes/_authenticated/customer/$referenceId'
-import { Route as AuthenticatedCreatorReferenceIdImport } from './routes/_authenticated/creator/$referenceId'
-import { Route as AuthenticatedArticleReferenceIdImport } from './routes/_authenticated/article/$referenceId'
+import { Route as AuthenticatedEntityReferenceIdImport } from './routes/_authenticated/$entity.$referenceId'
 
 // Create Virtual Routes
 
@@ -41,44 +34,23 @@ const authForgotPasswordLazyImport = createFileRoute(
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
 )()
-const AuthenticatedWorkgroupIndexLazyImport = createFileRoute(
-  '/_authenticated/workgroup/',
-)()
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
-)()
-const AuthenticatedUsergroupIndexLazyImport = createFileRoute(
-  '/_authenticated/usergroup/',
-)()
-const AuthenticatedUseraccountIndexLazyImport = createFileRoute(
-  '/_authenticated/user_account/',
 )()
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
-const AuthenticatedRpataskIndexLazyImport = createFileRoute(
-  '/_authenticated/rpatask/',
-)()
-const AuthenticatedMemoryIndexLazyImport = createFileRoute(
-  '/_authenticated/memory/',
-)()
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
-)()
-const AuthenticatedCustomerIndexLazyImport = createFileRoute(
-  '/_authenticated/customer/',
-)()
-const AuthenticatedCreatorIndexLazyImport = createFileRoute(
-  '/_authenticated/creator/',
 )()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
 )()
-const AuthenticatedArticleIndexLazyImport = createFileRoute(
-  '/_authenticated/article/',
-)()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
+)()
+const AuthenticatedEntityIndexLazyImport = createFileRoute(
+  '/_authenticated/$entity/',
 )()
 const AuthenticatedSettingsNotificationsLazyImport = createFileRoute(
   '/_authenticated/settings/notifications',
@@ -191,15 +163,6 @@ const auth500Route = auth500Import.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthenticatedWorkgroupIndexLazyRoute =
-  AuthenticatedWorkgroupIndexLazyImport.update({
-    id: '/workgroup/',
-    path: '/workgroup/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/workgroup/index.lazy').then((d) => d.Route),
-  )
-
 const AuthenticatedUsersIndexLazyRoute =
   AuthenticatedUsersIndexLazyImport.update({
     id: '/users/',
@@ -209,26 +172,6 @@ const AuthenticatedUsersIndexLazyRoute =
     import('./routes/_authenticated/users/index.lazy').then((d) => d.Route),
   )
 
-const AuthenticatedUsergroupIndexLazyRoute =
-  AuthenticatedUsergroupIndexLazyImport.update({
-    id: '/usergroup/',
-    path: '/usergroup/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/usergroup/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedUseraccountIndexLazyRoute =
-  AuthenticatedUseraccountIndexLazyImport.update({
-    id: '/user_account/',
-    path: '/user_account/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/user_account/index.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
 const AuthenticatedSettingsIndexLazyRoute =
   AuthenticatedSettingsIndexLazyImport.update({
     id: '/',
@@ -236,24 +179,6 @@ const AuthenticatedSettingsIndexLazyRoute =
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedRpataskIndexLazyRoute =
-  AuthenticatedRpataskIndexLazyImport.update({
-    id: '/rpatask/',
-    path: '/rpatask/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/rpatask/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedMemoryIndexLazyRoute =
-  AuthenticatedMemoryIndexLazyImport.update({
-    id: '/memory/',
-    path: '/memory/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/memory/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedHelpCenterIndexLazyRoute =
@@ -267,24 +192,6 @@ const AuthenticatedHelpCenterIndexLazyRoute =
     ),
   )
 
-const AuthenticatedCustomerIndexLazyRoute =
-  AuthenticatedCustomerIndexLazyImport.update({
-    id: '/customer/',
-    path: '/customer/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/customer/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedCreatorIndexLazyRoute =
-  AuthenticatedCreatorIndexLazyImport.update({
-    id: '/creator/',
-    path: '/creator/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/creator/index.lazy').then((d) => d.Route),
-  )
-
 const AuthenticatedChatsIndexLazyRoute =
   AuthenticatedChatsIndexLazyImport.update({
     id: '/chats/',
@@ -292,15 +199,6 @@ const AuthenticatedChatsIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/chats/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedArticleIndexLazyRoute =
-  AuthenticatedArticleIndexLazyImport.update({
-    id: '/article/',
-    path: '/article/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/article/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
@@ -312,6 +210,15 @@ const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
 ).lazy(() =>
   import('./routes/_authenticated/apps/index.lazy').then((d) => d.Route),
 )
+
+const AuthenticatedEntityIndexLazyRoute =
+  AuthenticatedEntityIndexLazyImport.update({
+    id: '/$entity/',
+    path: '/$entity/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/$entity.index.lazy').then((d) => d.Route),
+  )
 
 const AuthenticatedSettingsNotificationsLazyRoute =
   AuthenticatedSettingsNotificationsLazyImport.update({
@@ -357,59 +264,10 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
-const AuthenticatedWorkgroupReferenceIdRoute =
-  AuthenticatedWorkgroupReferenceIdImport.update({
-    id: '/workgroup/$referenceId',
-    path: '/workgroup/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedUsergroupReferenceIdRoute =
-  AuthenticatedUsergroupReferenceIdImport.update({
-    id: '/usergroup/$referenceId',
-    path: '/usergroup/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedUseraccountReferenceIdRoute =
-  AuthenticatedUseraccountReferenceIdImport.update({
-    id: '/user_account/$referenceId',
-    path: '/user_account/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedRpataskReferenceIdRoute =
-  AuthenticatedRpataskReferenceIdImport.update({
-    id: '/rpatask/$referenceId',
-    path: '/rpatask/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedMemoryReferenceIdRoute =
-  AuthenticatedMemoryReferenceIdImport.update({
-    id: '/memory/$referenceId',
-    path: '/memory/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedCustomerReferenceIdRoute =
-  AuthenticatedCustomerReferenceIdImport.update({
-    id: '/customer/$referenceId',
-    path: '/customer/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedCreatorReferenceIdRoute =
-  AuthenticatedCreatorReferenceIdImport.update({
-    id: '/creator/$referenceId',
-    path: '/creator/$referenceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
-const AuthenticatedArticleReferenceIdRoute =
-  AuthenticatedArticleReferenceIdImport.update({
-    id: '/article/$referenceId',
-    path: '/article/$referenceId',
+const AuthenticatedEntityReferenceIdRoute =
+  AuthenticatedEntityReferenceIdImport.update({
+    id: '/$entity/$referenceId',
+    path: '/$entity/$referenceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -508,60 +366,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/article/$referenceId': {
-      id: '/_authenticated/article/$referenceId'
-      path: '/article/$referenceId'
-      fullPath: '/article/$referenceId'
-      preLoaderRoute: typeof AuthenticatedArticleReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/creator/$referenceId': {
-      id: '/_authenticated/creator/$referenceId'
-      path: '/creator/$referenceId'
-      fullPath: '/creator/$referenceId'
-      preLoaderRoute: typeof AuthenticatedCreatorReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/customer/$referenceId': {
-      id: '/_authenticated/customer/$referenceId'
-      path: '/customer/$referenceId'
-      fullPath: '/customer/$referenceId'
-      preLoaderRoute: typeof AuthenticatedCustomerReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/memory/$referenceId': {
-      id: '/_authenticated/memory/$referenceId'
-      path: '/memory/$referenceId'
-      fullPath: '/memory/$referenceId'
-      preLoaderRoute: typeof AuthenticatedMemoryReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/rpatask/$referenceId': {
-      id: '/_authenticated/rpatask/$referenceId'
-      path: '/rpatask/$referenceId'
-      fullPath: '/rpatask/$referenceId'
-      preLoaderRoute: typeof AuthenticatedRpataskReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/user_account/$referenceId': {
-      id: '/_authenticated/user_account/$referenceId'
-      path: '/user_account/$referenceId'
-      fullPath: '/user_account/$referenceId'
-      preLoaderRoute: typeof AuthenticatedUseraccountReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/usergroup/$referenceId': {
-      id: '/_authenticated/usergroup/$referenceId'
-      path: '/usergroup/$referenceId'
-      fullPath: '/usergroup/$referenceId'
-      preLoaderRoute: typeof AuthenticatedUsergroupReferenceIdImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/workgroup/$referenceId': {
-      id: '/_authenticated/workgroup/$referenceId'
-      path: '/workgroup/$referenceId'
-      fullPath: '/workgroup/$referenceId'
-      preLoaderRoute: typeof AuthenticatedWorkgroupReferenceIdImport
+    '/_authenticated/$entity/$referenceId': {
+      id: '/_authenticated/$entity/$referenceId'
+      path: '/$entity/$referenceId'
+      fullPath: '/$entity/$referenceId'
+      preLoaderRoute: typeof AuthenticatedEntityReferenceIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/account': {
@@ -592,18 +401,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/$entity/': {
+      id: '/_authenticated/$entity/'
+      path: '/$entity'
+      fullPath: '/$entity'
+      preLoaderRoute: typeof AuthenticatedEntityIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
       fullPath: '/apps'
       preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/article/': {
-      id: '/_authenticated/article/'
-      path: '/article'
-      fullPath: '/article'
-      preLoaderRoute: typeof AuthenticatedArticleIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/chats/': {
@@ -613,39 +422,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/creator/': {
-      id: '/_authenticated/creator/'
-      path: '/creator'
-      fullPath: '/creator'
-      preLoaderRoute: typeof AuthenticatedCreatorIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/customer/': {
-      id: '/_authenticated/customer/'
-      path: '/customer'
-      fullPath: '/customer'
-      preLoaderRoute: typeof AuthenticatedCustomerIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
       fullPath: '/help-center'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/memory/': {
-      id: '/_authenticated/memory/'
-      path: '/memory'
-      fullPath: '/memory'
-      preLoaderRoute: typeof AuthenticatedMemoryIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/rpatask/': {
-      id: '/_authenticated/rpatask/'
-      path: '/rpatask'
-      fullPath: '/rpatask'
-      preLoaderRoute: typeof AuthenticatedRpataskIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/': {
@@ -655,32 +436,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
-    '/_authenticated/user_account/': {
-      id: '/_authenticated/user_account/'
-      path: '/user_account'
-      fullPath: '/user_account'
-      preLoaderRoute: typeof AuthenticatedUseraccountIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/usergroup/': {
-      id: '/_authenticated/usergroup/'
-      path: '/usergroup'
-      fullPath: '/usergroup'
-      preLoaderRoute: typeof AuthenticatedUsergroupIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/workgroup/': {
-      id: '/_authenticated/workgroup/'
-      path: '/workgroup'
-      fullPath: '/workgroup'
-      preLoaderRoute: typeof AuthenticatedWorkgroupIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
   }
@@ -717,56 +477,24 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedArticleReferenceIdRoute: typeof AuthenticatedArticleReferenceIdRoute
-  AuthenticatedCreatorReferenceIdRoute: typeof AuthenticatedCreatorReferenceIdRoute
-  AuthenticatedCustomerReferenceIdRoute: typeof AuthenticatedCustomerReferenceIdRoute
-  AuthenticatedMemoryReferenceIdRoute: typeof AuthenticatedMemoryReferenceIdRoute
-  AuthenticatedRpataskReferenceIdRoute: typeof AuthenticatedRpataskReferenceIdRoute
-  AuthenticatedUseraccountReferenceIdRoute: typeof AuthenticatedUseraccountReferenceIdRoute
-  AuthenticatedUsergroupReferenceIdRoute: typeof AuthenticatedUsergroupReferenceIdRoute
-  AuthenticatedWorkgroupReferenceIdRoute: typeof AuthenticatedWorkgroupReferenceIdRoute
+  AuthenticatedEntityReferenceIdRoute: typeof AuthenticatedEntityReferenceIdRoute
+  AuthenticatedEntityIndexLazyRoute: typeof AuthenticatedEntityIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
-  AuthenticatedArticleIndexLazyRoute: typeof AuthenticatedArticleIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
-  AuthenticatedCreatorIndexLazyRoute: typeof AuthenticatedCreatorIndexLazyRoute
-  AuthenticatedCustomerIndexLazyRoute: typeof AuthenticatedCustomerIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
-  AuthenticatedMemoryIndexLazyRoute: typeof AuthenticatedMemoryIndexLazyRoute
-  AuthenticatedRpataskIndexLazyRoute: typeof AuthenticatedRpataskIndexLazyRoute
-  AuthenticatedUseraccountIndexLazyRoute: typeof AuthenticatedUseraccountIndexLazyRoute
-  AuthenticatedUsergroupIndexLazyRoute: typeof AuthenticatedUsergroupIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
-  AuthenticatedWorkgroupIndexLazyRoute: typeof AuthenticatedWorkgroupIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedArticleReferenceIdRoute: AuthenticatedArticleReferenceIdRoute,
-  AuthenticatedCreatorReferenceIdRoute: AuthenticatedCreatorReferenceIdRoute,
-  AuthenticatedCustomerReferenceIdRoute: AuthenticatedCustomerReferenceIdRoute,
-  AuthenticatedMemoryReferenceIdRoute: AuthenticatedMemoryReferenceIdRoute,
-  AuthenticatedRpataskReferenceIdRoute: AuthenticatedRpataskReferenceIdRoute,
-  AuthenticatedUseraccountReferenceIdRoute:
-    AuthenticatedUseraccountReferenceIdRoute,
-  AuthenticatedUsergroupReferenceIdRoute:
-    AuthenticatedUsergroupReferenceIdRoute,
-  AuthenticatedWorkgroupReferenceIdRoute:
-    AuthenticatedWorkgroupReferenceIdRoute,
+  AuthenticatedEntityReferenceIdRoute: AuthenticatedEntityReferenceIdRoute,
+  AuthenticatedEntityIndexLazyRoute: AuthenticatedEntityIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
-  AuthenticatedArticleIndexLazyRoute: AuthenticatedArticleIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
-  AuthenticatedCreatorIndexLazyRoute: AuthenticatedCreatorIndexLazyRoute,
-  AuthenticatedCustomerIndexLazyRoute: AuthenticatedCustomerIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
-  AuthenticatedMemoryIndexLazyRoute: AuthenticatedMemoryIndexLazyRoute,
-  AuthenticatedRpataskIndexLazyRoute: AuthenticatedRpataskIndexLazyRoute,
-  AuthenticatedUseraccountIndexLazyRoute:
-    AuthenticatedUseraccountIndexLazyRoute,
-  AuthenticatedUsergroupIndexLazyRoute: AuthenticatedUsergroupIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
-  AuthenticatedWorkgroupIndexLazyRoute: AuthenticatedWorkgroupIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -785,31 +513,17 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
-  '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
-  '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
-  '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
-  '/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
-  '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
-  '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
-  '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
+  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
-  '/article': typeof AuthenticatedArticleIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
-  '/creator': typeof AuthenticatedCreatorIndexLazyRoute
-  '/customer': typeof AuthenticatedCustomerIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
-  '/memory': typeof AuthenticatedMemoryIndexLazyRoute
-  '/rpatask': typeof AuthenticatedRpataskIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
-  '/user_account': typeof AuthenticatedUseraccountIndexLazyRoute
-  '/usergroup': typeof AuthenticatedUsergroupIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
-  '/workgroup': typeof AuthenticatedWorkgroupIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -823,31 +537,17 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
-  '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
-  '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
-  '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
-  '/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
-  '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
-  '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
-  '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
+  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
-  '/article': typeof AuthenticatedArticleIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
-  '/creator': typeof AuthenticatedCreatorIndexLazyRoute
-  '/customer': typeof AuthenticatedCustomerIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
-  '/memory': typeof AuthenticatedMemoryIndexLazyRoute
-  '/rpatask': typeof AuthenticatedRpataskIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
-  '/user_account': typeof AuthenticatedUseraccountIndexLazyRoute
-  '/usergroup': typeof AuthenticatedUsergroupIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
-  '/workgroup': typeof AuthenticatedWorkgroupIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -865,31 +565,17 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/article/$referenceId': typeof AuthenticatedArticleReferenceIdRoute
-  '/_authenticated/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
-  '/_authenticated/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
-  '/_authenticated/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
-  '/_authenticated/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
-  '/_authenticated/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
-  '/_authenticated/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
-  '/_authenticated/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
+  '/_authenticated/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/$entity/': typeof AuthenticatedEntityIndexLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
-  '/_authenticated/article/': typeof AuthenticatedArticleIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
-  '/_authenticated/creator/': typeof AuthenticatedCreatorIndexLazyRoute
-  '/_authenticated/customer/': typeof AuthenticatedCustomerIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
-  '/_authenticated/memory/': typeof AuthenticatedMemoryIndexLazyRoute
-  '/_authenticated/rpatask/': typeof AuthenticatedRpataskIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
-  '/_authenticated/user_account/': typeof AuthenticatedUseraccountIndexLazyRoute
-  '/_authenticated/usergroup/': typeof AuthenticatedUsergroupIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
-  '/_authenticated/workgroup/': typeof AuthenticatedWorkgroupIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -907,31 +593,17 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/article/$referenceId'
-    | '/creator/$referenceId'
-    | '/customer/$referenceId'
-    | '/memory/$referenceId'
-    | '/rpatask/$referenceId'
-    | '/user_account/$referenceId'
-    | '/usergroup/$referenceId'
-    | '/workgroup/$referenceId'
+    | '/$entity/$referenceId'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/$entity'
     | '/apps'
-    | '/article'
     | '/chats'
-    | '/creator'
-    | '/customer'
     | '/help-center'
-    | '/memory'
-    | '/rpatask'
     | '/settings/'
-    | '/user_account'
-    | '/usergroup'
     | '/users'
-    | '/workgroup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -944,31 +616,17 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/article/$referenceId'
-    | '/creator/$referenceId'
-    | '/customer/$referenceId'
-    | '/memory/$referenceId'
-    | '/rpatask/$referenceId'
-    | '/user_account/$referenceId'
-    | '/usergroup/$referenceId'
-    | '/workgroup/$referenceId'
+    | '/$entity/$referenceId'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/$entity'
     | '/apps'
-    | '/article'
     | '/chats'
-    | '/creator'
-    | '/customer'
     | '/help-center'
-    | '/memory'
-    | '/rpatask'
     | '/settings'
-    | '/user_account'
-    | '/usergroup'
     | '/users'
-    | '/workgroup'
   id:
     | '__root__'
     | '/_authenticated'
@@ -984,31 +642,17 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
-    | '/_authenticated/article/$referenceId'
-    | '/_authenticated/creator/$referenceId'
-    | '/_authenticated/customer/$referenceId'
-    | '/_authenticated/memory/$referenceId'
-    | '/_authenticated/rpatask/$referenceId'
-    | '/_authenticated/user_account/$referenceId'
-    | '/_authenticated/usergroup/$referenceId'
-    | '/_authenticated/workgroup/$referenceId'
+    | '/_authenticated/$entity/$referenceId'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/$entity/'
     | '/_authenticated/apps/'
-    | '/_authenticated/article/'
     | '/_authenticated/chats/'
-    | '/_authenticated/creator/'
-    | '/_authenticated/customer/'
     | '/_authenticated/help-center/'
-    | '/_authenticated/memory/'
-    | '/_authenticated/rpatask/'
     | '/_authenticated/settings/'
-    | '/_authenticated/user_account/'
-    | '/_authenticated/usergroup/'
     | '/_authenticated/users/'
-    | '/_authenticated/workgroup/'
   fileRoutesById: FileRoutesById
 }
 
@@ -1068,26 +712,12 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
-        "/_authenticated/article/$referenceId",
-        "/_authenticated/creator/$referenceId",
-        "/_authenticated/customer/$referenceId",
-        "/_authenticated/memory/$referenceId",
-        "/_authenticated/rpatask/$referenceId",
-        "/_authenticated/user_account/$referenceId",
-        "/_authenticated/usergroup/$referenceId",
-        "/_authenticated/workgroup/$referenceId",
+        "/_authenticated/$entity/$referenceId",
+        "/_authenticated/$entity/",
         "/_authenticated/apps/",
-        "/_authenticated/article/",
         "/_authenticated/chats/",
-        "/_authenticated/creator/",
-        "/_authenticated/customer/",
         "/_authenticated/help-center/",
-        "/_authenticated/memory/",
-        "/_authenticated/rpatask/",
-        "/_authenticated/user_account/",
-        "/_authenticated/usergroup/",
-        "/_authenticated/users/",
-        "/_authenticated/workgroup/"
+        "/_authenticated/users/"
       ]
     },
     "/(auth)/500": {
@@ -1135,36 +765,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/article/$referenceId": {
-      "filePath": "_authenticated/article/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/creator/$referenceId": {
-      "filePath": "_authenticated/creator/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/customer/$referenceId": {
-      "filePath": "_authenticated/customer/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/memory/$referenceId": {
-      "filePath": "_authenticated/memory/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/rpatask/$referenceId": {
-      "filePath": "_authenticated/rpatask/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/user_account/$referenceId": {
-      "filePath": "_authenticated/user_account/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/usergroup/$referenceId": {
-      "filePath": "_authenticated/usergroup/$referenceId.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/workgroup/$referenceId": {
-      "filePath": "_authenticated/workgroup/$referenceId.tsx",
+    "/_authenticated/$entity/$referenceId": {
+      "filePath": "_authenticated/$entity.$referenceId.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {
@@ -1183,56 +785,28 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
-    "/_authenticated/apps/": {
-      "filePath": "_authenticated/apps/index.lazy.tsx",
+    "/_authenticated/$entity/": {
+      "filePath": "_authenticated/$entity.index.lazy.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/article/": {
-      "filePath": "_authenticated/article/index.lazy.tsx",
+    "/_authenticated/apps/": {
+      "filePath": "_authenticated/apps/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/creator/": {
-      "filePath": "_authenticated/creator/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/customer/": {
-      "filePath": "_authenticated/customer/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
     "/_authenticated/help-center/": {
       "filePath": "_authenticated/help-center/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/memory/": {
-      "filePath": "_authenticated/memory/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/rpatask/": {
-      "filePath": "_authenticated/rpatask/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {
       "filePath": "_authenticated/settings/index.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
-    "/_authenticated/user_account/": {
-      "filePath": "_authenticated/user_account/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/usergroup/": {
-      "filePath": "_authenticated/usergroup/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
     "/_authenticated/users/": {
       "filePath": "_authenticated/users/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/workgroup/": {
-      "filePath": "_authenticated/workgroup/index.lazy.tsx",
       "parent": "/_authenticated"
     }
   }

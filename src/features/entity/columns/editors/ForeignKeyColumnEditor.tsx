@@ -21,12 +21,6 @@ import {
 import { ColumnEditorProps } from '../types'
 
 
-interface EntityOption {
-  id: string
-  reference_id: string
-  label: string
-}
-
 /**
  * Component for editing foreign key values
  */

@@ -23,7 +23,11 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')
   const [originalValues, setOriginalValues] = useState<Record<string, any>>({})
-  const { toast } = useToast()
+  const { toast } = useToast();
+  const columnMap = {};
+  columns.map(column => {
+    columnMap[column.ColumnName] = column
+  })
 
   // Group columns for tab organization
   const [localColumns, setLocalColumns] = useState<ColumnDefinition[]>(columns || [])
@@ -164,7 +168,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
     if (newValue === undefined && originalValue === undefined) return false
     if (newValue === null && originalValue === undefined) return false
     if (newValue === undefined && originalValue === null) return false
-    
+
     // Handle array and object comparisons
     if (typeof newValue === 'object' && newValue !== null) {
       try {
@@ -176,7 +180,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
         return newValue !== originalValue
       }
     }
-    
+
     // Simple value comparison for primitives
     return newValue !== originalValue
   }
@@ -191,14 +195,25 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       } else {
         // For updates, only send changed fields
         const changedFields: Record<string, any> = {}
-        
+
         // Compare each field with its original value
         Object.keys(data).forEach((key) => {
           if (hasValueChanged(key, data[key], originalValues[key])) {
-            changedFields[key] = data[key]
+            const columnInfo = columnMap[key];
+            if (columnInfo.ForeignKeyData && columnInfo.ForeignKeyData.DataSource) {
+              // todo fill in for other types
+              if (columnInfo.ForeignKeyData.DataSource === "self") {
+                changedFields[key] = {
+                  "type": columnInfo.ForeignKeyData.Namespace,
+                  "id": data[key]
+                }
+              }
+            } else {
+              changedFields[key] = data[key]
+            }
           }
         })
-        
+
         // Only proceed with update if there are changed fields
         if (Object.keys(changedFields).length > 0) {
           await updateItem(selectedItem.id || selectedItem.reference_id, changedFields)
@@ -259,7 +274,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
               {renderColumnFields(basicColumns)}
             </div>
           </TabsContent>

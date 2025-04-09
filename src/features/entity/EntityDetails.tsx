@@ -671,6 +671,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               className='flex flex-col space-y-6 overflow-y-auto pb-6'
             >
               <SingleEntityRelatedRecordsComponent
+                entityId={entityId}
                 entityName={entityName}
                 relations={relations}
               />
