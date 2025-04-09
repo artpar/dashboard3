@@ -241,7 +241,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
 
   // Handle back navigation
   const handleBack = () => {
-    navigate({ to: `/_authenticated/${entityName}` })
+    navigate({ to: `/${entityName}` })
   }
 
   // Find a display name for the entity
