@@ -157,7 +157,7 @@ export const ColumnUsageExample: React.FC = () => {
                   <div key={column.ColumnName} className='space-y-1'>
                     <h3 className='text-sm font-medium'>{column.Name}</h3>
                     <div className='rounded border p-2'>
-                      <ColumnViewer column={column} value={value} />
+                      <ColumnViewer column={column} value={value} entity={{"__type": "none", "reference_id": "na"}} />
                     </div>
                   </div>
                 ))}
@@ -217,7 +217,7 @@ export const ColumnUsageExample: React.FC = () => {
                       <div className='space-y-1'>
                         <p className='text-muted-foreground text-xs'>View</p>
                         <div className='flex min-h-12 items-center rounded border p-2'>
-                          <ColumnViewer column={column} value={value} />
+                          <ColumnViewer column={column} value={value} entity={{"__type": "none", "reference_id": "na"}}/>
                         </div>
                       </div>
                       <div className='space-y-1'>

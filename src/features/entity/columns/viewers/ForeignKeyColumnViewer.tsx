@@ -68,6 +68,11 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     // Skip if not a self reference
     if (dataSource !== 'self') return
 
+    if (typeof value === 'object') {
+      setReferenceData(value)
+      return
+    }
+
     // Get the reference ID based on the type of value
     const referenceId = isUuidReference
       ? value

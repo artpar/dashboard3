@@ -655,6 +655,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                               )[0]
                             }
                             value={entityItem[fieldName]}
+                            entity={entityItem}
                           />
                         </div>
                       </div>

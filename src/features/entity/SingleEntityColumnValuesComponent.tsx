@@ -35,6 +35,7 @@ export function SingleEntityColumnValuesComponent(props: {
                           )[0]
                         }
                         value={props.entityItem[fieldName]}
+                        entity={props.entityItem}
                       />
                     </div>
                   </div>
