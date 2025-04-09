@@ -12,20 +12,88 @@ import {
   Users,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
+import { useWorldEntities } from '@/hooks/use-world-entities'
+import { useMemo } from 'react'
 
-export const sidebarData: SidebarData = {
-  user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
+// Static user and team data
+const userData = {
+  name: 'satnaing',
+  email: 'satnaingdev@gmail.com',
+  avatar: '/avatars/shadcn.jpg',
+}
+
+const teamsData = [
+  {
+    name: 'Daptin',
+    logo: Command,
+    plan: '',
   },
-  teams: [
-    {
-      name: 'Daptin',
-      logo: Command,
-      plan: '',
-    },
-  ],
+]
+
+// Static settings and help items
+const otherItems = [
+  {
+    title: 'Settings',
+    icon: IconSettings,
+    items: [
+      {
+        title: 'Account',
+        url: '/settings/account',
+        icon: IconTool,
+      },
+    ],
+  },
+  {
+    title: 'Help Center',
+    url: '/help-center',
+    icon: IconHelp,
+  },
+]
+
+// Custom hook to generate sidebar data from world entities
+export function useSidebarData(): SidebarData {
+  const { groupedEntities, isLoading } = useWorldEntities()
+
+  return useMemo(() => {
+    // Default items that are always present
+    const defaultItems = [
+      {
+        title: 'Dashboard',
+        url: '/',
+        icon: LayoutDashboard,
+      },
+    ]
+
+    // Create nav items from top-level entities
+    const entityItems = isLoading
+      ? []
+      : groupedEntities.topLevel.map((entity) => ({
+          title: entity.display_name,
+          url: `/${entity.table_name}`,
+          icon: entity.icon,
+        }))
+
+    return {
+      user: userData,
+      teams: teamsData,
+      navGroups: [
+        {
+          title: 'General',
+          items: [...defaultItems, ...entityItems],
+        },
+        {
+          title: 'Other',
+          items: otherItems,
+        },
+      ],
+    }
+  }, [groupedEntities, isLoading])
+}
+
+// Export a static version for SSR/initial render
+export const sidebarData: SidebarData = {
+  user: userData,
+  teams: teamsData,
   navGroups: [
     {
       title: 'General',
@@ -65,7 +133,6 @@ export const sidebarData: SidebarData = {
           url: '/creator',
           icon: UserCircle,
         },
-
         {
           title: 'Articles',
           url: '/article',
@@ -80,43 +147,7 @@ export const sidebarData: SidebarData = {
     },
     {
       title: 'Other',
-      items: [
-        {
-          title: 'Settings',
-          icon: IconSettings,
-          items: [
-            // {
-            //   title: 'Profile',
-            //   url: '/settings',
-            //   icon: IconUserCog,
-            // },
-            {
-              title: 'Account',
-              url: '/settings/account',
-              icon: IconTool,
-            }, // {
-            //   title: 'Appearance',
-            //   url: '/settings/appearance',
-            //   icon: IconPalette,
-            // },
-            // {
-            //   title: 'Notifications',
-            //   url: '/settings/notifications',
-            //   icon: IconNotification,
-            // },
-            // {
-            //   title: 'Display',
-            //   url: '/settings/display',
-            //   icon: IconBrowserCheck,
-            // },
-          ],
-        },
-        {
-          title: 'Help Center',
-          url: '/help-center',
-          icon: IconHelp,
-        },
-      ],
+      items: otherItems,
     },
   ],
 }

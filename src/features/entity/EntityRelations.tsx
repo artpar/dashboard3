@@ -13,12 +13,12 @@ import { RelationsList } from './relations/RelationsList'
 export interface EntityRelationsProps {
   entityName: string
   entityId?: string
-  relations: Relation[]
+  relations: TableRelation[]
   title?: string
   description?: string
 }
 
-export interface Relation {
+export interface TableRelation {
   Subject: string
   SubjectName?: string
   Object: string
