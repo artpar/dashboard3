@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import { NavCollapsible, type NavGroup, NavItem, NavLink } from './types'
+import { DynamicIcon } from '@/dynamic-icon.tsx'
 
 export function NavGroup({ title, items }: NavGroup) {
   const { state } = useSidebar()
@@ -63,7 +64,7 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={checkIsActive(href, item)}>
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
-          {item.icon && <item.icon />}
+          {item.icon && <DynamicIcon icon={item.icon} / >}
           {state === 'expanded' && <span>{item.title}</span>}
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>

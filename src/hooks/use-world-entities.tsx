@@ -1,25 +1,12 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
-import { useMemo } from 'react'
-import { LucideIcon } from 'lucide-react'
-import * as LucideIcons from 'lucide-react'
+import { faDatabase } from '@fortawesome/free-solid-svg-icons'
+// Import icon packs as needed
 import { ColumnDefinition } from '@/features/entity/columns'
 
-// Map entity names to icon components
-const entityIconMap: Record<string, keyof typeof LucideIcons> = {
-  user_account: 'User',
-  usergroup: 'Users',
-  workgroup: 'Building',
-  customer: 'UserRound',
-  creator: 'UserCircle',
-  article: 'FileText',
-  rpatask: 'ClipboardList',
-  memory: 'Lightbulb',
-  // Add more mappings as needed
-}
-
 // Default icon for entities without a specific mapping
-const defaultIcon: keyof typeof LucideIcons = 'Database'
+const defaultIcon = faDatabase
 
 export interface WorldEntity {
   id: string
@@ -28,61 +15,76 @@ export interface WorldEntity {
   world_schema_json: string
   is_hidden: boolean
   is_top_level: boolean
-  icon?: LucideIcon
+  icon?: string
 }
-export type AuthPermission = number;
+
+export type AuthPermission = number
+
 /**
  * Represents a tag applied to a column for validation or conformation
  */
 export interface ColumnTag {
   /** The name of the column this tag applies to */
-  ColumnName: string;
+  ColumnName: string
   /** Tag string containing validation or conformation rules */
-  Tags: string;
+  Tags: string
 }
 
+/**
+ * Represents a relation between two tables
+ */
+export interface TableRelation {
+  /** Name of the related table */
+  TableName: string
+  /** Type of relation (e.g. one-to-many, many-to-many) */
+  RelationType: string
+  /** Column name in the current table that is related to the other table */
+  ColumnName: string
+  /** Column name in the related table that is related to the current table */
+  RelatedColumnName: string
+}
 
 export interface TableInfo {
   /** Name of the table */
-  TableName: string;
+  TableName: string
   /** Table ID */
-  TableId?: number;
+  TableId?: number
   /** Default permission for the table */
-  DefaultPermission: AuthPermission;
+  DefaultPermission: AuthPermission
   /** Columns in the table */
-  Columns: ColumnDefinition[];
+  Columns: ColumnDefinition[]
   /** Relations this table has with others */
-  Relations: TableRelation[];
+  Relations: TableRelation[]
   /** Whether this is a top level entity */
-  IsTopLevel: boolean;
+  IsTopLevel: boolean
   /** Permission value for the current user */
-  Permission: AuthPermission;
+  Permission: AuthPermission
   /** User ID of the owner */
-  UserId?: number;
+  UserId?: number
   /** Whether the table is hidden in APIs */
-  IsHidden: boolean;
+  IsHidden: boolean
   /** Whether this is a join table */
-  IsJoinTable: boolean;
+  IsJoinTable: boolean
   /** Whether state tracking is enabled */
-  IsStateTrackingEnabled: boolean;
+  IsStateTrackingEnabled: boolean
   /** Whether audit tracking is enabled */
-  IsAuditEnabled: boolean;
+  IsAuditEnabled: boolean
   /** Whether translations are enabled */
-  TranslationsEnabled: boolean;
+  TranslationsEnabled: boolean
   /** Default user groups for this table */
-  DefaultGroups: string[];
+  DefaultGroups: string[]
   /** Default relations for this table */
-  DefaultRelations: Record<string, string[]>;
+  DefaultRelations: Record<string, string[]>
   /** Column validations */
-  Validations: ColumnTag[];
+  Validations: ColumnTag[]
   /** Column conformations */
-  Conformations: ColumnTag[];
+  Conformations: ColumnTag[]
   /** Default sort order */
-  DefaultOrder?: string;
+  DefaultOrder?: string
   /** Icon for UI representation */
-  Icon?: string;
+  Icon?: string
   /** Composite keys */
-  CompositeKeys: string[][];
+  CompositeKeys: string[][]
 }
 
 export function useWorldEntities() {
@@ -110,7 +112,7 @@ export function useWorldEntities() {
 
         return response.data.map((entity: any) => ({
           ...entity,
-          icon: LucideIcons[entityIconMap[entity.icon] || defaultIcon],
+          icon: entity.icon,
         }))
       } catch (err) {
         console.error('Error fetching world entities:', err)

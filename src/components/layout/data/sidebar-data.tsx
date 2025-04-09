@@ -1,19 +1,7 @@
-import { IconHelp, IconSettings, IconTool } from '@tabler/icons-react'
-import {
-  Building,
-  ClipboardList,
-  Command,
-  FileText,
-  LayoutDashboard,
-  Lightbulb,
-  User,
-  UserCircle,
-  UserRound,
-  Users,
-} from 'lucide-react'
-import { type SidebarData } from '../types'
-import { useWorldEntities } from '@/hooks/use-world-entities'
 import { useMemo } from 'react'
+import { Command, LayoutDashboard } from 'lucide-react'
+import { useWorldEntities } from '@/hooks/use-world-entities.tsx'
+import { type SidebarData } from '../types'
 
 // Static user and team data
 const userData = {
@@ -34,19 +22,19 @@ const teamsData = [
 const otherItems = [
   {
     title: 'Settings',
-    icon: IconSettings,
+    icon: '',
     items: [
       {
         title: 'Account',
         url: '/settings/account',
-        icon: IconTool,
+        icon: '',
       },
     ],
   },
   {
     title: 'Help Center',
     url: '/help-center',
-    icon: IconHelp,
+    icon: '',
   },
 ]
 
@@ -60,7 +48,7 @@ export function useSidebarData(): SidebarData {
       {
         title: 'Dashboard',
         url: '/',
-        icon: LayoutDashboard,
+        icon: "",
       },
     ]
 
@@ -101,47 +89,47 @@ export const sidebarData: SidebarData = {
         {
           title: 'Dashboard',
           url: '/',
-          icon: LayoutDashboard,
+          icon: 'fa-dashboard',
         },
         {
           title: 'Memories',
           url: '/memory',
-          icon: Lightbulb,
+          icon: 'fa-bulb',
         },
         {
           title: 'User accounts',
           url: '/user_account',
-          icon: User,
+          icon: 'fa-user',
         },
         {
           title: 'User groups',
           url: '/usergroup',
-          icon: Users,
+          icon: 'fa-users',
         },
         {
           title: 'Workgroups',
           url: '/workgroup',
-          icon: Building,
+          icon: 'fa-building',
         },
         {
           title: 'Customer',
           url: '/customer',
-          icon: UserRound,
+          icon: 'fa-user',
         },
         {
           title: 'Creator',
           url: '/creator',
-          icon: UserCircle,
+          icon: '',
         },
         {
           title: 'Articles',
           url: '/article',
-          icon: FileText,
+          icon: '',
         },
         {
           title: 'Tasks',
           url: '/rpatask',
-          icon: ClipboardList,
+          icon: '',
         },
       ],
     },
