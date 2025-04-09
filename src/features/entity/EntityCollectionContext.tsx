@@ -85,9 +85,9 @@ export const EntityCollectionDataProvider: React.FC<{
 
   // Separate effect to fetch schema and columns when entityName changes
   useEffect(() => {
-    console.log('EntityCollectionDataProvider.useEffect', entityName)
+    // console.log('EntityCollectionDataProvider.useEffect', entityName)
     const fetchSchema = async () => {
-      console.log('EntityCollectionDataProvider.fetchSchema', entityName)
+      // console.log('EntityCollectionDataProvider.fetchSchema', entityName)
       if (!entityName) return
 
       setColumnsLoading(true)

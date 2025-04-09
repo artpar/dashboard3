@@ -140,6 +140,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               'permission',
               'version',
             ].includes(col.ColumnName) &&
+            (!col.ForeignKeyData.DataSource  || col.ForeignKeyData.DataSource.length === 0) &&
             entityItem[col.ColumnName] !== null &&
             entityItem[col.ColumnName] !== undefined
         )

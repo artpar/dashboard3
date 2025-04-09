@@ -11,6 +11,7 @@ import { useEntityData } from '@/features/entity/hooks/useEntityData'
 import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'
 import { ColumnDefinition } from '@/features/entity/columns/types'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/hooks/use-toast'
 
 interface EntityFormProps {
   mode: 'create' | 'edit'
@@ -21,6 +22,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   const { entityName, columns, schema, selectedItem, createItem, updateItem } = useEntityData()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')
+  const [originalValues, setOriginalValues] = useState<Record<string, any>>({})
+  const { toast } = useToast()
 
   // Group columns for tab organization
   const [localColumns, setLocalColumns] = useState<ColumnDefinition[]>(columns || [])
@@ -125,6 +128,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
             initialValues[column.ColumnName] = selectedItem[column.ColumnName]
           }
         })
+        // Store original values for comparison during update
+        setOriginalValues(initialValues)
       } else {
         // In create mode, initialize with default values
         localColumns.forEach((column) => {
@@ -152,6 +157,30 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
     },
   })
 
+  // Helper function to check if a value has changed
+  const hasValueChanged = (key: string, newValue: any, originalValue: any): boolean => {
+    // Handle null/undefined cases
+    if (newValue === null && originalValue === null) return false
+    if (newValue === undefined && originalValue === undefined) return false
+    if (newValue === null && originalValue === undefined) return false
+    if (newValue === undefined && originalValue === null) return false
+    
+    // Handle array and object comparisons
+    if (typeof newValue === 'object' && newValue !== null) {
+      try {
+        const newValueStr = JSON.stringify(newValue)
+        const originalValueStr = JSON.stringify(originalValue)
+        return newValueStr !== originalValueStr
+      } catch (e) {
+        // If JSON stringify fails, fall back to simple comparison
+        return newValue !== originalValue
+      }
+    }
+    
+    // Simple value comparison for primitives
+    return newValue !== originalValue
+  }
+
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
@@ -160,7 +189,26 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       if (mode === 'create') {
         await createItem(data)
       } else {
-        await updateItem(selectedItem.id || selectedItem.reference_id, data)
+        // For updates, only send changed fields
+        const changedFields: Record<string, any> = {}
+        
+        // Compare each field with its original value
+        Object.keys(data).forEach((key) => {
+          if (hasValueChanged(key, data[key], originalValues[key])) {
+            changedFields[key] = data[key]
+          }
+        })
+        
+        // Only proceed with update if there are changed fields
+        if (Object.keys(changedFields).length > 0) {
+          await updateItem(selectedItem.id || selectedItem.reference_id, changedFields)
+        } else {
+          // No changes detected
+          toast({
+            title: 'No changes',
+            description: 'No changes were detected to update',
+          })
+        }
       }
       onClose()
     } catch (error) {
