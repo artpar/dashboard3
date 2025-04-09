@@ -161,7 +161,7 @@ const Dashboard = () => {
   ]
 
   return (
-    <div className='space-y-6 w-full'>
+    <div className='w-full space-y-6 overflow-y-auto'>
       {/* User welcome section */}
       <Card>
         <CardHeader className='pb-2'>
@@ -267,10 +267,7 @@ const Dashboard = () => {
               Your recently created workflow memories
             </CardDescription>
           </div>
-          <Button
-            variant='outline'
-            onClick={() => navigate({ to: '/memory' })}
-          >
+          <Button variant='outline' onClick={() => navigate({ to: '/memory' })}>
             View All
           </Button>
         </CardHeader>
