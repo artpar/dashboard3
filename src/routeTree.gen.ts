@@ -21,6 +21,7 @@ import { Route as auth500Import } from './routes/(auth)/500'
 import { Route as AuthenticatedWorkgroupReferenceIdImport } from './routes/_authenticated/workgroup/$referenceId'
 import { Route as AuthenticatedUsergroupReferenceIdImport } from './routes/_authenticated/usergroup/$referenceId'
 import { Route as AuthenticatedUseraccountReferenceIdImport } from './routes/_authenticated/user_account/$referenceId'
+import { Route as AuthenticatedRpataskReferenceIdImport } from './routes/_authenticated/rpatask/$referenceId'
 import { Route as AuthenticatedMemoryReferenceIdImport } from './routes/_authenticated/memory/$referenceId'
 import { Route as AuthenticatedCustomerReferenceIdImport } from './routes/_authenticated/customer/$referenceId'
 import { Route as AuthenticatedCreatorReferenceIdImport } from './routes/_authenticated/creator/$referenceId'
@@ -377,6 +378,13 @@ const AuthenticatedUseraccountReferenceIdRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
+const AuthenticatedRpataskReferenceIdRoute =
+  AuthenticatedRpataskReferenceIdImport.update({
+    id: '/rpatask/$referenceId',
+    path: '/rpatask/$referenceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
 const AuthenticatedMemoryReferenceIdRoute =
   AuthenticatedMemoryReferenceIdImport.update({
     id: '/memory/$referenceId',
@@ -526,6 +534,13 @@ declare module '@tanstack/react-router' {
       path: '/memory/$referenceId'
       fullPath: '/memory/$referenceId'
       preLoaderRoute: typeof AuthenticatedMemoryReferenceIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/rpatask/$referenceId': {
+      id: '/_authenticated/rpatask/$referenceId'
+      path: '/rpatask/$referenceId'
+      fullPath: '/rpatask/$referenceId'
+      preLoaderRoute: typeof AuthenticatedRpataskReferenceIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/user_account/$referenceId': {
@@ -706,6 +721,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreatorReferenceIdRoute: typeof AuthenticatedCreatorReferenceIdRoute
   AuthenticatedCustomerReferenceIdRoute: typeof AuthenticatedCustomerReferenceIdRoute
   AuthenticatedMemoryReferenceIdRoute: typeof AuthenticatedMemoryReferenceIdRoute
+  AuthenticatedRpataskReferenceIdRoute: typeof AuthenticatedRpataskReferenceIdRoute
   AuthenticatedUseraccountReferenceIdRoute: typeof AuthenticatedUseraccountReferenceIdRoute
   AuthenticatedUsergroupReferenceIdRoute: typeof AuthenticatedUsergroupReferenceIdRoute
   AuthenticatedWorkgroupReferenceIdRoute: typeof AuthenticatedWorkgroupReferenceIdRoute
@@ -731,6 +747,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreatorReferenceIdRoute: AuthenticatedCreatorReferenceIdRoute,
   AuthenticatedCustomerReferenceIdRoute: AuthenticatedCustomerReferenceIdRoute,
   AuthenticatedMemoryReferenceIdRoute: AuthenticatedMemoryReferenceIdRoute,
+  AuthenticatedRpataskReferenceIdRoute: AuthenticatedRpataskReferenceIdRoute,
   AuthenticatedUseraccountReferenceIdRoute:
     AuthenticatedUseraccountReferenceIdRoute,
   AuthenticatedUsergroupReferenceIdRoute:
@@ -772,6 +789,7 @@ export interface FileRoutesByFullPath {
   '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
   '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
   '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
   '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
@@ -809,6 +827,7 @@ export interface FileRoutesByTo {
   '/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
   '/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
   '/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
   '/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
@@ -850,6 +869,7 @@ export interface FileRoutesById {
   '/_authenticated/creator/$referenceId': typeof AuthenticatedCreatorReferenceIdRoute
   '/_authenticated/customer/$referenceId': typeof AuthenticatedCustomerReferenceIdRoute
   '/_authenticated/memory/$referenceId': typeof AuthenticatedMemoryReferenceIdRoute
+  '/_authenticated/rpatask/$referenceId': typeof AuthenticatedRpataskReferenceIdRoute
   '/_authenticated/user_account/$referenceId': typeof AuthenticatedUseraccountReferenceIdRoute
   '/_authenticated/usergroup/$referenceId': typeof AuthenticatedUsergroupReferenceIdRoute
   '/_authenticated/workgroup/$referenceId': typeof AuthenticatedWorkgroupReferenceIdRoute
@@ -891,6 +911,7 @@ export interface FileRouteTypes {
     | '/creator/$referenceId'
     | '/customer/$referenceId'
     | '/memory/$referenceId'
+    | '/rpatask/$referenceId'
     | '/user_account/$referenceId'
     | '/usergroup/$referenceId'
     | '/workgroup/$referenceId'
@@ -927,6 +948,7 @@ export interface FileRouteTypes {
     | '/creator/$referenceId'
     | '/customer/$referenceId'
     | '/memory/$referenceId'
+    | '/rpatask/$referenceId'
     | '/user_account/$referenceId'
     | '/usergroup/$referenceId'
     | '/workgroup/$referenceId'
@@ -966,6 +988,7 @@ export interface FileRouteTypes {
     | '/_authenticated/creator/$referenceId'
     | '/_authenticated/customer/$referenceId'
     | '/_authenticated/memory/$referenceId'
+    | '/_authenticated/rpatask/$referenceId'
     | '/_authenticated/user_account/$referenceId'
     | '/_authenticated/usergroup/$referenceId'
     | '/_authenticated/workgroup/$referenceId'
@@ -1049,6 +1072,7 @@ export const routeTree = rootRoute
         "/_authenticated/creator/$referenceId",
         "/_authenticated/customer/$referenceId",
         "/_authenticated/memory/$referenceId",
+        "/_authenticated/rpatask/$referenceId",
         "/_authenticated/user_account/$referenceId",
         "/_authenticated/usergroup/$referenceId",
         "/_authenticated/workgroup/$referenceId",
@@ -1125,6 +1149,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/memory/$referenceId": {
       "filePath": "_authenticated/memory/$referenceId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/rpatask/$referenceId": {
+      "filePath": "_authenticated/rpatask/$referenceId.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/user_account/$referenceId": {

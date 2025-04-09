@@ -212,6 +212,7 @@ export const EntityCollectionDataProvider: React.FC<{
         const response = await daptinClient.jsonApi.findAll(entityName, {
           'page[size]': pageSize.toString(),
           'page[number]': currentPage.toString(),
+          "included_relations": "*",
           sort: '-created_at',
           query: parseFilters(),
         })

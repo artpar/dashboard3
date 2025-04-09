@@ -6,5 +6,5 @@ export const getFieldLabel = (
   fieldName: string
 ) => {
   const column = columns.find((col) => col.ColumnName === fieldName)
-  return column?.Name || fieldName
+  return column?.ColumnName || column?.Name || fieldName
 }

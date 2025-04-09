@@ -186,12 +186,17 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
         )
         .map((col) => col.ColumnName)
 
+      console.log('columns', columns)
       const relationFields = columns
         .filter(
           (col) =>
-            col.ColumnName.endsWith('_id') &&
-            !['reference_id'].includes(col.ColumnName) &&
-            entityItem[col.ColumnName] !== null
+            (col.ForeignKeyData &&
+              col.ForeignKeyData.DataSource &&
+              col.ForeignKeyData.DataSource.length > 0 &&
+              col.ForeignKeyData.Namespace &&
+              col.ForeignKeyData.Namespace.length > 0) ||
+            (col.ColumnName.endsWith('_id') &&
+              !['reference_id'].includes(col.ColumnName))
         )
         .map((col) => col.ColumnName)
 
@@ -648,6 +653,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                           {getFieldLabel(columns, fieldName)}
                         </div>
                         <div className='text-sm'>
+                          {fieldName}
                           <ColumnViewer
                             column={
                               columns.filter(

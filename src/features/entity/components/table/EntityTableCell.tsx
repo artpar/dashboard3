@@ -15,7 +15,7 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
   item,
   column,
 }) => {
-  console.log('EntityTableCell', item, column)
+  // console.log('EntityTableCell', item, column)
   return (
     <TableCell>
       <ColumnViewer

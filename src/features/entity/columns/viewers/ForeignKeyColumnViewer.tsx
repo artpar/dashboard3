@@ -29,7 +29,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   className,
   entity,
 }) => {
-  console.log('ForeignKeyColumnViewer', value, column)
+  // console.log('ForeignKeyColumnViewer', value, column)
   const navigate = useNavigate()
   const [referenceData, setReferenceData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -83,27 +83,31 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     if (!referenceId) return
 
     const fetchReferenceData = async () => {
-      setIsLoading(true)
-      setError(null)
+      // setIsLoading(true)
+      // setError(null)
+      setReferenceData({
+        "__type": namespace,
+        "reference_id": referenceId,
+      })
 
-      try {
-        // Attempt to fetch the referenced object using its ID
-        const response = await daptinClient.jsonApi.find(namespace, referenceId)
-        if (response.errors && response.errors.length) {
-          throw new Error(
-            response.errors[0].detail || 'Failed to load reference data'
-          )
-        }
-
-        setReferenceData(response.data)
-      } catch (err) {
-        console.error('Error fetching foreign key data:', err)
-        setError(
-          err instanceof Error ? err.message : 'Failed to load reference data'
-        )
-      } finally {
-        setIsLoading(false)
-      }
+      // try {
+      //   // Attempt to fetch the referenced object using its ID
+      //   const response = await daptinClient.jsonApi.find(namespace, referenceId)
+      //   if (response.errors && response.errors.length) {
+      //     throw new Error(
+      //       response.errors[0].detail || 'Failed to load reference data'
+      //     )
+      //   }
+      //
+      //   setReferenceData(response.data)
+      // } catch (err) {
+      //   console.error('Error fetching foreign key data:', err)
+      //   setError(
+      //     err instanceof Error ? err.message : 'Failed to load reference data'
+      //   )
+      // } finally {
+      //   setIsLoading(false)
+      // }
     }
 
     fetchReferenceData()
@@ -217,15 +221,25 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     // If we have reference data, use it
     if (referenceData) {
       // Try to find a display name from the reference data
-      const displayName =
-        referenceData.name ||
-        referenceData.title ||
-        referenceData.label ||
-        (referenceData.attributes &&
-          (referenceData.attributes.name ||
-            referenceData.attributes.title ||
-            referenceData.attributes.label)) ||
-        `${namespace}:${value}`
+      // const displayName = Object.keys(referenceData)
+      //   .map((columnName) => {
+      //     if (["created_at", "updated_at", "type", "__type", "user_account_id"].includes(columnName)) {
+      //       return null;
+      //     }
+      //     if (columnName.endsWith('_id') && columnName !== "id") {
+      //       return null;
+      //     }
+      //     if (
+      //       typeof referenceData[columnName] === 'string' &&
+      //       referenceData[columnName].length < 50
+      //     ) {
+      //       return columnName + '\n' + referenceData[columnName]
+      //     } else {
+      //       return null
+      //     }
+      //   })
+      //   .filter((e) => e !== null)
+      //   .join('\n')
 
       return (
         <TooltipProvider>
@@ -244,9 +258,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   })
                 }}
               >
-                <span className='mr-1 max-w-[150px] truncate'>
-                  {displayName}
-                </span>
+                <pre className='mr-1 max-w-[300px]'>{`${namespace}\n${value}`}</pre>
                 <ExternalLink className='h-3 w-3' />
               </Badge>
             </TooltipTrigger>
@@ -283,18 +295,18 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   }
 
   // Handle object references with reference_id
-  if (typeof value === 'object' && value !== null && 'reference_id' in value) {
+  if (typeof value === 'object' && 'reference_id' in value) {
     if (referenceData) {
       // Try to find a display name from the reference data
-      const displayName =
-        referenceData.name ||
-        referenceData.title ||
-        referenceData.label ||
-        (referenceData.attributes &&
-          (referenceData.attributes.name ||
-            referenceData.attributes.title ||
-            referenceData.attributes.label)) ||
-        `${namespace}:${value.reference_id}`
+      // const displayName =
+      //   referenceData.name ||
+      //   referenceData.title ||
+      //   referenceData.label ||
+      //   (referenceData.attributes &&
+      //     (referenceData.attributes.name ||
+      //       referenceData.attributes.title ||
+      //       referenceData.attributes.label)) ||
+      //   `${namespace}:${value.reference_id}`
 
       return (
         <TooltipProvider>
@@ -313,9 +325,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   })
                 }}
               >
-                <span className='mr-1 max-w-[150px] truncate'>
-                  {displayName}
-                </span>
+                <pre className='mr-1 max-w-[300px]'>{`${namespace}\n${value.reference_id}`}</pre>
+
                 <ExternalLink className='h-3 w-3' />
               </Badge>
             </TooltipTrigger>

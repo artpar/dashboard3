@@ -39,7 +39,7 @@ export function SingleEntityRelatedRecordsComponent(props: {
                           'text-xs': relation.Object === props.entityName,
                         })}
                       >
-                        {relation.Object}
+                        {relation.Object} ({relation.ObjectName})
                         <span className='text-muted-foreground ml-2 text-sm'>
                           ({relation.Relation})
                         </span>
@@ -49,7 +49,7 @@ export function SingleEntityRelatedRecordsComponent(props: {
                           'text-xs': relation.Subject === props.entityName,
                         })}
                       >
-                        {relation.Subject}
+                        {relation.Subject} ({relation.SubjectName})
                       </h3>
                     </div>
                     <Button variant='outline' size='sm'>
