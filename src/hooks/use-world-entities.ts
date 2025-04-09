@@ -25,7 +25,6 @@ export interface WorldEntity {
   id: string
   reference_id: string
   table_name: string
-  display_name: string
   world_schema_json: string
   is_hidden: boolean
   is_top_level: boolean
@@ -93,7 +92,7 @@ export function useWorldEntities() {
       try {
         const response = await daptinClient.jsonApi.findAll('world', {
           'page[size]': '500',
-          sort: 'display_name',
+          sort: 'table_name',
           query: JSON.stringify([
             {
               column: 'is_hidden',
@@ -111,7 +110,7 @@ export function useWorldEntities() {
 
         return response.data.map((entity: any) => ({
           ...entity,
-          icon: LucideIcons[entityIconMap[entity.table_name] || defaultIcon],
+          icon: LucideIcons[entityIconMap[entity.icon] || defaultIcon],
         }))
       } catch (err) {
         console.error('Error fetching world entities:', err)

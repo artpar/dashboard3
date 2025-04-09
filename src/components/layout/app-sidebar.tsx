@@ -136,15 +136,16 @@ const AppSidebar = () => {
                 <TeamSwitcher teams={sidebarData.teams} />
               </div>
 
-              <div className='px-4 py-2'>
+              <div  className='px-4 py-2'>
                 <Search />
+
               </div>
 
               {/* Main navigation */}
-              <ScrollArea className='flex-1 pb-16'>
+              <ScrollArea  className='flex-1 pb-16'>
                 <nav className='mb-4 space-y-1 p-2'>
                   {sidebarData.navGroups.map((props) => (
-                    <NavGroup key={props.title} {...props} />
+                    <NavGroup key={props.table_name} {...props} />
                   ))}
                 </nav>
               </ScrollArea>

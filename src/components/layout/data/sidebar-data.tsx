@@ -68,7 +68,7 @@ export function useSidebarData(): SidebarData {
     const entityItems = isLoading
       ? []
       : groupedEntities.topLevel.map((entity) => ({
-          title: entity.display_name,
+          title: entity.table_name,
           url: `/${entity.table_name}`,
           icon: entity.icon,
         }))
