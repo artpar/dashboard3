@@ -258,7 +258,9 @@ export const formatObjectValue = (value: object) => {
           <span>[Object]</span>
         </TooltipTrigger>
         <TooltipContent className='max-w-md'>
-          <pre className='text-xs'>{JSON.stringify(Object.keys(value), null, 2)}</pre>
+          <pre className='text-xs'>
+            {JSON.stringify(Object.keys(value), null, 2)}
+          </pre>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

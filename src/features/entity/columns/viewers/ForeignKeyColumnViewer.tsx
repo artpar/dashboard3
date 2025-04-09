@@ -1,7 +1,13 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
-import { AlertCircle, ExternalLink } from 'lucide-react'
+import {
+  AlertCircle,
+  ExternalLink,
+  FileIcon,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,7 +18,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { ColumnViewerProps } from '../types'
-import { useNavigate } from '@tanstack/react-router'
 
 
 /**
@@ -22,8 +27,10 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   value,
   column,
   className,
+  entity,
 }) => {
-  const navigate = useNavigate();
+  console.log('ForeignKeyColumnViewer', value, column)
+  const navigate = useNavigate()
   const [referenceData, setReferenceData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,18 +39,43 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   const foreignKeyData = column.ForeignKeyData
   const namespace = foreignKeyData?.Namespace
   const dataSource = foreignKeyData?.DataSource
+  const keyName = foreignKeyData?.KeyName
+  const columnType = column.ColumnType || ''
 
   // If the value is null or undefined, show a placeholder
   if (value === null || value === undefined) {
     return <span className={className}>-</span>
   }
 
+  // Determine the type of foreign key value
+  const isFileReference =
+    dataSource === 'cloud_store' || columnType.startsWith('file.')
+  const isUuidReference =
+    typeof value === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value
+    )
+  const isArrayReference = Array.isArray(value)
+
   // Load reference data if available
   useEffect(() => {
-    if (!namespace || !value || dataSource !== 'self') return
+    // Don't fetch for file references
+    if (isFileReference) return
 
-    // Avoid fetching if we don't have necessary data
-    if (!value.toString()) return
+    // Don't fetch if we don't have necessary data
+    if (!namespace || !value) return
+
+    // Skip if not a self reference
+    if (dataSource !== 'self') return
+
+    // Get the reference ID based on the type of value
+    const referenceId = isUuidReference
+      ? value
+      : typeof value === 'object' && value !== null && 'reference_id' in value
+        ? value.reference_id
+        : null
+
+    if (!referenceId) return
 
     const fetchReferenceData = async () => {
       setIsLoading(true)
@@ -51,10 +83,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
       try {
         // Attempt to fetch the referenced object using its ID
-        const response = await daptinClient.jsonApi.find(
-          namespace,
-          value.reference_id
-        )
+        const response = await daptinClient.jsonApi.find(namespace, referenceId)
         if (response.errors && response.errors.length) {
           throw new Error(
             response.errors[0].detail || 'Failed to load reference data'
@@ -73,7 +102,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     }
 
     fetchReferenceData()
-  }, [namespace, value, dataSource])
+  }, [namespace, value, dataSource, isFileReference, isUuidReference])
 
   // Display skeleton loader while fetching
   if (isLoading) {
@@ -99,19 +128,32 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     )
   }
 
-  // Render the foreign key data
-  // If reference data is available, display it with more context
-  if (referenceData) {
-    // Try to find a display name from the reference data
-    const displayName =
-      referenceData.name ||
-      referenceData.title ||
-      referenceData.label ||
-      (referenceData.attributes &&
-        (referenceData.attributes.name ||
-          referenceData.attributes.title ||
-          referenceData.attributes.label)) ||
-      `${namespace}:${value}`
+  // Handle file references (cloud_store or file.* column types)
+  if (isFileReference) {
+    // For array references, take the first item
+    const fileData = isArrayReference && value.length > 0 ? value[0] : value
+
+    // Determine if it's an image based on column type
+    const isImage =
+      columnType.includes('png') ||
+      columnType.includes('jpg') ||
+      columnType.includes('jpeg') ||
+      columnType.includes('webp') ||
+      columnType.includes('gif')
+
+    const assetUrl =
+      '/asset/' +
+      entity['__type'] +
+      '/' +
+      entity.reference_id +
+      '/' +
+      column.ColumnName +
+      '.png'
+    // Get file name or use placeholder
+    const fileName =
+      typeof fileData === 'object' && fileData !== null && 'name' in fileData
+        ? fileData.name
+        : 'File'
 
     return (
       <TooltipProvider>
@@ -120,27 +162,187 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             <Badge
               variant='outline'
               className={cn(
-                'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+                'flex cursor-pointer items-center bg-amber-50 text-amber-800 hover:bg-amber-100',
                 className
               )}
               onClick={() => {
-                console.log("navigate to related", `/${namespace}/${value.reference_id}`)
-                navigate({ to: `/${namespace}/${value.reference_id}`, params: { entityId: value.reference_id } })
-
+                // Handle file preview or download
+                if (
+                  typeof fileData === 'object' &&
+                  fileData !== null &&
+                  'url' in fileData
+                ) {
+                  window.open(fileData.url, '_blank')
+                }
               }}
             >
-              <span className='mr-1'>{displayName}</span>
-              <ExternalLink className='h-3 w-3' />
+              {isImage ? (
+                <ImageIcon className='mr-1 h-3 w-3' />
+              ) : (
+                <FileIcon className='mr-1 h-3 w-3' />
+              )}
+              <span className='max-w-[150px] truncate'>
+                {fileName}
+                {assetUrl} <br />
+                <img
+                  alt={column.ColumnName + ' ' + column.ColumnDescription}
+                  src={assetUrl}
+                />
+              </span>
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <div className='text-xs'>
-              <p className='font-bold'>{namespace}</p>
-              <p>ID: {value.reference_id}</p>
+              <p className='font-bold'>{isImage ? 'Image' : 'File'}</p>
+              <p>{fileName}</p>
+              {typeof fileData === 'object' &&
+                fileData !== null &&
+                'size' in fileData && (
+                  <p>Size: {formatFileSize(fileData.size)}</p>
+                )}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+    )
+  }
+
+  // Handle UUID references
+  if (isUuidReference) {
+    // If we have reference data, use it
+    if (referenceData) {
+      // Try to find a display name from the reference data
+      const displayName =
+        referenceData.name ||
+        referenceData.title ||
+        referenceData.label ||
+        (referenceData.attributes &&
+          (referenceData.attributes.name ||
+            referenceData.attributes.title ||
+            referenceData.attributes.label)) ||
+        `${namespace}:${value}`
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant='outline'
+                className={cn(
+                  'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+                  className
+                )}
+                onClick={() => {
+                  navigate({
+                    to: `/${namespace}/${value}`,
+                    params: { entityId: value },
+                  })
+                }}
+              >
+                <span className='mr-1 max-w-[150px] truncate'>
+                  {displayName}
+                </span>
+                <ExternalLink className='h-3 w-3' />
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className='text-xs'>
+                <p className='font-bold'>{namespace}</p>
+                <p>ID: {value}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    }
+
+    // If we don't have reference data yet, show a simplified badge
+    return (
+      <Badge
+        variant='outline'
+        className={cn(
+          'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+          className
+        )}
+        onClick={() => {
+          navigate({
+            to: `/${namespace}/${value}`,
+            params: { entityId: value },
+          })
+        }}
+      >
+        <span className='max-w-[100px] truncate'>{value}</span>
+        <ExternalLink className='ml-1 h-3 w-3' />
+      </Badge>
+    )
+  }
+
+  // Handle object references with reference_id
+  if (typeof value === 'object' && value !== null && 'reference_id' in value) {
+    if (referenceData) {
+      // Try to find a display name from the reference data
+      const displayName =
+        referenceData.name ||
+        referenceData.title ||
+        referenceData.label ||
+        (referenceData.attributes &&
+          (referenceData.attributes.name ||
+            referenceData.attributes.title ||
+            referenceData.attributes.label)) ||
+        `${namespace}:${value.reference_id}`
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant='outline'
+                className={cn(
+                  'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+                  className
+                )}
+                onClick={() => {
+                  navigate({
+                    to: `/${namespace}/${value.reference_id}`,
+                    params: { entityId: value.reference_id },
+                  })
+                }}
+              >
+                <span className='mr-1 max-w-[150px] truncate'>
+                  {displayName}
+                </span>
+                <ExternalLink className='h-3 w-3' />
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className='text-xs'>
+                <p className='font-bold'>{namespace}</p>
+                <p>ID: {value.reference_id}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    }
+
+    // If we don't have reference data yet, show a simplified badge
+    return (
+      <Badge
+        variant='outline'
+        className={cn(
+          'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+          className
+        )}
+        onClick={() => {
+          navigate({
+            to: `/${namespace}/${value.reference_id}`,
+            params: { entityId: value.reference_id },
+          })
+        }}
+      >
+        <span className='max-w-[100px] truncate'>{value.reference_id}</span>
+        <ExternalLink className='ml-1 h-3 w-3' />
+      </Badge>
     )
   }
 
@@ -150,9 +352,20 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       variant='outline'
       className={cn('bg-gray-100 text-gray-800', className)}
     >
-      {namespace ? `${namespace}:${JSON.stringify(value)}` : JSON.stringify(value)}
+      {namespace
+        ? `${namespace}:${JSON.stringify(value)}`
+        : JSON.stringify(value)}
     </Badge>
   )
+}
+
+// Helper function to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 export default ForeignKeyColumnViewer

@@ -90,6 +90,7 @@ export interface ColumnOption {
 export interface ColumnViewerProps {
   value: any
   column: ColumnDefinition
+  entity: any
   className?: string
 }
 

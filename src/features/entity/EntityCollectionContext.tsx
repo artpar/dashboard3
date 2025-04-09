@@ -40,9 +40,9 @@ interface EntityCollectionContextType {
 }
 
 // Create the entity context
-export const EntityCollectionContext = createContext<EntityCollectionContextType | undefined>(
-  undefined
-)
+export const EntityCollectionContext = createContext<
+  EntityCollectionContextType | undefined
+>(undefined)
 
 // Create a provider component for the entity context
 export const EntityCollectionDataProvider: React.FC<{

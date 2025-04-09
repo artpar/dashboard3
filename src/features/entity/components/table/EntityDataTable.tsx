@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { FerrisWheel } from 'lucide-react';
-import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx';
-import { useEntityColumns } from '../../hooks/useEntityColumns';
+import React, { useEffect } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { FerrisWheel } from 'lucide-react'
+import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
+import { useEntityColumns } from '../../hooks/useEntityColumns'
 import EntityTableBody from './EntityTableBody'
-import EntityTableHeader from './EntityTableHeader';
-
+import EntityTableHeader from './EntityTableHeader'
 
 /**
  * Main data table component that displays entity records
@@ -82,17 +81,20 @@ export const EntityDataTable: React.FC = () => {
 
       <div className='relative flex overflow-y-auto'>
         <Table>
-          <TableHeader className="bg-white">
+          <TableHeader className='bg-white'>
             <TableRow>
-              <TableHead className='min-w-12 sticky top-0 bg-white'>
+              <TableHead className='sticky top-0 min-w-12 bg-white'>
                 <FerrisWheel />
               </TableHead>
               {filteredColumns.map((column) => (
-                <TableHead className='min-w-16 sticky top-0 bg-white' key={column.ColumnName}>
+                <TableHead
+                  className='sticky top-0 min-w-16 bg-white'
+                  key={column.ColumnName}
+                >
                   {column.ColumnName}
                 </TableHead>
               ))}
-              <TableHead className='text-muted-foreground text-xs sticky top-0 bg-white'>
+              <TableHead className='text-muted-foreground sticky top-0 bg-white text-xs'>
                 Audit Info
               </TableHead>
             </TableRow>
@@ -100,7 +102,7 @@ export const EntityDataTable: React.FC = () => {
 
           <EntityTableBody
             data={data}
-            className="overflow-y-auto"
+            className='overflow-y-auto'
             filteredColumns={filteredColumns}
             auditColumns={auditColumnsToShow}
             relations={relations}

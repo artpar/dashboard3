@@ -190,7 +190,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
         .filter(
           (col) =>
             col.ColumnName.endsWith('_id') &&
-            !['user_id'].includes(col.ColumnName) &&
+            !['reference_id'].includes(col.ColumnName) &&
             entityItem[col.ColumnName] !== null
         )
         .map((col) => col.ColumnName)

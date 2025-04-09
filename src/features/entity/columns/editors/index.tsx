@@ -1,21 +1,21 @@
 // src/components/entity/columns/editors/index.ts
-import { ColumnDefinition, ColumnType, ColumnEditorProps } from '../types';
-import { getColumnType } from '../utils';
-
-import TextColumnEditor from './TextColumnEditor';
-import DateColumnEditor from './DateColumnEditor';
-import NumberColumnEditor from './NumberColumnEditor';
-import BooleanColumnEditor from './BooleanColumnEditor';
-import JsonColumnEditor from './JsonColumnEditor';
-import FileColumnEditor from './FileColumnEditor';
-import ForeignKeyColumnEditor from './ForeignKeyColumnEditor';
 import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
+import { ColumnDefinition, ColumnEditorProps, ColumnType } from '../types'
+import { getColumnType } from '../utils'
+import BooleanColumnEditor from './BooleanColumnEditor'
+import DateColumnEditor from './DateColumnEditor'
+import FileColumnEditor from './FileColumnEditor'
+import ForeignKeyColumnEditor from './ForeignKeyColumnEditor'
+import JsonColumnEditor from './JsonColumnEditor'
+import NumberColumnEditor from './NumberColumnEditor'
+import TextColumnEditor from './TextColumnEditor'
+
 
 /**
  * Default column editor that redirects to appropriate component based on column type
  */
 export const DefaultColumnEditor: React.FC<ColumnEditorProps> = (props) => {
-  const columnType = getColumnType(props.column);
+  const columnType = getColumnType(props.column)
 
   switch (columnType) {
     case ColumnType.Text:
@@ -32,13 +32,13 @@ export const DefaultColumnEditor: React.FC<ColumnEditorProps> = (props) => {
     case ColumnType.Pincode:
     case ColumnType.Continent:
     case ColumnType.Password:
-      return <TextColumnEditor {...props} />;
+      return <TextColumnEditor {...props} />
 
     case ColumnType.DateTime:
     case ColumnType.Date:
     case ColumnType.Time:
     case ColumnType.Timestamp:
-      return <DateColumnEditor {...props} />;
+      return <DateColumnEditor {...props} />
 
     case ColumnType.NumberInt:
     case ColumnType.NumberFloat:
@@ -49,27 +49,27 @@ export const DefaultColumnEditor: React.FC<ColumnEditorProps> = (props) => {
     case ColumnType.Rating100:
     case ColumnType.Latitude:
     case ColumnType.Longitude:
-      return <NumberColumnEditor {...props} />;
+      return <NumberColumnEditor {...props} />
 
     case ColumnType.Boolean:
-      return <BooleanColumnEditor {...props} />;
+      return <BooleanColumnEditor {...props} />
 
     case ColumnType.Json:
-      return <JsonColumnEditor {...props} />;
+      return <JsonColumnEditor {...props} />
 
     case ColumnType.File:
-      return <FileColumnEditor {...props} />;
+      return <FileColumnEditor {...props} />
 
     case ColumnType.ForeignKey:
-      return <ForeignKeyColumnEditor {...props} />;
+      return <ForeignKeyColumnEditor {...props} />
 
     case ColumnType.Permission:
-      return <PermissionColumnEditor {...props} />;
+      return <PermissionColumnEditor {...props} />
 
     default:
-      return <TextColumnEditor {...props} />;
+      return <TextColumnEditor {...props} />
   }
-};
+}
 
 /**
  * Get the column editor component for a specific column type
@@ -90,13 +90,13 @@ export function getColumnEditor(columnType: ColumnType) {
     case ColumnType.Pincode:
     case ColumnType.Continent:
     case ColumnType.Password:
-      return TextColumnEditor;
+      return TextColumnEditor
 
     case ColumnType.DateTime:
     case ColumnType.Date:
     case ColumnType.Time:
     case ColumnType.Timestamp:
-      return DateColumnEditor;
+      return DateColumnEditor
 
     case ColumnType.NumberInt:
     case ColumnType.NumberFloat:
@@ -107,25 +107,25 @@ export function getColumnEditor(columnType: ColumnType) {
     case ColumnType.Rating100:
     case ColumnType.Latitude:
     case ColumnType.Longitude:
-      return NumberColumnEditor;
+      return NumberColumnEditor
 
     case ColumnType.Boolean:
-      return BooleanColumnEditor;
+      return BooleanColumnEditor
 
     case ColumnType.Json:
-      return JsonColumnEditor;
+      return JsonColumnEditor
 
     case ColumnType.File:
-      return FileColumnEditor;
+      return FileColumnEditor
 
     case ColumnType.ForeignKey:
-      return ForeignKeyColumnEditor;
+      return ForeignKeyColumnEditor
 
     case ColumnType.Permission:
-      return PermissionColumnEditor;
+      return PermissionColumnEditor
 
     default:
-      return TextColumnEditor;
+      return TextColumnEditor
   }
 }
 
@@ -133,8 +133,8 @@ export function getColumnEditor(columnType: ColumnType) {
  * Get the appropriate column editor component for a specific column
  */
 export function getColumnEditorForColumn(column: ColumnDefinition) {
-  const columnType = getColumnType(column);
-  return getColumnEditor(columnType);
+  const columnType = getColumnType(column)
+  return getColumnEditor(columnType)
 }
 
 export {
@@ -144,5 +144,5 @@ export {
   BooleanColumnEditor,
   JsonColumnEditor,
   FileColumnEditor,
-  ForeignKeyColumnEditor
-};
+  ForeignKeyColumnEditor,
+}

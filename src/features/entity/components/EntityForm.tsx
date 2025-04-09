@@ -46,7 +46,9 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   useEffect(() => {
     if (columns && columns.length > 0) {
       console.log(`Updating local columns for ${entityName}:`, columns.length)
-      setLocalColumns(columns.sort((a, b) => a.ColumnName.localeCompare(b.ColumnName)))
+      setLocalColumns(
+        columns.sort((a, b) => a.ColumnName.localeCompare(b.ColumnName))
+      )
     }
   }, [columns, entityName])
 

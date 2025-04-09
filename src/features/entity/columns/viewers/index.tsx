@@ -76,7 +76,7 @@ export const DefaultColumnViewer: React.FC<ColumnViewerProps> = (props) => {
  * Get the column viewer component for a specific column type
  */
 export function getColumnViewer(columnType: ColumnType) {
-  console.log("GetColumnViewer", columnType)
+  console.log('GetColumnViewer', columnType)
   switch (columnType) {
     case ColumnType.Text:
     case ColumnType.Content:

@@ -18,7 +18,7 @@ export const formatText: FormatterFunction = (value) => {
   }
 
   try {
-    const asJson = JSON.parse(value);
+    const asJson = JSON.parse(value)
     return JSON.stringify(asJson, null, 2)
   } catch (ignored) {
     return String(value)
@@ -44,8 +44,8 @@ export const shouldUseTextarea = (value: any): boolean => {
   // Check if it's valid JSON
   try {
     const parsedObj = JSON.parse(stringValue)
-    if (typeof parsedObj === "number" || typeof parsedObj === "boolean") {
-      return false;
+    if (typeof parsedObj === 'number' || typeof parsedObj === 'boolean') {
+      return false
     }
     return true
   } catch (ignored) {
@@ -68,10 +68,9 @@ export const formatLongText: FormatterFunction = (value) => {
   }
 
   try {
-    const asJson = JSON.parse(value);
+    const asJson = JSON.parse(value)
     return JSON.stringify(asJson, null, 2)
-  } catch (ignored) {
-  }
+  } catch (ignored) {}
 
   const text = String(value)
   if (text.length <= 100) {

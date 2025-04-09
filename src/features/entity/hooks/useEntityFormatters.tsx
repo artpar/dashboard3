@@ -1,17 +1,7 @@
 import { useCallback } from 'react';
+import { AUDIT_COLUMNS, formatAuditColumn, formatBooleanValue, formatDateValue, formatFileValue, formatForeignKeyValue, formatLongTextValue, formatNumericValue, formatObjectValue, formatStatusValue } from '../utils/entityFormatters';
 import { ColumnDefinition } from './useEntityColumns';
-import {
-  AUDIT_COLUMNS,
-  formatAuditColumn,
-  formatDateValue,
-  formatBooleanValue,
-  formatStatusValue,
-  formatNumericValue,
-  formatFileValue,
-  formatForeignKeyValue,
-  formatLongTextValue,
-  formatObjectValue
-} from '../utils/entityFormatters';
+
 
 /**
  * Hook for formatting cell values based on column types
@@ -21,20 +11,20 @@ export function useEntityFormatters() {
    * Format a cell value based on column type
    */
   const formatCellValue = useCallback((item: any, column: ColumnDefinition) => {
-    const value = item[column.ColumnName];
+    const value = item[column.ColumnName]
 
     if (value === null || value === undefined) {
-      return '-';
+      return '-'
     }
 
     // Handle special audit columns
     if (AUDIT_COLUMNS.includes(column.ColumnName)) {
-      return formatAuditColumn(value, column.ColumnName);
+      return formatAuditColumn(value, column.ColumnName)
     }
 
     // Handle different column types
     if (column.ColumnType === 'datetime' || column.DataType === 'timestamp') {
-      return formatDateValue(value);
+      return formatDateValue(value)
     }
 
     // Boolean values
@@ -43,7 +33,7 @@ export function useEntityFormatters() {
       column.ColumnType === 'boolean' ||
       column.ColumnType === 'checkbox'
     ) {
-      return formatBooleanValue(value);
+      return formatBooleanValue(value)
     }
 
     // Status-like fields
@@ -53,7 +43,7 @@ export function useEntityFormatters() {
         column.ColumnName.endsWith('_status')) &&
       typeof value === 'string'
     ) {
-      return formatStatusValue(value);
+      return formatStatusValue(value)
     }
 
     // Numeric values
@@ -67,7 +57,7 @@ export function useEntityFormatters() {
           column.DataType === 'smallint' ||
           column.DataType === 'INTEGER'))
     ) {
-      return formatNumericValue(value);
+      return formatNumericValue(value)
     }
 
     // File columns
@@ -75,27 +65,27 @@ export function useEntityFormatters() {
       column.ColumnType &&
       (column.ColumnType.startsWith('file.') || column.ColumnType === 'file.*')
     ) {
-      return formatFileValue(value);
+      return formatFileValue(value)
     }
 
     // Foreign key references
     if (column.IsForeignKey && column.ForeignKeyData) {
-      return formatForeignKeyValue(value, column.ForeignKeyData.Namespace);
+      return formatForeignKeyValue(value, column.ForeignKeyData.Namespace)
     }
 
     // Long text
     if (typeof value === 'string' && value.length > 50) {
-      return formatLongTextValue(value);
+      return formatLongTextValue(value)
     }
 
     // JSON or objects
     if (typeof value === 'object' && value !== null) {
-      return formatObjectValue(value);
+      return formatObjectValue(value)
     }
 
     // Default case
-    return value.toString();
-  }, []);
+    return value.toString()
+  }, [])
 
-  return { formatCellValue };
+  return { formatCellValue }
 }

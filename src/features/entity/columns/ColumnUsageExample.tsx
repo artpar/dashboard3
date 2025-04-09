@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ColumnViewer, ColumnEditor } from '@/components/entity/columns';
+import { ColumnEditor, ColumnViewer } from '@/components/entity/columns'
 
 
 /**

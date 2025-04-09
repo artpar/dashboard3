@@ -1,32 +1,32 @@
-import React from 'react';
-import { TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { ColumnDefinition } from '../../hooks/useEntityColumns';
-import EntityTableRow from './EntityTableRow';
+import React from 'react'
+import { TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { ColumnDefinition } from '../../hooks/useEntityColumns'
+import EntityTableRow from './EntityTableRow'
 
 interface EntityTableBodyProps {
-  data: any[];
-  filteredColumns: ColumnDefinition[];
-  auditColumns: ColumnDefinition[];
-  relations: any[];
-  className: string;
-  onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
-  onViewDetails: (item: any) => void;
+  data: any[]
+  filteredColumns: ColumnDefinition[]
+  auditColumns: ColumnDefinition[]
+  relations: any[]
+  className: string
+  onEdit: (item: any) => void
+  onDelete: (item: any) => void
+  onViewDetails: (item: any) => void
 }
 
 /**
  * Component for rendering the table body with rows of data
  */
 export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
-                                                                  data,
-                                                                  filteredColumns,
-                                                                  auditColumns,
-                                                                  relations,
-                                                                  className,
-                                                                  onEdit,
-                                                                  onDelete,
-                                                                  onViewDetails,
-                                                                }) => {
+  data,
+  filteredColumns,
+  auditColumns,
+  relations,
+  className,
+  onEdit,
+  onDelete,
+  onViewDetails,
+}) => {
   // If no data, show empty state
   if (data.length === 0) {
     return (
@@ -34,13 +34,13 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
         <TableRow>
           <TableCell
             colSpan={filteredColumns.length + 2}
-            className="text-muted-foreground py-6 text-center"
+            className='text-muted-foreground py-6 text-center'
           >
             No data found
           </TableCell>
         </TableRow>
       </TableBody>
-    );
+    )
   }
 
   // Otherwise, render rows of data
@@ -60,7 +60,7 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
         />
       ))}
     </TableBody>
-  );
-};
+  )
+}
 
-export default EntityTableBody;
+export default EntityTableBody

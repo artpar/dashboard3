@@ -1,4 +1,5 @@
 import { Layers } from 'lucide-react'
+import { cn } from '@/lib/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
 import {
   Card,
@@ -33,11 +34,22 @@ export function SingleEntityRelatedRecordsComponent(props: {
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center space-x-2'>
                       <Layers className='text-muted-foreground h-4 w-4' />
-                      <h3 className='font-medium'>
+                      <h3
+                        className={cn('font-medium', {
+                          'text-xs': relation.Object === props.entityName,
+                        })}
+                      >
                         {relation.Object}
                         <span className='text-muted-foreground ml-2 text-sm'>
                           ({relation.Relation})
                         </span>
+                      </h3>
+                      <h3
+                        className={cn('font-medium', {
+                          'text-xs': relation.Subject === props.entityName,
+                        })}
+                      >
+                        {relation.Subject}
                       </h3>
                     </div>
                     <Button variant='outline' size='sm'>
