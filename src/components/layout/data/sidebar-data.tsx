@@ -1,14 +1,14 @@
-import React from 'react'
 import { IconHelp, IconSettings, IconTool } from '@tabler/icons-react'
 import {
-  AudioWaveform,
   Building,
   ClipboardList,
   Command,
   FileText,
-  GalleryVerticalEnd,
   LayoutDashboard,
-  Lightbulb, User, UserCircle, UserRound,
+  Lightbulb,
+  User,
+  UserCircle,
+  UserRound,
   Users,
 } from 'lucide-react'
 import { type SidebarData } from '../types'

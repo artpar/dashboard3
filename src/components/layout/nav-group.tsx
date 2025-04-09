@@ -27,6 +27,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import { NavCollapsible, NavItem, NavLink, type NavGroup } from './types'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { byPrefixAndName } from '@awesome.me/kit-KIT_CODE/icons'
 
 export function NavGroup({ title, items }: NavGroup) {
   const { state } = useSidebar()

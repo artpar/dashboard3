@@ -23,6 +23,7 @@ import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
 import { Search } from '@/components/search.tsx'
 import { sidebarData } from './data/sidebar-data'
 
+
 const AppSidebar = () => {
   const { user, customer } = useAuthStore()
   const [memories, setMemories] = useState([])
