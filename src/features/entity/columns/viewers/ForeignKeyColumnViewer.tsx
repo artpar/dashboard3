@@ -1,7 +1,6 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { daptinClient } from '@/daptin'
 import {
   AlertCircle,
   ExternalLink,
@@ -19,6 +18,8 @@ import {
 } from '@/components/ui/tooltip'
 import { ColumnViewerProps } from '../types'
 
+
+export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
 
 /**
  * Component for displaying foreign key values with reference data
@@ -86,8 +87,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       // setIsLoading(true)
       // setError(null)
       setReferenceData({
-        "__type": namespace,
-        "reference_id": referenceId,
+        __type: namespace,
+        reference_id: referenceId,
       })
 
       // try {
@@ -151,7 +152,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       columnType.includes('gif')
 
     const assetUrl =
-      '/asset/' +
+      DAPTIN_ENDPOINT + '/asset/' +
       entity['__type'] +
       '/' +
       entity.reference_id +
@@ -171,7 +172,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             <Badge
               variant='outline'
               className={cn(
-                'flex cursor-pointer items-center bg-amber-50 text-amber-800 hover:bg-amber-100',
+                'flex items-center bg-amber-50 hover:bg-amber-100 h-42 w-max',
                 className
               )}
               onClick={() => {
@@ -185,18 +186,20 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                 }
               }}
             >
-              {isImage ? (
-                <ImageIcon className='mr-1 h-3 w-3' />
-              ) : (
-                <FileIcon className='mr-1 h-3 w-3' />
-              )}
-              <span className='max-w-[150px] truncate'>
-                {fileName}
-                {assetUrl} <br />
-                <img
+              {/*{isImage ? (*/}
+              {/*  <ImageIcon className='mr-1 h-3 w-3' />*/}
+              {/*) : (*/}
+              {/*  <FileIcon className='mr-1 h-3 w-3' />*/}
+              {/*)}*/}
+              <span className='max-w-[150px]'>
+                {isImage && <img className="w-40 h-38"
                   alt={column.ColumnName + ' ' + column.ColumnDescription}
                   src={assetUrl}
-                />
+                />}
+                {!isImage && <a
+                  target="_blank"
+                  href={assetUrl}
+                >{column.ColumnName}</a>}
               </span>
             </Badge>
           </TooltipTrigger>

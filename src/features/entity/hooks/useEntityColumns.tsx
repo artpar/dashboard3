@@ -29,11 +29,11 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
   // Update lastValidColumns when we get a non-empty columns array
   useEffect(() => {
     if (columns && columns.length > 0) {
-      console.log(
-        'useEntityColumns: Updating lastValidColumns with',
-        columns.length,
-        'columns'
-      )
+      // console.log(
+      //   'useEntityColumns: Updating lastValidColumns with',
+      //   columns.length,
+      //   'columns'
+      // )
       setLastValidColumns(columns)
     }
   }, [columns])
@@ -48,10 +48,10 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
     const initialColumns = effectiveColumns
       .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
       .map((col) => col.ColumnName)
-    console.log(
-      'useEntityColumns: Initial visibleColumns:',
-      initialColumns.length
-    )
+    // console.log(
+    //   'useEntityColumns: Initial visibleColumns:',
+    //   initialColumns.length
+    // )
     return initialColumns
   })
 
@@ -61,10 +61,10 @@ export function useEntityColumns(columns: ColumnDefinition[]) {
       const newVisibleColumns = effectiveColumns
         .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
         .map((col) => col.ColumnName)
-      console.log(
-        'useEntityColumns: Updating visibleColumns:',
-        newVisibleColumns.length
-      )
+      // console.log(
+      //   'useEntityColumns: Updating visibleColumns:',
+      //   newVisibleColumns.length
+      // )
       setVisibleColumns(newVisibleColumns)
     }
   }, [effectiveColumns])

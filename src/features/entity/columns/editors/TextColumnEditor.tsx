@@ -32,7 +32,7 @@ export const TextColumnEditor: React.FC<ColumnEditorProps> = ({
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         placeholder={defaultPlaceholder}
-        className={cn(error && 'border-red-500', className)}
+        className={cn(error && 'border-red-500 font-serif', className)}
         disabled={disabled}
         rows={4}
       />

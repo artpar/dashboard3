@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import { useToast } from '@/hooks/use-toast'
 import { ColumnDefinition } from './hooks/useEntityColumns'
+import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 
 // Define the entity data context type
 interface EntityCollectionContextType {
@@ -126,7 +127,7 @@ export const EntityCollectionDataProvider: React.FC<{
                 if (parsedSchema && parsedSchema.Columns) {
                   normalizedColumns = parsedSchema.Columns
 
-                  console.log('Setting columns:', normalizedColumns.length)
+                  // console.log('Setting columns:', normalizedColumns.length)
                   setColumns(normalizedColumns)
 
                   // Set relations from the parsed schema
@@ -227,7 +228,7 @@ export const EntityCollectionDataProvider: React.FC<{
         const totalItems = response.meta?.total || response.data.length
         setTotalPages(Math.ceil(totalItems / pageSize))
 
-        return response.data
+        return safelySerializeData(response.data)
       } catch (err) {
         console.error(`Error fetching ${entityName} data:`, err)
         throw err
