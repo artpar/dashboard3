@@ -22,8 +22,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const location = useLocation()
 
   useEffect(() => {
+    // Skip redirection if already on the sign-in page
+    const isSignInPage = location.pathname === '/sign-in'
+    
     // Check if not authenticated or token is expired
-    if (!isLoading) {
+    if (!isLoading && !isSignInPage) {
       if (!isAuthenticated) {
         // Redirect to login page with return URL
         navigate({
@@ -54,5 +57,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // If authenticated and token is not expired, render children
-  return isAuthenticated && !isTokenExpired(user) ? <>{children}</> : null
+  // Also render if we're on the sign-in page regardless of auth status
+  return (isAuthenticated && !isTokenExpired(user)) || location.pathname === '/sign-in' ? <>{children}</> : null
 }

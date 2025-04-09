@@ -138,6 +138,32 @@ export function SingleEntitySummaryViewComponent({columns, entityItem}: {
           </Card>
         )
       })}
+      <Card  className='h-fit'>
+        <CardHeader className='pb-2'>
+          <CardTitle className='flex items-center text-base'>
+
+            <span className='ml-2'>Permission</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+            <div className='flex flex-col space-y-1'>
+              <div className='text-muted-foreground flex text-sm font-medium'>
+                {getFieldLabel(columns, "permission")}
+              </div>
+              <div className='flex justify-start text-sm'>
+                <ColumnViewer
+                  column={
+                    columns.filter(
+                      (e) => e.ColumnName === "permission"
+                    )[0]
+                  }
+                  value={entityItem["permission"]}
+                  entity={entityItem}
+                />
+              </div>
+            </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

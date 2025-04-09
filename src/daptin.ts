@@ -13,18 +13,13 @@ let daptinClient: DaptinClient
 async function reloadToken() {
   if (daptinClient) {
     await daptinClient.worldManager.init()
-    await daptinClient.worldManager.loadModels(false)
-    // await daptinClient.worldManager.loadModel('workgroup', false);
-    // await daptinClient.worldManager.loadModel('customer', false);
-    // await daptinClient.worldManager.loadModel('user_account', false);
-    // await daptinClient.worldManager.loadModel('usergroup', false);
-    // await daptinClient.worldManager.loadModel('world', false);
-    // await daptinClient.worldManager.loadModel('action', false);
-    // await daptinClient.worldManager.loadModel('memory', false);
-    // await daptinClient.worldManager.loadModel('rpatask', false);
-    // await daptinClient.worldManager.loadModel('article', false);
-    // await daptinClient.worldManager.loadModel('creator', false);
-    // await daptinClient.worldManager.loadModel('credit', false);
+    await daptinClient.worldManager.loadModel('user_account', false);
+    await daptinClient.worldManager.loadModel('usergroup', false);
+    await daptinClient.worldManager.loadModel('world', false);
+    await daptinClient.worldManager.loadModel('action', false);
+    (() => {
+      daptinClient.worldManager.loadModels(false)
+    })();
   }
   // const result = await daptinClient.aggregateClient
   //   .entity('user_account')
