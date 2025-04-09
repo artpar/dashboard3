@@ -1,7 +1,7 @@
 import React from 'react'
 import { TableBody, TableCell, TableRow } from '@/components/ui/table'
-import { ColumnDefinition } from '../../hooks/useEntityColumns'
 import EntityTableRow from './EntityTableRow'
+import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityTableBodyProps {
   data: any[]

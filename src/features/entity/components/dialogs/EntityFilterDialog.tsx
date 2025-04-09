@@ -18,9 +18,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { ColumnDefinition } from '@/features/entity/hooks/useEntityColumns'
 import { useEntityData } from '@/features/entity/hooks/useEntityData'
 import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
+import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityFilterDialogProps {
   open: boolean

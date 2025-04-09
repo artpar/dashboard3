@@ -1,7 +1,7 @@
 import React from 'react'
 import { TableCell } from '@/components/ui/table'
-import { ColumnDefinition } from '../../hooks/useEntityColumns'
 import { useEntityFormatters } from '../../hooks/useEntityFormatters'
+import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityAuditCellProps {
   item: any

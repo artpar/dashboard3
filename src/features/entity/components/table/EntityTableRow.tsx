@@ -1,9 +1,9 @@
 import React from 'react'
 import { TableRow } from '@/components/ui/table'
-import { ColumnDefinition } from '../../hooks/useEntityColumns'
 import EntityAuditCell from './EntityAuditCell'
 import EntityTableActions from './EntityTableActions'
 import EntityTableCell from './EntityTableCell'
+import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityTableRowProps {
   item: any

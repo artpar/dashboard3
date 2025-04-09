@@ -46,11 +46,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Main } from '@/components/layout/main'
+import { EntityRelations } from '@/features/entity/EntityRelations.tsx'
 import { FieldGroup } from '@/features/entity/FieldGroup.tsx'
-import { getFieldLabel } from '@/features/entity/GetFieldLabel.tsx'
-import { SingleEntityColumnValuesComponent } from '@/features/entity/SingleEntityColumnValuesComponent.tsx'
-import { SingleEntityRelatedRecordsComponent } from '@/features/entity/SingleEntityRelatedRecordsComponent.tsx'
-import { ColumnViewer } from '@/features/entity/columns'
+import { SingleEntitySummaryViewComponent } from '@/features/entity/SingleEntitySummaryViewComponent.tsx'
+import { EntityDetailView } from '@/features/entity/detail-view'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 import { EntityCollectionDataProvider } from './EntityCollectionContext'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
@@ -91,7 +90,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
   } = useEntityData()
 
   const [activeTab, setActiveTab] = useState<string>('overview')
-  const [fieldGroups, setFieldGroups] = useState<FieldGroup[]>([])
 
   // Fetch the specific entity item
   const {
@@ -124,92 +122,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
     refetchOnWindowFocus: false,
   })
 
-  // Organize columns into field groups
-  useEffect(() => {
-    if (columns && columns.length > 0 && entityItem) {
-      // Categorize fields into groups
-      const basicFields = columns
-        .filter(
-          (col) =>
-            !col.ColumnName.includes('_id') &&
-            ![
-              'id',
-              'reference_id',
-              'created_at',
-              'updated_at',
-              'permission',
-              'version',
-            ].includes(col.ColumnName) &&
-            (!col.ForeignKeyData.DataSource  || col.ForeignKeyData.DataSource.length === 0) &&
-            entityItem[col.ColumnName] !== null &&
-            entityItem[col.ColumnName] !== undefined
-        )
-        .map((col) => col.ColumnName)
-
-      console.log('columns', columns)
-      const relationFields = columns
-        .filter(
-          (col) =>
-            (col.ForeignKeyData &&
-              col.ForeignKeyData.DataSource &&
-              col.ForeignKeyData.DataSource.length > 0 &&
-              col.ForeignKeyData.Namespace &&
-              col.ForeignKeyData.Namespace.length > 0) ||
-            (col.ColumnName.endsWith('_id') &&
-              !['reference_id'].includes(col.ColumnName))
-        )
-        .map((col) => col.ColumnName)
-
-      const metadataFields = ['reference_id', 'permission', 'version'].filter(
-        (fieldName) =>
-          entityItem[fieldName] !== null && entityItem[fieldName] !== undefined
-      )
-
-      const timeFields = ['created_at', 'updated_at'].filter(
-        (fieldName) =>
-          entityItem[fieldName] !== null && entityItem[fieldName] !== undefined
-      )
-
-      // Define groups
-      const groups: FieldGroup[] = [
-        {
-          id: 'basic',
-          title: 'Basic Information',
-          icon: <Info className='h-4 w-4' />,
-          fields: basicFields,
-        },
-      ]
-
-      if (relationFields.length > 0) {
-        groups.push({
-          id: 'relations',
-          title: 'Relations',
-          icon: <Layers className='h-4 w-4' />,
-          fields: relationFields,
-        })
-      }
-
-      if (metadataFields.length > 0) {
-        groups.push({
-          id: 'metadata',
-          title: 'Metadata',
-          icon: <Tag className='h-4 w-4' />,
-          fields: metadataFields,
-        })
-      }
-
-      if (timeFields.length > 0) {
-        groups.push({
-          id: 'time',
-          title: 'Time Information',
-          icon: <Clock className='h-4 w-4' />,
-          fields: timeFields,
-        })
-      }
-
-      setFieldGroups(groups)
-    }
-  }, [columns, entityItem])
 
   // Reset state and refetch when entityName or entityId changes
   useEffect(() => {
@@ -597,49 +509,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
             value='overview'
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
-            <div className='grid gap-6 md:grid-cols-2'>
-              {fieldGroups.slice(0, 2).map((group) => (
-                <Card key={group.id} className='h-fit'>
-                  <CardHeader className='pb-2'>
-                    <CardTitle className='flex items-center text-base'>
-                      {group.icon}
-                      <span className='ml-2'>{group.title}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className='space-y-4'>
-                    {group.fields.slice(0, 5).map((fieldName) => (
-                      <div key={fieldName} className='space-y-1 flex flex-col'>
-                        <div className='flex text-muted-foreground text-sm font-medium'>
-                          {getFieldLabel(columns, fieldName)}
-                        </div>
-                        <div className='flex text-sm justify-start'>
-                          <ColumnViewer
-                            column={
-                              columns.filter(
-                                (e) => e.ColumnName === fieldName
-                              )[0]
-                            }
-                            value={entityItem[fieldName]}
-                            entity={entityItem}
-                          />
-                        </div>
-                      </div>
-                    ))}
-
-                    {group.fields.length > 5 && (
-                      <Button
-                        variant='link'
-                        className='h-auto p-0 text-xs'
-                        onClick={() => setActiveTab('details')}
-                      >
-                        Show {group.fields.length - 5} more fields
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
+            <SingleEntitySummaryViewComponent
+              columns={columns}
+              entityItem={entityItem}
+            />
           </TabsContent>
 
           {/* Details Tab (All Fields) */}
@@ -655,8 +528,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <SingleEntityColumnValuesComponent
-                  fieldGroups={fieldGroups}
+                <EntityDetailView
                   columns={columns}
                   entityItem={entityItem}
                 />
@@ -670,7 +542,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               value='relations'
               className='flex flex-col space-y-6 overflow-y-auto pb-6'
             >
-              <SingleEntityRelatedRecordsComponent
+              <EntityRelations
                 entityId={entityId}
                 entityName={entityName}
                 relations={relations}

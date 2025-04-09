@@ -7,8 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ColumnDefinition } from '../../hooks/useEntityColumns'
 import { AUDIT_COLUMNS } from '../../utils/entityFormatters'
+import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityTableHeaderProps {
   columns: ColumnDefinition[]

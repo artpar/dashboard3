@@ -1,21 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AUDIT_COLUMNS } from '../utils/entityFormatters'
-
-export interface ColumnDefinition {
-  ColumnName: string
-  Name: string
-  ColumnType?: string
-  DataType?: string
-  IsNullable?: boolean
-  IsUnique?: boolean
-  IsPrimaryKey?: boolean
-  IsForeignKey?: boolean
-  DefaultValue?: any
-  RelationName?: string
-  ForeignKeyData?: any
-  Options?: any[]
-  ColumnDescription?: string
-}
+import { ColumnDefinition } from '@/features/entity/columns'
 
 /**
  * Hook for managing column visibility in entity tables

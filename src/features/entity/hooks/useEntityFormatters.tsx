@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
+import { ColumnDefinition } from '../columns/types';
 import { AUDIT_COLUMNS, formatAuditColumn, formatBooleanValue, formatDateValue, formatFileValue, formatForeignKeyValue, formatLongTextValue, formatNumericValue, formatObjectValue, formatStatusValue } from '../utils/entityFormatters';
-import { ColumnDefinition } from './useEntityColumns';
 
 
 /**

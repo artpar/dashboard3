@@ -1,7 +1,6 @@
 import React from 'react'
 import { TableCell } from '@/components/ui/table'
-import { ColumnViewer } from '@/features/entity/columns'
-import { ColumnDefinition } from '../../hooks/useEntityColumns'
+import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
 
 interface EntityTableCellProps {
   item: any
