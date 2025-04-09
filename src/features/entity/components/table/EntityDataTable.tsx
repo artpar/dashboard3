@@ -81,20 +81,20 @@ export const EntityDataTable: React.FC = () => {
 
       <div className='relative flex overflow-y-auto'>
         <Table>
-          <TableHeader className='bg-white'>
+          <TableHeader className='bg-background'>
             <TableRow>
-              <TableHead className='sticky top-0 min-w-12 bg-white'>
+              <TableHead className='sticky top-0 min-w-12 bg-background'>
                 <FerrisWheel />
               </TableHead>
               {filteredColumns.map((column) => (
                 <TableHead
-                  className='sticky top-0 min-w-16 bg-white'
+                  className='sticky top-0 min-w-16 bg-background'
                   key={column.ColumnName}
                 >
                   {column.ColumnName}
                 </TableHead>
               ))}
-              <TableHead className='text-muted-foreground sticky top-0 bg-white text-xs'>
+              <TableHead className='text-muted-foreground sticky top-0 bg-background text-xs'>
                 Audit Info
               </TableHead>
             </TableRow>

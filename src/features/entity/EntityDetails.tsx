@@ -607,12 +607,11 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                   </CardHeader>
                   <CardContent className='space-y-4'>
                     {group.fields.slice(0, 5).map((fieldName) => (
-                      <div key={fieldName} className='space-y-1'>
-                        <div className='text-muted-foreground text-sm font-medium'>
+                      <div key={fieldName} className='space-y-1 flex flex-col'>
+                        <div className='flex text-muted-foreground text-sm font-medium'>
                           {getFieldLabel(columns, fieldName)}
                         </div>
-                        <div className='text-sm'>
-                          {fieldName}
+                        <div className='flex text-sm justify-start'>
                           <ColumnViewer
                             column={
                               columns.filter(
@@ -640,25 +639,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
               ))}
             </div>
 
-            {/* Summary Cards - customized for common entities */}
-            <div className='grid gap-6 md:grid-cols-3'>
-              {entityItem.description && (
-                <Card className='col-span-full'>
-                  <CardHeader className='pb-2'>
-                    <CardTitle className='text-base'>
-                      Description [summary]
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='prose prose-sm max-w-none'>
-                      {entityItem.description}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Additional custom cards could be conditionally rendered here based on entity type */}
-            </div>
           </TabsContent>
 
           {/* Details Tab (All Fields) */}

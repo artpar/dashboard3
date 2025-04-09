@@ -24,10 +24,10 @@ export function SingleEntityColumnValuesComponent(props: {
                     key={fieldName}
                     className={`flex ${idx % 2 === 0 ? 'bg-muted/50' : ''}`}
                   >
-                    <div className='w-1/3 px-4 py-3 font-medium'>
+                    <div className='flex w-1/3 px-4 py-3 font-medium'>
                       {getFieldLabel(props.columns, fieldName)}
                     </div>
-                    <div className='w-2/3 px-4 py-3'>
+                    <div className='flex w-2/3 px-4 py-3'>
                       <ColumnViewer
                         column={
                           props.columns.filter(
