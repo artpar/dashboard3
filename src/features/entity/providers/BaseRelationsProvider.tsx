@@ -1,10 +1,11 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { categorizeRelations, Relation } from '../relations/relations-utils'
 import { RelationsApiService } from '../services/RelationsApiService'
-import { Relation, categorizeRelations, RelationDirection } from '../relations/relations-utils'
+import { BaseEntityContextType } from '@/features/entity/providers/BaseEntityDataProvider.tsx'
 
 // Base relations context type
-export interface BaseRelationsContextType {
+export interface BaseRelationsContextType extends BaseEntityContextType {
   entityName: string
   relations: Relation[]
   inboundRelations: Relation[]
@@ -43,7 +44,10 @@ export const BaseRelationsProvider: React.FC<{
   // Update relations state when query data changes
   useEffect(() => {
     if (relationsData) {
-      const { inbound, outbound, allRelations } = categorizeRelations(relationsData, entityName)
+      const { inbound, outbound, allRelations } = categorizeRelations(
+        relationsData,
+        entityName
+      )
       setRelations(allRelations)
       setInboundRelations(inbound)
       setOutboundRelations(outbound)

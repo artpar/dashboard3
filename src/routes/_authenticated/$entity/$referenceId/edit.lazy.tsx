@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { Main } from '@/components/layout/main.tsx'
-import { SingleEntityDataProvider } from '@/features/entity/SingleEntityDataProvider.tsx'
 import EntityForm from '@/features/entity/components/EntityForm.tsx'
+import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEntityDataProvider'
 
 export const Route = createLazyFileRoute(
   '/_authenticated/$entity/$referenceId/edit'

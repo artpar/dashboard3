@@ -20,13 +20,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -49,7 +42,6 @@ import { EntityDetailView } from '@/features/entity/detail-view'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
 import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEntityDataProvider.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import { formatDate, formatDateTime } from './utils/entityFormatters'
 
 interface EntityDetailsContentProps {
@@ -57,7 +49,7 @@ interface EntityDetailsContentProps {
   entityId: string
 }
 
-export const EntityDetailsComponent: React.FC<{
+export const SingleEntityManagementComponent: React.FC<{
   entityName: string
   referenceId: string
 }> = ({ entityName, referenceId }) => {
@@ -342,17 +334,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
             value='details'
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>All Fields</CardTitle>
-                <CardDescription>
-                  Complete information about this {entityName}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <EntityDetailView columns={columns} entityItem={entityItem} />
-              </CardContent>
-            </Card>
+            <EntityDetailView columns={columns} entityItem={entityItem} />
           </TabsContent>
 
           {/* Relations Tab */}
@@ -369,10 +351,9 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
             </TabsContent>
           )}
         </Tabs>
-
       </Main>
     </>
   )
 }
 
-export default EntityDetailsComponent
+export default SingleEntityManagementComponent

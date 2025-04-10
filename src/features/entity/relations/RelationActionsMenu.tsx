@@ -1,12 +1,11 @@
 // src/features/entity/components/relations/RelationActionsMenu.tsx
-import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   CopyIcon,
   ExternalLinkIcon,
   MoreHorizontalIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast.ts'
 import { Button } from '@/components/ui/button.tsx'
@@ -28,9 +27,9 @@ interface RelationActionsMenuProps {
  * Dropdown menu with actions for a related record
  */
 export function RelationActionsMenu({
-                                      relatedEntityName,
-                                      record
-                                    }: RelationActionsMenuProps) {
+  relatedEntityName,
+  record,
+}: RelationActionsMenuProps) {
   const navigate = useNavigate()
 
   const handleViewEntity = () => {
@@ -63,33 +62,33 @@ export function RelationActionsMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="group-hover:opacity-100 opacity-0 transition-opacity h-8 w-8"
+          variant='ghost'
+          size='icon'
+          className='h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100'
         >
-          <MoreHorizontalIcon className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
+          <MoreHorizontalIcon className='h-4 w-4' />
+          <span className='sr-only'>Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[180px]">
+      <DropdownMenuContent align='end' className='w-[180px]'>
         <DropdownMenuItem onClick={handleViewEntity}>
-          <ExternalLinkIcon className="mr-2 h-4 w-4" />
+          <ExternalLinkIcon className='mr-2 h-4 w-4' />
           View Details
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleEditEntity}>
-          <PencilIcon className="mr-2 h-4 w-4" />
+          <PencilIcon className='mr-2 h-4 w-4' />
           Edit Record
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyId}>
-          <CopyIcon className="mr-2 h-4 w-4" />
+          <CopyIcon className='mr-2 h-4 w-4' />
           Copy ID
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleDeleteEntity}
-          className="text-red-600 focus:text-red-600"
+          className='text-red-600 focus:text-red-600'
         >
-          <TrashIcon className="mr-2 h-4 w-4" />
+          <TrashIcon className='mr-2 h-4 w-4' />
           Delete Record
         </DropdownMenuItem>
       </DropdownMenuContent>

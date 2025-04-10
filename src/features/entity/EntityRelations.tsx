@@ -6,9 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { EntityRelationsProvider } from './providers/EntityRelationsProvider'
 import { RelationsEmpty } from './relations/RelationsEmpty'
 import { RelationsList } from './relations/RelationsList'
-import { EntityRelationsProvider } from './providers/EntityRelationsProvider'
 
 export interface EntityRelationsProps {
   entityName: string
@@ -49,10 +49,7 @@ export function EntityRelations({
           <RelationsEmpty entityName={entityName} />
         ) : (
           <EntityRelationsProvider entityName={entityName}>
-            <RelationsList
-              entityName={entityName}
-              entityId={entityId}
-            />
+            <RelationsList entityName={entityName} entityId={entityId} />
           </EntityRelationsProvider>
         )}
       </CardContent>

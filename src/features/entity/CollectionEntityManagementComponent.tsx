@@ -6,7 +6,6 @@ import { Main } from '@/components/layout/main'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx'
 import EntityHeader from './components/EntityHeader'
-import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
 import EntityPagination from './components/pagination/EntityPagination'
 import EntityDataTable from './components/table/EntityDataTable'
@@ -20,7 +19,7 @@ interface EntityManagementProps {
 /**
  * Container component that wraps the data provider
  */
-export const EntityManagementComponent: React.FC<EntityManagementProps> = ({
+export const CollectionEntityManagementComponent: React.FC<EntityManagementProps> = ({
   entityName,
   title,
   description,
@@ -129,7 +128,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
           />
         </div>
 
-
         {/* Filter Dialog */}
         <EntityFilterDialog
           open={showFilterDialog}
@@ -142,4 +140,4 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
   )
 }
 
-export default EntityManagementComponent
+export default CollectionEntityManagementComponent

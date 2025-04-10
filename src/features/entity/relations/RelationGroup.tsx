@@ -1,18 +1,16 @@
 // src/features/entity/relations/RelationGroup.tsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRelationRecords } from '../hooks/useRelationRecords'
 import { RelationRecordsList } from './RelationRecordsList'
-import { RelationsEmpty } from './RelationsEmpty'
 import {
   getRelationDirectionStyles,
   getRelationLabel,
   Relation,
   RelationDirection,
 } from './relations-utils'
-
 
 interface RelationGroupProps {
   entityName: string
@@ -99,11 +97,7 @@ export function RelationGroup({
               relatedEntityName={relatedEntityName}
             />
           ) : (
-            <RelationsEmpty
-              entityName={entityName}
-              relatedEntityName={relatedEntityName}
-              relation={relation}
-            />
+            <div className='m-2 flex p-2'>No records for this relation</div>
           )}
         </CardContent>
       )}

@@ -1,15 +1,15 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
-import { EntityManagementComponent } from '@/features/entity'
+import { CollectionEntityManagementComponent } from '@/features/entity'
 
 function EntityManagementForMemory() {
   const { entity } = Route.useParams()
 
   return (
-    <EntityManagementComponent
+    <CollectionEntityManagementComponent
       entityName={entity}
       title={entity}
       description={entity + ' management'}
-    ></EntityManagementComponent>
+    ></CollectionEntityManagementComponent>
   )
 }
 

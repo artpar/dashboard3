@@ -1,9 +1,8 @@
 // src/features/entity/components/detail-view/EntityFieldGroup.tsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
-import { ColumnDefinition } from '@/features/entity/columns'
-import { FieldGroup } from '@/features/entity/types'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -11,8 +10,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { Badge } from '@/components/ui/badge'
+import { ColumnDefinition } from '@/features/entity/columns'
+import { FieldGroup } from '@/features/entity/types'
 import { EntityDetailField } from './EntityDetailField'
+
 
 interface EntityFieldGroupProps {
   group: FieldGroup
@@ -27,13 +28,13 @@ interface EntityFieldGroupProps {
  * Displays a group of entity fields in a card with collapsible sections
  */
 export function EntityFieldGroup({
-                                   group,
-                                   columns,
-                                   entityItem,
-                                   expandedFields,
-                                   toggleFieldExpansion,
-                                   enableFieldExpansion,
-                                 }: EntityFieldGroupProps) {
+  group,
+  columns,
+  entityItem,
+  expandedFields,
+  toggleFieldExpansion,
+  enableFieldExpansion,
+}: EntityFieldGroupProps) {
   const [isGroupOpen, setIsGroupOpen] = useState(true)
 
   // Skip empty groups unless they have a special renderEmpty function
@@ -42,55 +43,57 @@ export function EntityFieldGroup({
   }
 
   const getColumnObj = (fieldName: string) => {
-    return columns.find(col => col.ColumnName === fieldName)
+    return columns.find((col) => col.ColumnName === fieldName)
   }
 
   return (
     <Collapsible
       open={isGroupOpen}
       onOpenChange={setIsGroupOpen}
-      className={cn(
-        "transition-all duration-200",
-        group.colorClass
-      )}
+      className={cn('transition-all duration-200', group.colorClass)}
     >
-      <Card className={cn(
-        group.variant === 'flat' ? 'border-0 bg-transparent shadow-none' : '',
-        group.highlighted && 'border-primary/20'
-      )}>
+      <Card
+        className={cn(
+          group.variant === 'flat' ? 'border-0 bg-transparent shadow-none' : '',
+          group.highlighted && 'border-primary/20'
+        )}
+      >
         <CollapsibleTrigger asChild>
-          <CardHeader className={cn(
-            "flex flex-row items-center justify-between space-y-0 px-4 py-3",
-            group.headerClass,
-            group.highlighted && 'bg-primary/5'
-          )}>
-            <div className="flex items-center gap-2">
+          <CardHeader
+            className={cn(
+              'flex flex-row items-center justify-between space-y-0 px-4 py-3',
+              group.headerClass,
+              group.highlighted && 'bg-primary/5'
+            )}
+          >
+            <div className='flex items-center gap-2'>
               {group.icon && (
-                <div className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full",
-                  group.iconBgClass || "bg-primary/10"
-                )}>
+                <div
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-full',
+                    group.iconBgClass || 'bg-primary/10'
+                  )}
+                >
                   {group.icon}
                 </div>
               )}
-              <CardTitle className={cn(
-                "text-base font-medium",
-                group.titleClass
-              )}>
+              <CardTitle
+                className={cn('text-base font-medium', group.titleClass)}
+              >
                 {group.title}
                 {group.badge && (
-                  <Badge variant="outline" className="ml-2">
+                  <Badge variant='outline' className='ml-2'>
                     {group.badge}
                   </Badge>
                 )}
               </CardTitle>
             </div>
-            <Button variant="ghost" size="sm" className="gap-1">
-              <span className="text-xs">{isGroupOpen ? 'Hide' : 'Show'}</span>
+            <Button variant='ghost' size='sm' className='gap-1'>
+              <span className='text-xs'>{isGroupOpen ? 'Hide' : 'Show'}</span>
               <ChevronDownIcon
                 className={cn(
-                  "h-4 w-4 transition-transform",
-                  isGroupOpen ? "rotate-180" : ""
+                  'h-4 w-4 transition-transform',
+                  isGroupOpen ? 'rotate-180' : ''
                 )}
               />
             </Button>
@@ -98,17 +101,17 @@ export function EntityFieldGroup({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className={cn(
-            "px-0 pt-0",
-            !isGroupOpen && "hidden" // Ensure content is fully hidden when collapsed
-          )}>
+          <CardContent
+            className={cn(
+              'px-0 pt-0',
+              !isGroupOpen && 'hidden' // Ensure content is fully hidden when collapsed
+            )}
+          >
             {group.fields.length === 0 && group.renderEmpty ? (
-              <div className="p-4">
-                {group.renderEmpty()}
-              </div>
+              <div className='p-4'>{group.renderEmpty()}</div>
             ) : (
-              <div className="rounded-b-lg">
-                <div className="divide-y">
+              <div className='rounded-b-lg'>
+                <div className='divide-y'>
                   {group.fields.map((fieldName, idx) => {
                     const column = getColumnObj(fieldName)
 

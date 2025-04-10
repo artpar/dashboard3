@@ -1,5 +1,5 @@
 import React from 'react'
-import { EntityManagementComponent } from './EntityManagement'
+import { CollectionEntityManagementComponent } from './CollectionEntityManagementComponent.tsx'
 
 // Main entry component that takes an entity name and renders the management interface
 interface EntityManagementProps {
@@ -14,7 +14,7 @@ const EntityManagementIndex: React.FC<EntityManagementProps> = ({
   description,
 }) => {
   return (
-    <EntityManagementComponent
+    <CollectionEntityManagementComponent
       entityName={entityName}
       title={title}
       description={description}
@@ -25,5 +25,5 @@ const EntityManagementIndex: React.FC<EntityManagementProps> = ({
 export default EntityManagementIndex
 
 // Export the component and all its related parts for flexibility
-export * from './EntityManagement'
+export * from './CollectionEntityManagementComponent.tsx'
 export { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'

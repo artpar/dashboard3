@@ -1,5 +1,5 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
-import EntityDetails from '@/features/entity/EntityDetails.tsx'
+import SingleEntityManagementComponent from '@/features/entity/SingleEntityManagementComponent.tsx'
 
 export const Route = createLazyFileRoute(
   '/_authenticated/$entity/$referenceId/',
@@ -11,9 +11,9 @@ function RouteComponent() {
   const { referenceId, entity } = Route.useParams()
 
   return (
-    <EntityDetails
+    <SingleEntityManagementComponent
       entityName={entity}
       referenceId={referenceId}
-    ></EntityDetails>
+    ></SingleEntityManagementComponent>
   )
 }

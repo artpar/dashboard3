@@ -7,7 +7,7 @@ import { ColumnDefinition } from '@/features/entity/columns'
 import { FieldGroup } from '@/features/entity/types'
 import { EntityFieldGroup } from './EntityFieldGroup'
 import { EntityViewHeader } from './EntityViewHeader'
-import { filterFieldsBySearch, getAllFields } from './entity-detail-utils'
+import { filterFieldsBySearch} from './entity-detail-utils'
 
 
 export interface EntityDetailViewProps {
@@ -50,7 +50,7 @@ export function EntityDetailView({
               'permission',
               'version',
             ].includes(col.ColumnName) &&
-            (!col.ForeignKeyData.DataSource ||
+            (!col.ForeignKeyData || !col.ForeignKeyData.DataSource ||
               col.ForeignKeyData.DataSource.length === 0) &&
             entityItem[col.ColumnName] !== null &&
             entityItem[col.ColumnName] !== undefined

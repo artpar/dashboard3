@@ -48,7 +48,6 @@ export const useRelationRecords = (
       )
     },
     enabled: !!relation && !!entityName && !!entityId && enabled,
-    keepPreviousData: true,
     staleTime: 30000,
   })
 

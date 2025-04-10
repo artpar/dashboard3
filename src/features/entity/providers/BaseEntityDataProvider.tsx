@@ -1,6 +1,6 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { useToast } from '@/hooks/use-toast'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { EntityApiService } from '../services/EntityApiService'
 
@@ -51,8 +51,9 @@ export const BaseEntityDataProvider: React.FC<{
 
       try {
         setSchemaLoading(true)
-        const { schema, columns, relations, actions } = await EntityApiService.fetchSchema(entityName)
-        
+        const { schema, columns, relations, actions } =
+          await EntityApiService.fetchSchema(entityName)
+
         setSchema(schema)
         setColumns(columns)
         setRelations(relations)
@@ -74,7 +75,9 @@ export const BaseEntityDataProvider: React.FC<{
     async (actionName: string, payload: any) => {
       try {
         // Check if the action exists
-        const action = availableActions.find((a) => a.action_name === actionName)
+        const action = availableActions.find(
+          (a) => a.action_name === actionName
+        )
         if (!action) {
           throw new Error(
             `Action '${actionName}' not found for entity '${entityName}'`
@@ -137,5 +140,7 @@ export const BaseEntityDataProvider: React.FC<{
 
   const ContextProvider = context.Provider
 
-  return <ContextProvider value={mergedContextValue}>{children}</ContextProvider>
+  return (
+    <ContextProvider value={mergedContextValue}>{children}</ContextProvider>
+  )
 }

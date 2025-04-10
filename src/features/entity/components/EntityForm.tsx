@@ -18,25 +18,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'
 import { ColumnDefinition } from '@/features/entity/columns/types'
-import { useEntitySingleEntity } from '@/features/entity/hooks/useEntitySingleData.tsx'
+import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 
 interface EntityFormProps {
   mode: 'create' | 'edit'
-  entityId: string | undefined
-  entity: string | undefined
   onClose: () => void
 }
 
 export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
-  const {
-    entityName,
-    columns,
-    selectedItem,
-    setSelectedItem,
-    createItem,
-    updateItem,
-  } = useEntitySingleEntity()
+  const { entityName, columns, selectedItem, createItem, updateItem } =
+    useEntitySingleData()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')

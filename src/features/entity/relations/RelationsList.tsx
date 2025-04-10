@@ -1,5 +1,5 @@
 // src/features/entity/relations/RelationsList.tsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { getRelationKey } from './relations-utils'
