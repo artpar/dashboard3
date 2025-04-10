@@ -370,8 +370,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
           )}
         </Tabs>
 
-        {/* Delete Confirmation Dialog */}
-        <EntityDeleteDialog />
       </Main>
     </>
   )

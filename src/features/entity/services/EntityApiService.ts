@@ -136,6 +136,7 @@ export class EntityApiService {
     const relatedData: Record<string, any[]> = {}
 
     try {
+      relations = relations || [];
       for (const relation of relations) {
         let relationEntityName: string
         let queryParam: Record<string, string>

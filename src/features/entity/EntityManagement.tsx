@@ -129,8 +129,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
           />
         </div>
 
-        {/* Delete Confirmation Dialog */}
-        <EntityDeleteDialog />
 
         {/* Filter Dialog */}
         <EntityFilterDialog
