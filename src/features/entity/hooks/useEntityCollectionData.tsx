@@ -1,11 +1,10 @@
-// Custom hook to use the entity context
-import { useContext } from 'react'
-import { CollectionEntityDataProvider } from '@/features/entity/CollectionEntityDataProvider.tsx'
+// Custom hook to use the collection entity context
+import { CollectionEntityContext } from '../providers/CollectionEntityDataProvider'
+import { useEntityData } from './useEntityData'
 
 export const useEntityCollectionData = () => {
-  const context = useContext(CollectionEntityDataProvider)
-  if (context === undefined) {
-    throw new Error('useEntityData must be used within an EntityDataProvider')
-  }
-  return context
+  return useEntityData(
+    CollectionEntityContext,
+    'useEntityCollectionData must be used within a CollectionEntityDataProvider'
+  )
 }

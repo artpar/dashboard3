@@ -3,9 +3,8 @@ import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Main } from '@/components/layout/main'
-import EntityEditorDialog from '@/features/entity/components/dialogs/EntityEditDialog.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { EntityCollectionDataProvider } from './CollectionEntityDataProvider.tsx'
+import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx'
 import EntityHeader from './components/EntityHeader'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
@@ -27,7 +26,7 @@ export const EntityManagementComponent: React.FC<EntityManagementProps> = ({
   description,
 }) => {
   return (
-    <EntityCollectionDataProvider entityName={entityName}>
+    <CollectionEntityDataProvider entityName={entityName}>
       <EntityManagementContent
         entityName={entityName}
         title={
@@ -36,7 +35,7 @@ export const EntityManagementComponent: React.FC<EntityManagementProps> = ({
         }
         description={description || `Manage your ${entityName} records`}
       />
-    </EntityCollectionDataProvider>
+    </CollectionEntityDataProvider>
   )
 }
 
@@ -65,7 +64,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
     showFilterDialog,
     setShowFilterDialog,
     filters,
-    schema,
     setFilters,
     availableActions,
   } = useEntityCollectionData()
@@ -130,15 +128,6 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
             onPageSizeChange={setPageSize}
           />
         </div>
-
-        {/* Create/Edit Dialog */}
-        <EntityEditorDialog
-          entityName={entityName}
-          setShowCreateDialog={setShowCreateDialog}
-          setShowEditDialog={setShowEditDialog}
-          showCreateDialog={showCreateDialog}
-          showEditDialog={showEditDialog}
-        ></EntityEditorDialog>
 
         {/* Delete Confirmation Dialog */}
         <EntityDeleteDialog />

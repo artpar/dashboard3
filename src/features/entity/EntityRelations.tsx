@@ -1,5 +1,4 @@
 // src/features/entity/components/relations/EntityRelations.tsx
-import React from 'react'
 import {
   Card,
   CardContent,

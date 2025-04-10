@@ -1,5 +1,5 @@
 // src/features/entity/components/detail-view/EntityDetailView.tsx
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Clock, Info, Layers, Search, Tag } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,7 +11,6 @@ import { filterFieldsBySearch, getAllFields } from './entity-detail-utils'
 
 
 export interface EntityDetailViewProps {
-  fieldGroups: FieldGroup[]
   columns: ColumnDefinition[]
   entityItem: any
   title?: string
@@ -129,7 +128,7 @@ export function EntityDetailView({
     searchQuery,
     entityItem
   )
-  const allFields = getAllFields(fieldGroups)
+  // const allFields = getAllFields(fieldGroups)
 
   // Toggle field expansion
   const toggleFieldExpansion = (fieldName: string) => {

@@ -1,12 +1,9 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
-import { faDatabase } from '@fortawesome/free-solid-svg-icons'
+import { TableRelation } from '@/features/entity/EntityRelations'
 // Import icon packs as needed
 import { ColumnDefinition } from '@/features/entity/columns'
-
-// Default icon for entities without a specific mapping
-const defaultIcon = faDatabase
 
 export interface WorldEntity {
   id: string
@@ -28,20 +25,6 @@ export interface ColumnTag {
   ColumnName: string
   /** Tag string containing validation or conformation rules */
   Tags: string
-}
-
-/**
- * Represents a relation between two tables
- */
-export interface TableRelation {
-  /** Name of the related table */
-  TableName: string
-  /** Type of relation (e.g. one-to-many, many-to-many) */
-  RelationType: string
-  /** Column name in the current table that is related to the other table */
-  ColumnName: string
-  /** Column name in the related table that is related to the current table */
-  RelatedColumnName: string
 }
 
 export interface TableInfo {

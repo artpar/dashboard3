@@ -1,13 +1,10 @@
 // Custom hook to use the single entity context
-import React from 'react'
-import { SingleEntityContext } from '@/features/entity/SingleEntityDataProvider.tsx'
+import { SingleEntityContext } from '../providers/SingleEntityDataProvider'
+import { useEntityData } from './useEntityData'
 
-export const useEntitySingleEntity = () => {
-  const context = React.useContext(SingleEntityContext)
-  if (context === undefined) {
-    throw new Error(
-      'useSingleEntity must be used within a SingleEntityProvider'
-    )
-  }
-  return context
+export const useEntitySingleData = () => {
+  return useEntityData(
+    SingleEntityContext,
+    'useEntitySingleData must be used within a SingleEntityDataProvider'
+  )
 }

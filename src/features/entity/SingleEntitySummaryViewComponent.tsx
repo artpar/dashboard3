@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Clock, Info, Layers, Tag } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -8,9 +9,12 @@ import {
 import { FieldGroup } from '@/features/entity/FieldGroup.tsx'
 import { getFieldLabel } from '@/features/entity/GetFieldLabel.tsx'
 import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
-import { Clock, Info, Layers, Tag } from 'lucide-react'
+import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 
-export function SingleEntitySummaryViewComponent({columns, entityItem}: {
+export function SingleEntitySummaryViewComponent({
+  columns,
+  entityItem,
+}: {
   columns: ColumnDefinition[]
   entityItem: any
 }) {
@@ -23,15 +27,8 @@ export function SingleEntitySummaryViewComponent({columns, entityItem}: {
         .filter(
           (col) =>
             !col.ColumnName.includes('_id') &&
-            ![
-              'id',
-              'reference_id',
-              'created_at',
-              'updated_at',
-              'permission',
-              'version',
-            ].includes(col.ColumnName) &&
-            (!col.ForeignKeyData.DataSource ||
+            !SYSTEM_COLUMNS.includes(col.ColumnName) &&
+            (!col.ForeignKeyData || !col.ForeignKeyData.DataSource ||
               col.ForeignKeyData.DataSource.length === 0) &&
             entityItem[col.ColumnName] !== null &&
             entityItem[col.ColumnName] !== undefined
@@ -103,7 +100,6 @@ export function SingleEntitySummaryViewComponent({columns, entityItem}: {
     }
   }, [columns, entityItem])
 
-
   return (
     <div className='grid gap-6 md:grid-cols-2'>
       {fieldGroups.slice(0, 2).map((group) => {
@@ -124,9 +120,7 @@ export function SingleEntitySummaryViewComponent({columns, entityItem}: {
                   <div className='flex justify-start text-sm'>
                     <ColumnViewer
                       column={
-                        columns.filter(
-                          (e) => e.ColumnName === fieldName
-                        )[0]
+                        columns.filter((e) => e.ColumnName === fieldName)[0]
                       }
                       value={entityItem[fieldName]}
                       entity={entityItem}
@@ -138,30 +132,25 @@ export function SingleEntitySummaryViewComponent({columns, entityItem}: {
           </Card>
         )
       })}
-      <Card  className='h-fit'>
+      <Card className='h-fit'>
         <CardHeader className='pb-2'>
           <CardTitle className='flex items-center text-base'>
-
             <span className='ml-2'>Permission</span>
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-            <div className='flex flex-col space-y-1'>
-              <div className='text-muted-foreground flex text-sm font-medium'>
-                {getFieldLabel(columns, "permission")}
-              </div>
-              <div className='flex justify-start text-sm'>
-                <ColumnViewer
-                  column={
-                    columns.filter(
-                      (e) => e.ColumnName === "permission"
-                    )[0]
-                  }
-                  value={entityItem["permission"]}
-                  entity={entityItem}
-                />
-              </div>
+          <div className='flex flex-col space-y-1'>
+            <div className='text-muted-foreground flex text-sm font-medium'>
+              {getFieldLabel(columns, 'permission')}
             </div>
+            <div className='flex justify-start text-sm'>
+              <ColumnViewer
+                column={columns.filter((e) => e.ColumnName === 'permission')[0]}
+                value={entityItem['permission']}
+                entity={entityItem}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

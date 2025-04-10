@@ -46,11 +46,10 @@ import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPan
 import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
 import { SingleEntitySummaryViewComponent } from '@/features/entity/SingleEntitySummaryViewComponent.tsx'
 import { EntityDetailView } from '@/features/entity/detail-view'
+import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
+import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEntityDataProvider.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import { EntityCollectionDataProvider } from './CollectionEntityDataProvider.tsx'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
-import EntityEditorDialog from './components/dialogs/EntityEditDialog'
-import { useEntityCollectionData } from './hooks/useEntityCollectionData.tsx'
 import { formatDate, formatDateTime } from './utils/entityFormatters'
 
 interface EntityDetailsContentProps {
@@ -63,27 +62,16 @@ export const EntityDetailsComponent: React.FC<{
   referenceId: string
 }> = ({ entityName, referenceId }) => {
   return (
-    <EntityCollectionDataProvider entityName={entityName}>
+    <SingleEntityDataProvider entityName={entityName} entityId={referenceId}>
       <EntityDetailsContent entityName={entityName} entityId={referenceId} />
-    </EntityCollectionDataProvider>
+    </SingleEntityDataProvider>
   )
 }
 
-const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
-  entityName,
-  entityId,
-}) => {
+const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
   const navigate = useNavigate()
-  const {
-    schema,
-    columns,
-    setSelectedItem,
-    showEditDialog,
-    setShowEditDialog,
-    showDeleteDialog,
-    setShowDeleteDialog,
-    relations,
-  } = useEntityCollectionData()
+  const { columns, setSelectedItem, entityName, entityId, relations } =
+    useEntitySingleData()
 
   const [activeTab, setActiveTab] = useState<string>('overview')
 
@@ -137,16 +125,15 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
 
   // Handle edit action
   const handleEdit = () => {
-    navigate('/' + entityName + '/' + entityId + '/edit');
-
-    // setSelectedItem(entityItem)
-    // setShowEditDialog(true)
+    navigate({
+      to: '/' + entityName + '/' + entityId + '/edit',
+    })
   }
 
   // Handle delete action
   const handleDelete = () => {
+    alert('TODO: handleDelete')
     setSelectedItem(entityItem)
-    setShowDeleteDialog(true)
   }
 
   // Handle back navigation
@@ -223,13 +210,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
             </div>
 
             <div className='flex space-x-2'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => {
-                  navigate({to: '/' + entityName + '/' + entityId + '/edit'})
-                }}
-              >
+              <Button variant='outline' size='sm' onClick={handleEdit}>
                 <Edit className='mr-2 h-4 w-4' />
                 Edit
               </Button>
@@ -389,17 +370,8 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
           )}
         </Tabs>
 
-        {/* Edit Dialog */}
-        <EntityEditorDialog
-          entityName={entityName}
-          setShowCreateDialog={() => {}}
-          setShowEditDialog={setShowEditDialog}
-          showCreateDialog={false}
-          showEditDialog={showEditDialog}
-        />
-
         {/* Delete Confirmation Dialog */}
-        <EntityDeleteDialog onDeleted={handleBack} />
+        <EntityDeleteDialog />
       </Main>
     </>
   )
