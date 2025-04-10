@@ -1,13 +1,14 @@
+// components/TextPermissionViewer.tsx
 import { HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  PermissionScope, 
-  PermissionAction, 
+import {
+  PermissionAction,
+  PermissionScope,
   PERMISSION_COLORS,
-  findPermissionPresetName,
+  hasPermission,
   getPermissionFlag,
-  hasPermission
-} from '../PermissionTypes';
+  findPermissionPresetName,
+} from '@/features/entity/columns/PermissionTypes.ts'
 
 interface TextPermissionViewerProps {
   permissionValue: number;

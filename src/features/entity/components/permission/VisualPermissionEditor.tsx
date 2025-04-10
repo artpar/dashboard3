@@ -1,33 +1,34 @@
 // components/VisualPermissionEditor.tsx
 import { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  PermissionScope,
   PermissionAction,
+  PermissionScope,
   PERMISSION_COLORS,
-  PERMISSION_EXPLANATIONS,
+  hasPermission,
   getPermissionFlag,
-  hasPermission
-} from '../PermissionTypes';
-import { PermissionActionToggle } from './PermissionActionToggle';
+  PERMISSION_EXPLANATIONS,
+} from '@/features/entity/columns/PermissionTypes.ts'
+import { PermissionActionToggle } from './PermissionPresetSelector'
+
 
 interface VisualPermissionEditorProps {
-  permissionValue: number;
-  togglePermission: (scope: PermissionScope, action: PermissionAction) => void;
-  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void;
-  disabled?: boolean;
+  permissionValue: number
+  togglePermission: (scope: PermissionScope, action: PermissionAction) => void
+  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void
+  disabled?: boolean
 }
 
 export function VisualPermissionEditor({
   permissionValue,
   togglePermission,
   toggleAllForScope,
-  disabled
+  disabled,
 }: VisualPermissionEditorProps) {
   const [activeTab, setActiveTab] = useState<PermissionScope>(
     PermissionScope.Guest
-  );
+  )
 
   return (
     <div className='rounded-md border p-4'>
@@ -37,7 +38,7 @@ export function VisualPermissionEditor({
       >
         <TabsList className='mb-4 grid grid-cols-3'>
           {Object.values(PermissionScope).map((scope) => {
-            const colors = PERMISSION_COLORS[scope];
+            const colors = PERMISSION_COLORS[scope]
             return (
               <TabsTrigger
                 key={scope}
@@ -46,12 +47,12 @@ export function VisualPermissionEditor({
               >
                 {scope}
               </TabsTrigger>
-            );
+            )
           })}
         </TabsList>
 
         {Object.values(PermissionScope).map((scope) => {
-          const colors = PERMISSION_COLORS[scope];
+          const colors = PERMISSION_COLORS[scope]
 
           return (
             <TabsContent key={scope} value={scope} className='space-y-4'>
@@ -86,12 +87,12 @@ export function VisualPermissionEditor({
 
               <div className='grid grid-cols-1 gap-2'>
                 {Object.values(PermissionAction).map((action) => {
-                  const flag = getPermissionFlag(scope, action);
-                  const isChecked = hasPermission(permissionValue, flag);
-                  const permissionKey = `${scope}${action}`;
+                  const flag = getPermissionFlag(scope, action)
+                  const isChecked = hasPermission(permissionValue, flag)
+                  const permissionKey = `${scope}${action}`
                   const explanation =
                     PERMISSION_EXPLANATIONS[permissionKey] ||
-                    `Allows ${scope.toLowerCase()}s to ${action.toLowerCase()} this resource`;
+                    `Allows ${scope.toLowerCase()}s to ${action.toLowerCase()} this resource`
 
                   return (
                     <PermissionActionToggle
@@ -104,14 +105,13 @@ export function VisualPermissionEditor({
                       colors={colors}
                       explanation={explanation}
                     />
-                  );
+                  )
                 })}
               </div>
             </TabsContent>
-          );
+          )
         })}
       </Tabs>
     </div>
-  );
+  )
 }
-

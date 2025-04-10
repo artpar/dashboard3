@@ -30,7 +30,7 @@ export function DaptinInitializer({ children }: { children: React.ReactNode }) {
   if (error) {
     return (
       <div className='flex h-screen flex-col items-center justify-center p-4'>
-        <div className='max-w-md rounded-lg bg-red-50 p-6 dark:bg-red-900/20'>
+        <div className='max-w-md rounded-lg bg-red-50 p-6 dark:bg-red-900/20 flex flex-col space-y-4 space-x-4'>
           <h2 className='mb-2 text-xl font-bold text-red-700 dark:text-red-400'>
             Initialization Error
           </h2>
@@ -40,6 +40,15 @@ export function DaptinInitializer({ children }: { children: React.ReactNode }) {
             className='mt-4 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700'
           >
             Retry
+          </button>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            className='mt-4 rounded bg-blue-800 px-4 py-2 text-white hover:bg-red-700'
+          >
+            Logout
           </button>
         </div>
       </div>
