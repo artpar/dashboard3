@@ -139,32 +139,20 @@ export class EntityApiService {
       relations = relations || [];
       for (const relation of relations) {
         let relationEntityName: string
-        let queryParam: Record<string, string>
+        let queryParam: any
 
         if (relation.Subject === entityName) {
           // This entity is the subject, we need to find objects
           relationEntityName = relation.Object
-          queryParam = {
-            query: JSON.stringify([
-              {
-                column: `${entityName}_id`,
-                operator: 'eq',
-                value: entityId,
-              },
-            ]),
-          }
+          queryParam = {}
+          queryParam[relationEntityName + "_id"] = entityId
+          queryParam[relationEntityName + "Name"] = relation.SubjectName
         } else {
           // This entity is the object, we need to find subjects
           relationEntityName = relation.Subject
-          queryParam = {
-            query: JSON.stringify([
-              {
-                column: `${entityName}_id`,
-                operator: 'eq',
-                value: entityId,
-              },
-            ]),
-          }
+          queryParam = {}
+          queryParam[relationEntityName + "_id"] = entityId
+          queryParam[relationEntityName + "Name"] = relation.ObjectName
         }
 
         try {

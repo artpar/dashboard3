@@ -77,10 +77,12 @@ export function getRelationQueryParams(relation: Relation, entityName: string, e
   if (relation.Object === entityName) {
     return {
       [relation.ObjectName || entityName + '_id']: entityId,
+      [relation.Object + 'Name']: relation.SubjectName,
     }
   } else {
     return {
       [relation.SubjectName || entityName + '_id']: entityId,
+      [relation.Subject + 'Name']: relation.ObjectName,
     }
   }
 }

@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { EntityApiService } from '../services/EntityApiService'
+import { TableRelation } from '@/features/entity/EntityRelations'
 import {
   BaseEntityContextType,
   BaseEntityDataProvider,
@@ -30,7 +31,8 @@ export const SingleEntityDataProvider: React.FC<{
   children: React.ReactNode
   entityName: string
   entityId: string
-}> = ({ children, entityName, entityId }) => {
+  relations?: TableRelation[]
+}> = ({ children, entityName, entityId, relations = [] }) => {
   const [selectedItem, setSelectedItem] = useState<any | null>(null)
   const [relatedEntities, setRelatedEntities] = useState<Record<string, any[]>>(
     {}
@@ -136,16 +138,16 @@ export const SingleEntityDataProvider: React.FC<{
 
   // Fetch related entities when the main entity data and relations are loaded
   const { data: relationsData, isLoading: isLoadingRelationsData } = useQuery({
-    queryKey: [`entity-${entityName}-${entityId}-relations`],
+    queryKey: [`entity-${entityName}-${entityId}-relations`, entityName, entityId, relations],
     queryFn: async ({ queryKey }) => {
-      const [_, __, ___, relations] = queryKey
+      const [_, entityName, entityId, relations] = queryKey
       return EntityApiService.fetchRelatedEntities(
-        entityName,
-        entityId,
-        relations
+        entityName as string,
+        entityId as string,
+        relations as TableRelation[]
       )
     },
-    enabled: !!selectedItem && !!entityName && !!entityId,
+    enabled: !!selectedItem && !!entityName && !!entityId && relations.length > 0,
   })
 
   // Update related entities when data changes

@@ -60,7 +60,8 @@ export function useRelationData(
       const response = await daptinClient.jsonApi.findAll(
         relatedEntityName,
         enhancedParams
-      )
+      );
+      console.log("fetchData", response)
 
       if (response.errors && response.errors.length) {
         throw new Error(
@@ -69,7 +70,11 @@ export function useRelationData(
         )
       }
 
-      setData(response.data || [])
+      let data1 = response.data || [];
+      if (!(data1 instanceof Array)) {
+        data1 = [data1]
+      }
+      setData(data1)
     } catch (err) {
       console.error(
         `Error fetching related ${relatedEntityName}:`,
