@@ -41,7 +41,7 @@ interface EntityCollectionContextType {
 }
 
 // Create the entity context
-export const EntityCollectionContext = createContext<
+export const CollectionEntityProvider = createContext<
   EntityCollectionContextType | undefined
 >(undefined)
 
@@ -423,8 +423,8 @@ export const EntityCollectionDataProvider: React.FC<{
   }
 
   return (
-    <EntityCollectionContext.Provider value={contextValue}>
+    <CollectionEntityProvider.Provider value={contextValue}>
       {children}
-    </EntityCollectionContext.Provider>
+    </CollectionEntityProvider.Provider>
   )
 }

@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useEffect, useState, useMemo } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import { useToast } from '@/hooks/use-toast'
@@ -33,7 +39,7 @@ export const SingleEntityContext = createContext<
 >(undefined)
 
 // Create a provider component for the single entity context
-export const SingleEntityProvider: React.FC<{
+export const SingleEntityDataProvider: React.FC<{
   children: React.ReactNode
   entityName: string
   entityId: string
@@ -54,8 +60,8 @@ export const SingleEntityProvider: React.FC<{
 
   // Log only when entityName or entityId changes
   useEffect(() => {
-    console.log("SingleEntityProvider.load", entityName, entityId)
-  }, [entityName, entityId]);
+    console.log('SingleEntityProvider.load', entityName, entityId)
+  }, [entityName, entityId])
 
   // Reset state when entityName or entityId changes
   useEffect(() => {
@@ -65,7 +71,7 @@ export const SingleEntityProvider: React.FC<{
     setRelations([])
     setRelatedEntities({})
     setSchemaLoaded(false)
-  }, [entityName, entityId]);
+  }, [entityName, entityId])
 
   // Memoize fetchSchema to prevent unnecessary recreations
   const fetchSchema = useCallback(async () => {
@@ -137,10 +143,7 @@ export const SingleEntityProvider: React.FC<{
                 console.warn('Error fetching actions:', actionError)
               }
             } catch (jsonParseError) {
-              console.error(
-                'Error parsing world_schema_json:',
-                jsonParseError
-              )
+              console.error('Error parsing world_schema_json:', jsonParseError)
             }
           }
         } catch (error) {
@@ -153,7 +156,7 @@ export const SingleEntityProvider: React.FC<{
       console.error(`Error fetching schema for ${entityName}:`, err)
       setSchemaLoaded(true) // Still mark as loaded so we can try to fetch the entity
     }
-  }, [entityName]);
+  }, [entityName])
 
   // Fetch schema and entity information
   useEffect(() => {
@@ -427,44 +430,47 @@ export const SingleEntityProvider: React.FC<{
   }
 
   // Memoize the context value to prevent unnecessary re-renders of consumers
-  const contextValue = useMemo(() => ({
-    entityName,
-    entityId,
-    selectedItem,
-    setSelectedItem,
-    schema,
-    isLoading,
-    columns,
-    error,
-    fetchData: refetch,
-    updateItem,
-    createItem,
-    deleteItem,
-    executeAction,
-    availableActions,
-    relations,
-    relatedEntities,
-    isLoadingRelations,
-    refresh,
-  }), [
-    entityName,
-    entityId,
-    selectedItem,
-    schema,
-    isLoading,
-    columns,
-    error,
-    refetch,
-    updateItem,
-    createItem,
-    deleteItem,
-    executeAction,
-    availableActions,
-    relations,
-    relatedEntities,
-    isLoadingRelations,
-    refresh,
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      entityName,
+      entityId,
+      selectedItem,
+      setSelectedItem,
+      schema,
+      isLoading,
+      columns,
+      error,
+      fetchData: refetch,
+      updateItem,
+      createItem,
+      deleteItem,
+      executeAction,
+      availableActions,
+      relations,
+      relatedEntities,
+      isLoadingRelations,
+      refresh,
+    }),
+    [
+      entityName,
+      entityId,
+      selectedItem,
+      schema,
+      isLoading,
+      columns,
+      error,
+      refetch,
+      updateItem,
+      createItem,
+      deleteItem,
+      executeAction,
+      availableActions,
+      relations,
+      relatedEntities,
+      isLoadingRelations,
+      refresh,
+    ]
+  )
 
   return (
     <SingleEntityContext.Provider value={contextValue}>

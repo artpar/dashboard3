@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,10 +28,7 @@ interface EntityFormProps {
   onClose: () => void
 }
 
-export const EntityForm: React.FC<EntityFormProps> = ({
-  mode,
-  onClose,
-}) => {
+export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
   const {
     entityName,
     columns,
@@ -40,7 +37,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({
     createItem,
     updateItem,
   } = useEntitySingleEntity()
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')
   const [originalValues, setOriginalValues] = useState<Record<string, any>>({})
@@ -56,12 +53,8 @@ export const EntityForm: React.FC<EntityFormProps> = ({
 
   // Log only when entityName or selectedItem changes
   useEffect(() => {
-    console.log(
-      'EntityForm.selectedItem',
-      entityName,
-      selectedItem
-    )
-  }, [entityName, selectedItem]);
+    console.log('EntityForm.selectedItem', entityName, selectedItem)
+  }, [entityName, selectedItem])
 
   // Update local columns when columns from context change and are not empty
   useEffect(() => {
@@ -87,37 +80,42 @@ export const EntityForm: React.FC<EntityFormProps> = ({
   }, [selectedItem])
 
   // Memoize column groups for tabs to prevent recalculation on every render
-  const basicColumns = useMemo(() => localColumns.filter(
-    (col) =>
-      !col.ColumnName.endsWith('_id') &&
-      ![
-        'id',
-        'reference_id',
-        'created_at',
-        'updated_at',
-        'permission',
-        'version',
-      ].includes(col.ColumnName) &&
-      !(
-        col.ForeignKeyData &&
-        col.ForeignKeyData.DataSource &&
-        col.ForeignKeyData.DataSource.length > 0
-      )
-  ), [localColumns]);
+  const basicColumns = useMemo(
+    () =>
+      localColumns.filter(
+        (col) =>
+          !col.ColumnName.endsWith('_id') &&
+          !SYSTEM_COLUMNS.includes(col.ColumnName) &&
+          !(
+            col.ForeignKeyData &&
+            col.ForeignKeyData.DataSource &&
+            col.ForeignKeyData.DataSource.length > 0
+          )
+      ),
+    [localColumns]
+  )
 
-  const relationshipColumns = useMemo(() => localColumns.filter(
-    (col) =>
-      col.ForeignKeyData &&
-      col.ForeignKeyData.DataSource &&
-      col.ForeignKeyData.DataSource.length > 0
-  ), [localColumns]);
+  const relationshipColumns = useMemo(
+    () =>
+      localColumns.filter(
+        (col) =>
+          col.ForeignKeyData &&
+          col.ForeignKeyData.DataSource &&
+          col.ForeignKeyData.DataSource.length > 0
+      ),
+    [localColumns]
+  )
 
-  const advancedColumns = useMemo(() => localColumns.filter(
-    (col) =>
-      !basicColumns.includes(col) &&
-      !relationshipColumns.includes(col) &&
-      !SYSTEM_COLUMNS.includes(col.ColumnName)
-  ), [localColumns, basicColumns, relationshipColumns]);
+  const advancedColumns = useMemo(
+    () =>
+      localColumns.filter(
+        (col) =>
+          !basicColumns.includes(col) &&
+          !relationshipColumns.includes(col) &&
+          !SYSTEM_COLUMNS.includes(col.ColumnName)
+      ),
+    [localColumns, basicColumns, relationshipColumns]
+  )
 
   // Create a dynamic schema based on columns
   const createFormSchema = useCallback(() => {
@@ -137,7 +135,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({
     })
 
     return z.object(schemaFields)
-  }, [localColumns]);
+  }, [localColumns])
 
   const formSchema = createFormSchema()
   type FormValues = z.infer<typeof formSchema>
@@ -185,7 +183,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({
     }
 
     return initialValues
-  }, [mode, selectedItem, localColumns]);
+  }, [mode, selectedItem, localColumns])
 
   // Reset form values when selectedItem changes
   useEffect(() => {
@@ -194,15 +192,11 @@ export const EntityForm: React.FC<EntityFormProps> = ({
       form.reset(values)
       setOriginalValues({ ...values })
     }
-  }, [selectedItem, mode, getInitialValues]);
+  }, [selectedItem, mode, getInitialValues])
 
   // Helper function to check if a value has changed
   const hasValueChanged = useCallback(
-    (
-      key: string,
-      newValue: any,
-      originalValue: any
-    ): boolean => {
+    (key: string, newValue: any, originalValue: any): boolean => {
       // Handle null/undefined cases
       if (newValue === null && originalValue === null) return false
       if (newValue === undefined && originalValue === undefined) return false
@@ -228,97 +222,101 @@ export const EntityForm: React.FC<EntityFormProps> = ({
   )
 
   // Handle form submission
-  const onSubmit = useCallback(async (data: FormValues) => {
-    setIsSubmitting(true)
+  const onSubmit = useCallback(
+    async (data: FormValues) => {
+      setIsSubmitting(true)
 
-    try {
-      if (mode === 'create') {
-        await createItem(data)
-      } else {
-        // For updates, only send changed fields
-        const changedFields: Record<string, any> = {}
-
-        // Compare each field with its original value
-        Object.keys(data).forEach((key) => {
-          if (hasValueChanged(key, data[key], originalValues[key])) {
-            const columnInfo = columnMap[key]
-            if (
-              columnInfo &&
-              columnInfo.ForeignKeyData &&
-              columnInfo.ForeignKeyData.DataSource
-            ) {
-              // todo fill in for other types
-              if (columnInfo.ForeignKeyData.DataSource === 'self') {
-                changedFields[key] = {
-                  type: columnInfo.ForeignKeyData.Namespace,
-                  id: data[key],
-                }
-              }
-            } else {
-              changedFields[key] = data[key]
-            }
-          }
-        })
-
-        // Only proceed with update if there are changed fields
-        if (Object.keys(changedFields).length > 0) {
-          await updateItem(
-            {
-              id: selectedItem.id || selectedItem.reference_id,
-              ...changedFields
-            }
-          )
+      try {
+        if (mode === 'create') {
+          await createItem(data)
         } else {
-          // No changes detected
-          toast({
-            title: 'No changes',
-            description: 'No changes were detected to update',
+          // For updates, only send changed fields
+          const changedFields: Record<string, any> = {}
+
+          // Compare each field with its original value
+          Object.keys(data).forEach((key) => {
+            if (hasValueChanged(key, data[key], originalValues[key])) {
+              const columnInfo = columnMap[key]
+              if (
+                columnInfo &&
+                columnInfo.ForeignKeyData &&
+                columnInfo.ForeignKeyData.DataSource
+              ) {
+                // todo fill in for other types
+                if (columnInfo.ForeignKeyData.DataSource === 'self') {
+                  changedFields[key] = {
+                    type: columnInfo.ForeignKeyData.Namespace,
+                    id: data[key],
+                  }
+                }
+              } else {
+                changedFields[key] = data[key]
+              }
+            }
           })
+
+          // Only proceed with update if there are changed fields
+          if (Object.keys(changedFields).length > 0) {
+            await updateItem({
+              id: selectedItem.id || selectedItem.reference_id,
+              ...changedFields,
+            })
+          } else {
+            // No changes detected
+            toast({
+              title: 'No changes',
+              description: 'No changes were detected to update',
+            })
+          }
         }
+        onClose()
+      } catch (error) {
+        console.error('Form submission error:', error)
+      } finally {
+        setIsSubmitting(false)
       }
-      onClose()
-    } catch (error) {
-      console.error('Form submission error:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [
-    mode,
-    createItem,
-    updateItem,
-    selectedItem,
-    columnMap,
-    originalValues,
-    onClose,
-    toast,
-    hasValueChanged,
-  ])
+    },
+    [
+      mode,
+      createItem,
+      updateItem,
+      selectedItem,
+      columnMap,
+      originalValues,
+      onClose,
+      toast,
+      hasValueChanged,
+    ]
+  )
 
   // Render form fields for a group of columns
-  const renderColumnFields = useCallback((columns: ColumnDefinition[]) => {
-    return columns.map((column) => (
-      <FormField
-        key={column.ColumnName}
-        control={form.control}
-        name={column.ColumnName}
-        render={({ field }) => (
-          <FormItem className='mb-4'>
-            <FormLabel>{column.Name || column.ColumnName}</FormLabel>
-            <FormControl>
-              <ColumnEditor
-                column={column}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={form.formState.errors[column.ColumnName]?.message}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    ))
-  }, [form.control, form.formState.errors])
+  const renderColumnFields = useCallback(
+    (columns: ColumnDefinition[]) => {
+      return columns.map((column) => (
+        <FormField
+          key={column.ColumnName}
+          control={form.control}
+          name={column.ColumnName}
+          render={({ field }) => (
+            <FormItem className='mb-4'>
+              <FormLabel>{column.Name || column.ColumnName}</FormLabel>
+              <FormControl>
+                <ColumnEditor
+                  column={column}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={form.formState.errors[column.ColumnName]?.message}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      ))
+    },
+    [form.control, form.formState.errors]
+  )
 
   return (
     <Form {...form}>
