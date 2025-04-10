@@ -2,15 +2,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  PermissionAction,
-  PermissionScope,
-  PERMISSION_COLORS,
-  hasPermission,
-  getPermissionFlag,
-  PERMISSION_EXPLANATIONS,
-} from '@/features/entity/columns/PermissionTypes.ts'
-import { PermissionActionToggle } from './PermissionPresetSelector'
+import { PermissionAction, PermissionScope, PERMISSION_COLORS, hasPermission, getPermissionFlag, PERMISSION_EXPLANATIONS } from '@/features/entity/columns/PermissionTypes.ts';
+import { PermissionActionToggle } from './PermissionActionToggle'
 
 
 interface VisualPermissionEditorProps {

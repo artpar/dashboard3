@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import { GroupPermissionManager } from '@/features/entity/components/permission/GroupPermissionManager.tsx'
-import { TextPermissionViewer } from '@/features/entity/components/permission/TextPermissionViewer.tsx'
 import { VisualPermissionEditor } from '@/features/entity/components/permission/VisualPermissionEditor.tsx'
 import {
   useGroupData,
   usePermissionValue,
 } from '@/features/entity/hooks/usePermissionValue.ts'
-import {
-  DisplayModeToggle,
-  PermissionPresetSelector,
-} from '../../components/permission/PermissionPresetSelector'
+import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
+import { DisplayModeToggle } from '@/features/entity/components/permission/DisplayModeToggle.tsx'
 
 interface PermissionColumnEditorProps {
   value: number
@@ -47,9 +44,7 @@ export default function PermissionColumnEditor({
   const groupData = useGroupData()
 
   // Display mode state
-  const [displayMode, setDisplayMode] = useState<'visual' | 'text' | 'groups'>(
-    'visual'
-  )
+  const [displayMode, setDisplayMode] = useState<'visual' | 'groups'>('visual')
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -77,11 +72,6 @@ export default function PermissionColumnEditor({
           toggleAllForScope={toggleAllForScope}
           disabled={disabled}
         />
-      )}
-
-      {/* Text mode */}
-      {displayMode === 'text' && (
-        <TextPermissionViewer permissionValue={permissionValue} />
       )}
 
       {/* Group permissions mode */}
