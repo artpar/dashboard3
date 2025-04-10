@@ -33,6 +33,7 @@ export function usePermissionValue(initialValue: any, onChange: (value: number) 
 
   // Toggle a specific permission
   const togglePermission = (scope: PermissionScope, action: PermissionAction) => {
+    console.log("togglePermission", scope, action)
     const flag = getPermissionFlag(scope, action)
     const newValue = hasPermission(permissionValue, flag) ? removePermission(permissionValue, flag) : addPermission(permissionValue, flag)
 
@@ -104,8 +105,8 @@ export function useGroupData() {
         for (const table of tables) {
           try {
             const relationName = `${table.table_name}_id`
-            const response = await daptinClient.jsonApi.getRelation({
-              tableName: 'usergroup', id: selectedGroup, relationName: relationName,
+            const response = await daptinClient.jsonApi.findAll(`usergroup_${relationName}`, {
+              'filter[usergroup_id]': selectedGroup
             })
 
             if (response.data && response.data.length > 0) {

@@ -27,15 +27,6 @@ export function DisplayModeToggle({
       </Button>
       <Button
         type='button'
-        variant={mode === 'visual' ? 'default' : 'outline'}
-        className='rounded-none px-3'
-        onClick={() => onChange('visual')}
-        disabled={disabled}
-      >
-        Text
-      </Button>
-      <Button
-        type='button'
         variant={mode === 'groups' ? 'default' : 'outline'}
         className='rounded-none px-3'
         onClick={() => onChange('groups')}
