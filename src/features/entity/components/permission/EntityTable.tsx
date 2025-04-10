@@ -1,11 +1,12 @@
 // components/EntityTable.tsx
+import { Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash2 } from 'lucide-react';
-import { PermissionFlag } from '../PermissionTypes';
+import { PermissionFlag } from '../../columns/PermissionTypes'
+
 
 interface EntityTableProps {
   table: any;
@@ -119,4 +120,3 @@ export function EntityTable({
     </Card>
   );
 }
-

@@ -1,6 +1,5 @@
 // components/PermissionPresetSelector.tsx
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PERMISSION_PRESET_OPTIONS } from '../PermissionTypes';
 
 interface PermissionPresetSelectorProps {
   value: number;
@@ -48,10 +47,10 @@ interface DisplayModeToggleProps {
   disabled?: boolean;
 }
 
-export function DisplayModeToggle({ 
-  mode, 
-  onChange, 
-  disabled 
+export function DisplayModeToggle({
+  mode,
+  onChange,
+  disabled
 }: DisplayModeToggleProps) {
   return (
     <div className='flex overflow-hidden rounded-md border'>
@@ -91,6 +90,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { PermissionAction, PermissionScope } from '../PermissionTypes';
+import { PERMISSION_PRESET_OPTIONS } from '@/features/entity/columns/PermissionTypes.ts'
 
 interface PermissionActionToggleProps {
   scope: PermissionScope;
