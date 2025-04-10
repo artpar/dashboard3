@@ -12,8 +12,5 @@ export {
   getRelationKey,
   getRelationLabel,
   getRelationDirectionStyles,
-  categorizeRelations
+  categorizeRelations,
 } from './relations-utils.ts'
-
-// Export hooks
-export { useRelationData } from './useRelationData.ts'

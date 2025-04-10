@@ -1,29 +1,32 @@
-// src/features/entity/components/relations/RelationsList.tsx
+// src/features/entity/relations/RelationsList.tsx
 import React, { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
-import { Separator } from '@/components/ui/separator.tsx'
-import {
-  Relation,
-  RelationDirection,
-  categorizeRelations,
-  getRelationKey,
-} from './relations-utils.ts'
-import { RelationGroup } from './RelationGroup.tsx'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { getRelationKey } from './relations-utils'
+import { RelationGroup } from './RelationGroup'
+import { useEntityRelations } from '../hooks/useEntityRelations'
 
 interface RelationsListProps {
   entityName: string
   entityId?: string
-  relations: Relation[]
 }
 
 /**
  * List of entity relations, categorized by direction
  */
-export function RelationsList({ entityName, entityId, relations }: RelationsListProps) {
+export function RelationsList({ entityName, entityId }: RelationsListProps) {
   const [activeTab, setActiveTab] = useState<string>('all')
 
-  // Group relations by their relationship to this entity
-  const { inbound, outbound, allRelations } = categorizeRelations(relations, entityName)
+  const {
+    relations,
+    inboundRelations,
+    outboundRelations,
+    isLoading
+  } = useEntityRelations()
+
+  if (isLoading) {
+    return <div className="py-4 text-center">Loading relations...</div>
+  }
 
   return (
     <div className="space-y-4">
@@ -38,19 +41,19 @@ export function RelationsList({ entityName, entityId, relations }: RelationsList
             <TabsTrigger value="all" className="px-4">
               All Relations
               <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-                {allRelations.length}
+                {relations.length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="inbound" className="px-4">
               Inbound
               <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-                {inbound.length}
+                {inboundRelations.length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="outbound" className="px-4">
               Outbound
               <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-                {outbound.length}
+                {outboundRelations.length}
               </span>
             </TabsTrigger>
           </TabsList>
@@ -59,8 +62,8 @@ export function RelationsList({ entityName, entityId, relations }: RelationsList
         <Separator className="my-4" />
 
         <TabsContent value="all" className="space-y-4">
-          {allRelations.length > 0 ? (
-            allRelations.map((relation) => (
+          {relations.length > 0 ? (
+            relations.map((relation) => (
               <RelationGroup
                 key={getRelationKey(relation)}
                 entityName={entityName}
@@ -77,14 +80,14 @@ export function RelationsList({ entityName, entityId, relations }: RelationsList
         </TabsContent>
 
         <TabsContent value="inbound" className="space-y-4">
-          {inbound.length > 0 ? (
-            inbound.map((relation) => (
+          {inboundRelations.length > 0 ? (
+            inboundRelations.map((relation) => (
               <RelationGroup
                 key={getRelationKey(relation)}
                 entityName={entityName}
                 entityId={entityId}
                 relation={relation}
-                direction={RelationDirection.Inbound}
+                direction={relation.direction}
               />
             ))
           ) : (
@@ -95,14 +98,14 @@ export function RelationsList({ entityName, entityId, relations }: RelationsList
         </TabsContent>
 
         <TabsContent value="outbound" className="space-y-4">
-          {outbound.length > 0 ? (
-            outbound.map((relation) => (
+          {outboundRelations.length > 0 ? (
+            outboundRelations.map((relation) => (
               <RelationGroup
                 key={getRelationKey(relation)}
                 entityName={entityName}
                 entityId={entityId}
                 relation={relation}
-                direction={RelationDirection.Outbound}
+                direction={relation.direction}
               />
             ))
           ) : (
