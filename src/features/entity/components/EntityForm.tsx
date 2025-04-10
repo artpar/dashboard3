@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery } from '@tanstack/react-query'
+import { daptinClient } from '@/daptin.ts'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
@@ -19,8 +21,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'
 import { ColumnDefinition } from '@/features/entity/columns/types'
 import { useEntityData } from '@/features/entity/hooks/useEntityData'
-import { useQuery } from '@tanstack/react-query'
-import { daptinClient } from '@/daptin.ts'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 
 interface EntityFormProps {
@@ -29,9 +29,20 @@ interface EntityFormProps {
   onClose: () => void
 }
 
-export const EntityForm: React.FC<EntityFormProps> = ({ mode, entityId, onClose }) => {
-  const { entityName, columns, schema, selectedItem, setSelectedItem, createItem, updateItem } =
-    useEntityData()
+export const EntityForm: React.FC<EntityFormProps> = ({
+  mode,
+  entityId,
+  onClose,
+}) => {
+  const {
+    entityName,
+    columns,
+    schema,
+    selectedItem,
+    setSelectedItem,
+    createItem,
+    updateItem,
+  } = useEntityData()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')
   const [originalValues, setOriginalValues] = useState<Record<string, any>>({})
@@ -53,7 +64,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, entityId, onClose 
         columns.sort((a, b) => a.ColumnName.localeCompare(b.ColumnName))
       )
     }
-  }, [columns]);
+  }, [columns])
 
   // Fetch the specific entity item
   const {
@@ -84,7 +95,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, entityId, onClose 
     },
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-  });
+  })
 
   // Set the selected item when data is loaded
   useEffect(() => {
@@ -92,8 +103,6 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, entityId, onClose 
       setSelectedItem(entityItem)
     }
   }, [entityItem, setSelectedItem])
-
-
 
   // Identify column groups for tabs
   const basicColumns = localColumns.filter(
@@ -333,10 +342,10 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, entityId, onClose 
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='flex w-full flex-col space-y-6 overflow-y-auto pb-6 p-4'
+        className='flex w-full flex-col space-y-6 overflow-y-auto p-4 pb-6'
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-          <TabsList className='mb-4 grid grid-cols-3'>
+          <TabsList className='mb-4 grid grid-cols-6'>
             <TabsTrigger value='basic'>Basic Information</TabsTrigger>
             {relationshipColumns.length > 0 && (
               <TabsTrigger value='relationships'>Relationships</TabsTrigger>

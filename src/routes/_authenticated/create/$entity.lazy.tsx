@@ -1,8 +1,7 @@
-import { createLazyFileRoute } from '@tanstack/react-router';
-import { Main } from '@/components/layout/main';
-import { EntityCollectionDataProvider } from '@/features/entity';
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { Main } from '@/components/layout/main'
+import { EntityCollectionDataProvider } from '@/features/entity'
 import EntityForm from '@/features/entity/components/EntityForm.tsx'
-
 
 export const Route = createLazyFileRoute('/_authenticated/create/$entity')({
   component: RouteComponent,

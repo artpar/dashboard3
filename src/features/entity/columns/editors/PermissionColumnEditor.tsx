@@ -340,7 +340,10 @@ export default function PermissionColumnEditor({
         <div className='rounded-md border p-4'>
           <Tabs
             value={activeTab}
-            onValueChange={(v) => setActiveTab(v as PermissionScope)}
+            onValueChange={(v) => {
+              console.log("setActiveTab", v)
+              setActiveTab(v as PermissionScope);
+            }}
           >
             <TabsList className='mb-4 grid grid-cols-3'>
               {Object.values(PermissionScope).map((scope) => {
@@ -849,20 +852,6 @@ export default function PermissionColumnEditor({
       </Dialog>
 
       {error && <p className='text-sm text-red-500'>{error}</p>}
-
-      <style jsx>{`
-        .sticky-header-table {
-          position: relative;
-        }
-
-        .sticky-header-table thead tr th {
-          position: sticky;
-          top: 0;
-          background-color: white;
-          z-index: 10;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-      `}</style>
     </div>
   )
 }
