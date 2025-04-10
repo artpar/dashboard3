@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card'
 import { RelationsEmpty } from './relations/RelationsEmpty'
 import { RelationsList } from './relations/RelationsList'
+import { EntityRelationsProvider } from './providers/EntityRelationsProvider'
 
 export interface EntityRelationsProps {
   entityName: string
@@ -47,11 +48,12 @@ export function EntityRelations({
         {relations.length === 0 ? (
           <RelationsEmpty entityName={entityName} />
         ) : (
-          <RelationsList
-            entityName={entityName}
-            entityId={entityId}
-            relations={relations}
-          />
+          <EntityRelationsProvider entityName={entityName}>
+            <RelationsList
+              entityName={entityName}
+              entityId={entityId}
+            />
+          </EntityRelationsProvider>
         )}
       </CardContent>
     </Card>

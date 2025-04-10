@@ -54,8 +54,8 @@ export function RelationGroup({
   }
 
   return (
-    <Card className={`border ${dirStyles.borderClass}`}>
-      <CardHeader className={`${dirStyles.bgClass} py-3`}>
+    <Card>
+      <CardHeader className={`bg-background py-3`}>
         <div className='flex items-center justify-between'>
           <CardTitle
             className={`text-base ${dirStyles.textClass} flex items-center`}
