@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Main } from '@/components/layout/main'
 import EntityEditorDialog from '@/features/entity/components/dialogs/EntityEditDialog.tsx'
-import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 import { EntityCollectionDataProvider } from './EntityCollectionContext.tsx'
 import EntityHeader from './components/EntityHeader'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
@@ -68,7 +68,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
     schema,
     setFilters,
     availableActions,
-  } = useEntityData()
+  } = useEntityCollectionData()
 
   // Early return for error state
   if (error) {

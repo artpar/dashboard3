@@ -50,7 +50,7 @@ import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 import { EntityCollectionDataProvider } from './EntityCollectionContext'
 import EntityDeleteDialog from './components/dialogs/EntityDeleteDialog'
 import EntityEditorDialog from './components/dialogs/EntityEditDialog'
-import { useEntityData } from './hooks/useEntityData'
+import { useEntityCollectionData } from './hooks/useEntityCollectionData.tsx'
 import { formatDate, formatDateTime } from './utils/entityFormatters'
 
 interface EntityDetailsContentProps {
@@ -83,7 +83,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
     showDeleteDialog,
     setShowDeleteDialog,
     relations,
-  } = useEntityData()
+  } = useEntityCollectionData()
 
   const [activeTab, setActiveTab] = useState<string>('overview')
 

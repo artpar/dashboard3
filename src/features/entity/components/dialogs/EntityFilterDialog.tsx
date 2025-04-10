@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { useEntityData } from '@/features/entity/hooks/useEntityData'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
 import { ColumnDefinition } from '@/features/entity/columns'
 
@@ -39,7 +39,7 @@ const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
   onApplyFilters,
 }) => {
   // Get columns from context
-  const { columns } = useEntityData()
+  const { columns } = useEntityCollectionData()
 
   // Local state for filter values
   const [filterValues, setFilterValues] = useState<Record<string, any>>(

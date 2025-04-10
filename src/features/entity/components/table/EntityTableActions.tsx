@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { TableCell } from '@/components/ui/table'
-import { useEntityData } from '@/features/entity/hooks/useEntityData'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 
 interface EntityTableActionsProps {
   item: any
@@ -34,7 +34,7 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
   relations,
 }) => {
   const navigate = useNavigate()
-  const { entityName } = useEntityData()
+  const { entityName } = useEntityCollectionData()
 
   const handleViewDetails = () => {
     const itemId = item.id || item.reference_id

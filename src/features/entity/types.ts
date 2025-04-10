@@ -1,6 +1,14 @@
 // src/features/entity/types.ts
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
 
+export const SYSTEM_COLUMNS = [
+  'id',
+  'reference_id',
+  'created_at',
+  'updated_at',
+  'version',
+  'permission',
+]
 
 /**
  * Represents a group of fields in an entity

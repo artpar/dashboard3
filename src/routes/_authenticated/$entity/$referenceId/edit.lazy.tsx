@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { Main } from '@/components/layout/main.tsx'
-import { EntityCollectionDataProvider } from '@/features/entity'
+import { SingleEntityProvider } from '@/features/entity/SingleEntityProvider.tsx'
 import EntityForm from '@/features/entity/components/EntityForm.tsx'
 
 export const Route = createLazyFileRoute(
@@ -13,17 +13,15 @@ function RouteComponent() {
   const { referenceId, entity } = Route.useParams()
 
   return (
-    <EntityCollectionDataProvider entityName={entity}>
+    <SingleEntityProvider entityName={entity} entityId={referenceId}>
       <Main className='flex h-screen w-full flex-col overflow-hidden'>
         <EntityForm
-          mode='create'
-          entity={entity}
-          entityItem={referenceId}
+          mode='edit'
           onClose={() => {
             console.log('Go back from new ?')
           }}
         ></EntityForm>
       </Main>
-    </EntityCollectionDataProvider>
+    </SingleEntityProvider>
   )
 }

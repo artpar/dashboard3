@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { FerrisWheel } from 'lucide-react'
 import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useEntityData } from '@/features/entity/hooks/useEntityData.tsx'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 import { useEntityColumns } from '../../hooks/useEntityColumns'
 import EntityTableBody from './EntityTableBody'
 import EntityTableHeader from './EntityTableHeader'
@@ -21,7 +21,7 @@ export const EntityDataTable: React.FC = () => {
     setShowDeleteDialog,
     relations,
     entityName,
-  } = useEntityData()
+  } = useEntityCollectionData()
   const [localColumns, setLocalColumns] = React.useState(columns || [])
   const navigate = useNavigate()
   // Update local columns when columns from context change and are not empty

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useEntityData } from '@/features/entity/hooks/useEntityData';
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx';
 
 
 /**
@@ -13,7 +13,7 @@ const EntityDeleteDialog: React.FC = () => {
     showDeleteDialog,
     setShowDeleteDialog,
     deleteItem,
-  } = useEntityData()
+  } = useEntityCollectionData()
 
   // Handle the deletion confirmation
   const handleDelete = async () => {
