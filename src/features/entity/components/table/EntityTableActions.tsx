@@ -43,6 +43,13 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
     onViewDetails(item)
   }
 
+  const handleEditDetails = () => {
+    const itemId = item.id || item.reference_id
+    navigate({ to: `/${entityName}/$entityId/edit`, params: { entityId: itemId } })
+    // Also call the original handler for any additional logic
+    onEdit(item)
+  }
+
   return (
     <TableCell className='w-12 text-left'>
       <DropdownMenu>
@@ -60,7 +67,7 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
           </DropdownMenuItem>
 
           {/* Standard CRUD operations */}
-          <DropdownMenuItem onClick={() => onEdit(item)}>
+          <DropdownMenuItem onClick={() => handleEditDetails()}>
             <Edit className='mr-2 h-4 w-4' />
             Edit
           </DropdownMenuItem>

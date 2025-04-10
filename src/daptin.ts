@@ -13,23 +13,25 @@ let daptinClient: DaptinClient
 async function reloadToken() {
   if (daptinClient) {
     await daptinClient.worldManager.init()
-    await daptinClient.worldManager.loadModel('user_account', false);
-    await daptinClient.worldManager.loadModel('usergroup', false);
-    await daptinClient.worldManager.loadModel('world', false);
-    await daptinClient.worldManager.loadModel('action', false);
-    (() => {
+    await daptinClient.worldManager.loadModel('user_account', false)
+    await daptinClient.worldManager.loadModel('usergroup', false)
+    await daptinClient.worldManager.loadModel('world', false)
+    await daptinClient.worldManager.loadModel('action', false)
+    await daptinClient.worldManager.loadModel('memory', false)
+    await daptinClient.worldManager.loadModel('workgroup', false)
+    ;(() => {
       daptinClient.worldManager.loadModels(false)
-    })();
+    })()
   }
   const result = await daptinClient.aggregateClient
     .entity('user_account')
     .groupBy('date(created_at)')
     .count()
-    .max("date(created_at)")
-    .min("date(created_at)")
-    .execute();
+    .max('date(created_at)')
+    .min('date(created_at)')
+    .execute()
 
-  console.log('Total users:', result[0].attributes.count);
+  // console.log('Total users:', result, JSON.stringify(result, null, 2));
 
   // return new Promise((resolve, reject) => {})
 }
@@ -131,5 +133,5 @@ daptinClient = new DaptinClient(
   },
   axiosConfig
 )
-daptinClient.reloadToken = reloadToken;
+daptinClient.reloadToken = reloadToken
 export { daptinClient }

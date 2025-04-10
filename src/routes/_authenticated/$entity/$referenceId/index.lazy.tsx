@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute } from '@tanstack/react-router'
 import EntityDetails from '@/features/entity/EntityDetails.tsx'
 
-export const Route = createFileRoute('/_authenticated/$entity/$referenceId')({
+export const Route = createLazyFileRoute(
+  '/_authenticated/$entity/$referenceId/',
+)({
   component: RouteComponent,
 })
 

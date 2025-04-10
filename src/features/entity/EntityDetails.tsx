@@ -3,23 +3,19 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
 import {
-  AlertCircle,
   ArrowLeft,
   ChevronRight,
   Clock,
   Edit,
   ExternalLink,
   FileText,
-  Info,
   Layers,
   List,
   MoreHorizontal,
   Star,
-  Tag,
   Trash2,
   User,
 } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Tooltip,
@@ -47,7 +42,8 @@ import {
 } from '@/components/ui/tooltip'
 import { Main } from '@/components/layout/main'
 import { EntityRelations } from '@/features/entity/EntityRelations.tsx'
-import { FieldGroup } from '@/features/entity/FieldGroup.tsx'
+import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPanel.tsx'
+import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
 import { SingleEntitySummaryViewComponent } from '@/features/entity/SingleEntitySummaryViewComponent.tsx'
 import { EntityDetailView } from '@/features/entity/detail-view'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
@@ -122,7 +118,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
     refetchOnWindowFocus: false,
   })
 
-
   // Reset state and refetch when entityName or entityId changes
   useEffect(() => {
     setSelectedItem(null)
@@ -142,8 +137,10 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
 
   // Handle edit action
   const handleEdit = () => {
-    setSelectedItem(entityItem)
-    setShowEditDialog(true)
+    navigate('/' + entityName + '/' + entityId + '/edit');
+
+    // setSelectedItem(entityItem)
+    // setShowEditDialog(true)
   }
 
   // Handle delete action
@@ -185,171 +182,14 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
     )
   }
 
-  // Format field value for display
-  const formatFieldValue = (fieldName: string, value: any) => {
-    if (value === null || value === undefined) return '-'
-
-    // Find the column definition
-    const column = columns.find((col) => col.ColumnName === fieldName)
-
-    // Handle different data types
-    if (fieldName === 'created_at' || fieldName === 'updated_at') {
-      return formatDateTime(value)
-    }
-
-    if (fieldName === 'reference_id') {
-      return (
-        <code className='bg-muted rounded px-1 py-0.5 font-mono text-sm'>
-          {value}
-        </code>
-      )
-    }
-
-    if (typeof value === 'boolean') {
-      return (
-        <Badge variant={value ? 'default' : 'outline'}>
-          {value ? 'Yes' : 'No'}
-        </Badge>
-      )
-    }
-
-    if (typeof value === 'number') {
-      return value.toLocaleString()
-    }
-
-    if (typeof value === 'object') {
-      return (
-        <code className='bg-muted block max-h-24 overflow-auto rounded p-2 text-xs'>
-          {value.reference_id}
-        </code>
-      )
-    }
-
-    // Handle status-like fields
-    if (fieldName === 'status' || fieldName.endsWith('_status')) {
-      return (
-        <Badge className='capitalize' variant='outline'>
-          {value}
-        </Badge>
-      )
-    }
-
-    // Handle long text
-    if (typeof value === 'string' && value.length > 100) {
-      return (
-        <div className='max-h-24 overflow-auto rounded border p-2 text-sm'>
-          {value}
-        </div>
-      )
-    }
-
-    return value.toString()
-  }
-
   // Early return for error state
   if (error) {
-    return (
-      <Main>
-        <div className='mb-6 flex items-center'>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='mr-2'
-            onClick={handleBack}
-          >
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Back
-          </Button>
-          <div>
-            <h1 className='text-2xl font-bold tracking-tight'>
-              {entityName} Details
-            </h1>
-            <p className='text-muted-foreground'>
-              View details for this {entityName}
-            </p>
-          </div>
-        </div>
-        <Alert variant='destructive'>
-          <AlertCircle className='h-4 w-4' />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error instanceof Error
-              ? error.message
-              : 'An error occurred while fetching data'}
-          </AlertDescription>
-        </Alert>
-      </Main>
-    )
+    return <ErrorLoadingEntityPanel entityName={entityName} error={error} />
   }
 
   // Loading state
   if (isLoading || !entityItem) {
-    return (
-      <Main className='flex h-full w-full flex-col overflow-hidden'>
-        <div className='mb-6 flex items-center'>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='mr-2'
-            onClick={handleBack}
-          >
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Back
-          </Button>
-          <div>
-            <h1 className='text-2xl font-bold tracking-tight'>
-              {entityName} Details
-            </h1>
-            <p className='text-muted-foreground'>Loading details...</p>
-          </div>
-        </div>
-        <div className='space-y-6'>
-          <div className='flex items-center space-x-4'>
-            <Skeleton className='h-16 w-16 rounded-full' />
-            <div className='space-y-2'>
-              <Skeleton className='h-6 w-40' />
-              <Skeleton className='h-4 w-24' />
-            </div>
-          </div>
-
-          <Skeleton className='h-10 w-full max-w-md' />
-
-          <div className='grid gap-6 md:grid-cols-2'>
-            <Card>
-              <CardHeader className='pb-2'>
-                <Skeleton className='h-5 w-32' />
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-24' />
-                  <Skeleton className='h-8 w-full' />
-                </div>
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-24' />
-                  <Skeleton className='h-8 w-full' />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className='pb-2'>
-                <Skeleton className='h-5 w-32' />
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-24' />
-                  <Skeleton className='h-8 w-full' />
-                </div>
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-24' />
-                  <Skeleton className='h-8 w-full' />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </Main>
-    )
+    return <LoadingEntityPanel entityName={entityName} />
   }
 
   return (
@@ -383,7 +223,13 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
             </div>
 
             <div className='flex space-x-2'>
-              <Button variant='outline' size='sm' onClick={handleEdit}>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => {
+                  navigate({to: '/' + entityName + '/' + entityId + '/edit'})
+                }}
+              >
                 <Edit className='mr-2 h-4 w-4' />
                 Edit
               </Button>
@@ -396,11 +242,6 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56'>
-                  <DropdownMenuItem onClick={handleEdit}>
-                    <Edit className='mr-2 h-4 w-4' />
-                    Edit details
-                  </DropdownMenuItem>
-
                   <DropdownMenuItem>
                     <ExternalLink className='mr-2 h-4 w-4' />
                     Open in new tab
@@ -528,10 +369,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EntityDetailView
-                  columns={columns}
-                  entityItem={entityItem}
-                />
+                <EntityDetailView columns={columns} entityItem={entityItem} />
               </CardContent>
             </Card>
           </TabsContent>

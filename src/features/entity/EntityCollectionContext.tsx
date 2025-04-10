@@ -2,8 +2,8 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import { useToast } from '@/hooks/use-toast'
-import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 import { ColumnDefinition } from '@/features/entity/columns'
+import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 
 // Define the entity data context type
 interface EntityCollectionContextType {

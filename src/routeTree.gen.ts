@@ -18,7 +18,6 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
-import { Route as AuthenticatedEntityReferenceIdImport } from './routes/_authenticated/$entity.$referenceId'
 
 // Create Virtual Routes
 
@@ -63,6 +62,15 @@ const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
 )()
 const AuthenticatedSettingsAccountLazyImport = createFileRoute(
   '/_authenticated/settings/account',
+)()
+const AuthenticatedCreateEntityLazyImport = createFileRoute(
+  '/_authenticated/create/$entity',
+)()
+const AuthenticatedEntityReferenceIdIndexLazyImport = createFileRoute(
+  '/_authenticated/$entity/$referenceId/',
+)()
+const AuthenticatedEntityReferenceIdEditLazyImport = createFileRoute(
+  '/_authenticated/$entity/$referenceId/edit',
 )()
 
 // Create/Update Routes
@@ -217,7 +225,7 @@ const AuthenticatedEntityIndexLazyRoute =
     path: '/$entity/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
-    import('./routes/_authenticated/$entity.index.lazy').then((d) => d.Route),
+    import('./routes/_authenticated/$entity/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedSettingsNotificationsLazyRoute =
@@ -264,12 +272,36 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
-const AuthenticatedEntityReferenceIdRoute =
-  AuthenticatedEntityReferenceIdImport.update({
-    id: '/$entity/$referenceId',
-    path: '/$entity/$referenceId',
+const AuthenticatedCreateEntityLazyRoute =
+  AuthenticatedCreateEntityLazyImport.update({
+    id: '/create/$entity',
+    path: '/create/$entity',
     getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+  } as any).lazy(() =>
+    import('./routes/_authenticated/create/$entity.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedEntityReferenceIdIndexLazyRoute =
+  AuthenticatedEntityReferenceIdIndexLazyImport.update({
+    id: '/$entity/$referenceId/',
+    path: '/$entity/$referenceId/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/$entity/$referenceId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedEntityReferenceIdEditLazyRoute =
+  AuthenticatedEntityReferenceIdEditLazyImport.update({
+    id: '/$entity/$referenceId/edit',
+    path: '/$entity/$referenceId/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/$entity/$referenceId/edit.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -366,11 +398,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/$entity/$referenceId': {
-      id: '/_authenticated/$entity/$referenceId'
-      path: '/$entity/$referenceId'
-      fullPath: '/$entity/$referenceId'
-      preLoaderRoute: typeof AuthenticatedEntityReferenceIdImport
+    '/_authenticated/create/$entity': {
+      id: '/_authenticated/create/$entity'
+      path: '/create/$entity'
+      fullPath: '/create/$entity'
+      preLoaderRoute: typeof AuthenticatedCreateEntityLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/account': {
@@ -443,6 +475,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/$entity/$referenceId/edit': {
+      id: '/_authenticated/$entity/$referenceId/edit'
+      path: '/$entity/$referenceId/edit'
+      fullPath: '/$entity/$referenceId/edit'
+      preLoaderRoute: typeof AuthenticatedEntityReferenceIdEditLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/$entity/$referenceId/': {
+      id: '/_authenticated/$entity/$referenceId/'
+      path: '/$entity/$referenceId'
+      fullPath: '/$entity/$referenceId'
+      preLoaderRoute: typeof AuthenticatedEntityReferenceIdIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
   }
 }
 
@@ -477,24 +523,30 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedEntityReferenceIdRoute: typeof AuthenticatedEntityReferenceIdRoute
+  AuthenticatedCreateEntityLazyRoute: typeof AuthenticatedCreateEntityLazyRoute
   AuthenticatedEntityIndexLazyRoute: typeof AuthenticatedEntityIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
+  AuthenticatedEntityReferenceIdEditLazyRoute: typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  AuthenticatedEntityReferenceIdIndexLazyRoute: typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedEntityReferenceIdRoute: AuthenticatedEntityReferenceIdRoute,
+  AuthenticatedCreateEntityLazyRoute: AuthenticatedCreateEntityLazyRoute,
   AuthenticatedEntityIndexLazyRoute: AuthenticatedEntityIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
+  AuthenticatedEntityReferenceIdEditLazyRoute:
+    AuthenticatedEntityReferenceIdEditLazyRoute,
+  AuthenticatedEntityReferenceIdIndexLazyRoute:
+    AuthenticatedEntityReferenceIdIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -513,7 +565,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
+  '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -524,6 +576,8 @@ export interface FileRoutesByFullPath {
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -537,7 +591,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
+  '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -548,6 +602,8 @@ export interface FileRoutesByTo {
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -565,7 +621,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdRoute
+  '/_authenticated/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -576,6 +632,8 @@ export interface FileRoutesById {
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
+  '/_authenticated/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/_authenticated/$entity/$referenceId/': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -593,7 +651,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/$entity/$referenceId'
+    | '/create/$entity'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -604,6 +662,8 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/settings/'
     | '/users'
+    | '/$entity/$referenceId/edit'
+    | '/$entity/$referenceId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -616,7 +676,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/$entity/$referenceId'
+    | '/create/$entity'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -627,6 +687,8 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/settings'
     | '/users'
+    | '/$entity/$referenceId/edit'
+    | '/$entity/$referenceId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -642,7 +704,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
-    | '/_authenticated/$entity/$referenceId'
+    | '/_authenticated/create/$entity'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -653,6 +715,8 @@ export interface FileRouteTypes {
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
     | '/_authenticated/users/'
+    | '/_authenticated/$entity/$referenceId/edit'
+    | '/_authenticated/$entity/$referenceId/'
   fileRoutesById: FileRoutesById
 }
 
@@ -712,12 +776,14 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
-        "/_authenticated/$entity/$referenceId",
+        "/_authenticated/create/$entity",
         "/_authenticated/$entity/",
         "/_authenticated/apps/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
-        "/_authenticated/users/"
+        "/_authenticated/users/",
+        "/_authenticated/$entity/$referenceId/edit",
+        "/_authenticated/$entity/$referenceId/"
       ]
     },
     "/(auth)/500": {
@@ -765,8 +831,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/$entity/$referenceId": {
-      "filePath": "_authenticated/$entity.$referenceId.tsx",
+    "/_authenticated/create/$entity": {
+      "filePath": "_authenticated/create/$entity.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {
@@ -786,7 +852,7 @@ export const routeTree = rootRoute
       "parent": "/_authenticated/settings"
     },
     "/_authenticated/$entity/": {
-      "filePath": "_authenticated/$entity.index.lazy.tsx",
+      "filePath": "_authenticated/$entity/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/apps/": {
@@ -807,6 +873,14 @@ export const routeTree = rootRoute
     },
     "/_authenticated/users/": {
       "filePath": "_authenticated/users/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/$entity/$referenceId/edit": {
+      "filePath": "_authenticated/$entity/$referenceId/edit.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/$entity/$referenceId/": {
+      "filePath": "_authenticated/$entity/$referenceId/index.lazy.tsx",
       "parent": "/_authenticated"
     }
   }

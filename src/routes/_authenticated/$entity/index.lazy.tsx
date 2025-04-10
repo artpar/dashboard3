@@ -8,7 +8,7 @@ function EntityManagementForMemory() {
     <EntityManagementComponent
       entityName={entity}
       title={entity}
-      description={entity + " management"}
+      description={entity + ' management'}
     ></EntityManagementComponent>
   )
 }
