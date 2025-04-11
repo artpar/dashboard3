@@ -4,7 +4,7 @@ import { Clock, Info, Layers, Search, Tag } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ColumnDefinition } from '@/features/entity/columns'
-import { FieldGroup } from '@/features/entity/types'
+import { FieldGroup, SYSTEM_COLUMNS } from '@/features/entity/types'
 import { EntityFieldGroup } from './EntityFieldGroup'
 import { EntityViewHeader } from './EntityViewHeader'
 import { filterFieldsBySearch} from './entity-detail-utils'
@@ -42,14 +42,7 @@ export function EntityDetailView({
         .filter(
           (col) =>
             !col.ColumnName.includes('_id') &&
-            ![
-              'id',
-              'reference_id',
-              'created_at',
-              'updated_at',
-              'permission',
-              'version',
-            ].includes(col.ColumnName) &&
+            !SYSTEM_COLUMNS.includes(col.ColumnName) &&
             (!col.ForeignKeyData || !col.ForeignKeyData.DataSource ||
               col.ForeignKeyData.DataSource.length === 0) &&
             entityItem[col.ColumnName] !== null &&

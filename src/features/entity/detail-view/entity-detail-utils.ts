@@ -1,6 +1,6 @@
 // src/features/entity/components/detail-view/entity-detail-utils.ts
 import { ColumnDefinition } from '@/features/entity/columns'
-import { FieldGroup } from '@/features/entity/types'
+import { FieldGroup, SYSTEM_COLUMNS } from '@/features/entity/types'
 
 /**
  * Get a human-readable label for a field
@@ -137,9 +137,6 @@ export function groupColumnsByCategory(
   ]
 
   // System/metadata fields
-  const systemFields = [
-    'id', 'reference_id', 'created_at', 'updated_at', 'version', 'permission'
-  ]
 
   // Important fields that should be in the first group
   const primaryFields = [
@@ -174,7 +171,7 @@ export function groupColumnsByCategory(
     }
 
     // Assign system fields
-    if (systemFields.includes(fieldName)) {
+    if (SYSTEM_COLUMNS.includes(fieldName)) {
       groups.find(g => g.id === 'system')?.fields.push(fieldName)
       return
     }

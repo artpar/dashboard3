@@ -7,6 +7,8 @@ export const SYSTEM_COLUMNS = [
   'created_at',
   'updated_at',
   'version',
+  'type',
+  '__type',
   'permission',
 ]
 

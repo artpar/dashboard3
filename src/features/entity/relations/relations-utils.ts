@@ -1,5 +1,7 @@
 // src/features/entity/components/relations/relations-utils.ts
 
+import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
+
 /**
  * Enum for relation direction relative to the current entity
  */
@@ -102,16 +104,12 @@ export function getDisplayFields(data: RelatedRecord, maxFields: number = 3): Re
   }
 
   // If no priority fields, get first N non-system fields
-  const systemFields = [
-    'id', 'reference_id', 'type', '__type', 'created_at', 'updated_at',
-    'permission', 'version', 'user_id'
-  ]
   const displayFields: Record<string, any> = {}
 
   Object.entries(data)
     .filter(
       ([key, value]) =>
-        !systemFields.includes(key) &&
+        !SYSTEM_COLUMNS.includes(key) &&
         value !== null &&
         value !== undefined &&
         !key.endsWith('_id') &&
