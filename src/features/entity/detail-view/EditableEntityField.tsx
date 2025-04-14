@@ -106,6 +106,7 @@ export function EditableEntityField({
             {fieldName}
           </div>
         )}
+        {JSON.stringify(editValue)}
         <ColumnEditor
           value={editValue}
           column={column}

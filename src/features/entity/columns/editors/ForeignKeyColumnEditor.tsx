@@ -1,10 +1,17 @@
 // src/components/entity/columns/editors/ForeignKeyColumnEditor.tsx
-import React, { useEffect, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
-import { Check, ChevronsUpDown, Loader2 } from 'lucide-react'
-import { ReactFilesPreview } from 'react-files-preview'
+import {
+  Check,
+  ChevronsUpDown,
+  FileIcon,
+  Loader2,
+  Upload,
+  X,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -14,6 +21,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
+import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
@@ -23,11 +31,6 @@ import { ColumnEditorProps } from '../types'
 
 
 export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
-
-// Extend ColumnEditorProps to include entity
-interface ForeignKeyColumnEditorProps extends ColumnEditorProps {
-  entity?: any
-}
 
 /**
  * Helper function to format file size
@@ -44,25 +47,31 @@ const formatFileSize = (bytes: number): string => {
   }
 }
 
+// Extend ColumnEditorProps to include entity
+interface ForeignKeyColumnEditorProps extends ColumnEditorProps {
+  entity?: any
+}
+
 /**
  * Component for editing foreign key values
  */
 export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
-  value,
-  column,
-  onChange,
-  onBlur,
-  className,
-  error,
-  entity,
-  disabled,
-  placeholder,
-}) => {
+                                                                                value,
+                                                                                column,
+                                                                                onChange,
+                                                                                onBlur,
+                                                                                className,
+                                                                                error,
+                                                                                entity,
+                                                                                disabled,
+                                                                                placeholder,
+                                                                              }) => {
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [isUploading, setIsUploading] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [files, setFiles] = useState<File[]>([])
-  const [fileObjects, setFileObjects] = useState<any[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Get the referenced entity from the column's ForeignKeyData
   const referencedEntity = column.ForeignKeyData?.Namespace || ''
@@ -83,7 +92,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
   // File references should always be arrays
   // If we receive a non-array value, we'll normalize it
-  const normalizedValue = Array.isArray(value) ? value : value ? [value] : []
+  const normalizedValue = Array.isArray(value) ? value : (value ? [value] : [])
 
   // Extract file data for display (first item in the array)
   const fileData = normalizedValue.length > 0 ? normalizedValue[0] : null
@@ -94,30 +103,17 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
       ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png`
       : ''
 
-  // Initialize files from existing value
-  useEffect(() => {
-    if (fileData && isFileReference) {
-      // If we already have a file object with file data, we'll create a placeholder File object
-      // for react-files-preview to display
-      if (assetUrl && fileData.name) {
-        // Since we can't directly convert back from a stored file to a File object,
-        // we'll fetch the file from the server if needed
-        setFileObjects([fileData])
-      }
-    }
-  }, [fileData, assetUrl, isFileReference])
+  // Handle file upload
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
 
-  // Handle file change from ReactFilesPreview
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = files[0]
+    setIsUploading(true)
     setUploadError(null)
-
-    if (!e.target.files || e.target.files.length === 0) return
-
-    const newFiles = Array.from(e.target.files)
-    setFiles(newFiles)
-
-    // Process the first file (since our component expects a single file)
-    const file = newFiles[0]
+    setUploadProgress(0)
 
     try {
       // Create file metadata object
@@ -130,44 +126,71 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
       }
 
       // Convert file to base64 for the 'contents' field
-      const base64Content = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const result = (e.target?.result as string)?.split(',')[1] || ''
-          resolve(result)
-        }
-        reader.onerror = () => reject(new Error('Failed to read file'))
-        reader.readAsDataURL(file)
-      })
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        try {
+          const base64Content =
+            (e.target?.result as string)?.split(',')[1] || ''
 
-      // Add contents to file object
-      const fileWithContents = {
-        ...fileObject,
-        contents: base64Content,
+          // Add contents to file object
+          const fileWithContents = {
+            ...fileObject,
+            contents: base64Content,
+          }
+
+          // Always use array for file/image type columns
+          const newValue = [fileWithContents]
+
+          // Update the value
+          onChange(newValue)
+          setUploadProgress(100)
+
+          // Reset the file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
+
+          // Close the popover after successful upload
+          setTimeout(() => {
+            setIsUploading(false)
+            setOpen(false)
+            if (onBlur) onBlur()
+          }, 500)
+        } catch (error) {
+          console.error('Error processing file:', error)
+          setUploadError('Failed to process file')
+          setIsUploading(false)
+        }
       }
 
-      // Always use array for file/image type columns
-      const newValue = [fileWithContents]
+      reader.onerror = () => {
+        setUploadError('Failed to read file')
+        setIsUploading(false)
+      }
 
-      // Update the value
-      onChange(newValue)
-      setFileObjects([fileWithContents])
+      // Simulate progress
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const newProgress = prev + Math.random() * 10
+          return newProgress < 90 ? newProgress : 90
+        })
+      }, 200)
 
-      // Close the popover after successful upload
-      setTimeout(() => {
-        setOpen(false)
-        if (onBlur) onBlur()
-      }, 500)
+      // Read file as data URL
+      reader.readAsDataURL(file)
+
+      // Clean up interval
+      return () => clearInterval(interval)
     } catch (error) {
-      console.error('Error processing file:', error)
-      setUploadError('Failed to process file')
+      console.error('Error uploading file:', error)
+      setUploadError('Failed to upload file')
+      setIsUploading(false)
     }
   }
 
   // Handle file removal
-  const handleRemoveFile = (removedFile: File) => {
-    setFiles([])
-    setFileObjects([])
+  const handleRemoveFile = () => {
+    // Always use array for file/image type columns
     onChange([])
     if (onBlur) onBlur()
   }
@@ -226,34 +249,157 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
   // Render file reference editor
   if (isFileReference) {
-    // Prepare props for ReactFilesPreview
-    const previewProps = {
-      files: files,
-      onChange: handleFileChange,
-      onRemove: handleRemoveFile,
-      disabled: disabled,
-      multiple: false,
-      accept: isImage ? 'image/*' : undefined,
-      fileWidth: 'rfp-w-40',
-      fileHeight: 'rfp-h-30',
-      removeFile: !disabled && files.length > 0,
-      showFileSize: true,
-      showSliderCount: false,
-      onError: (error: string) => setUploadError(error),
+    // Display current file if exists
+    if (fileData) {
+      const fileName =
+        typeof fileData === 'object' && fileData !== null && 'name' in fileData
+          ? fileData.name
+          : 'File'
+
+      const fileSize =
+        typeof fileData === 'object' && fileData !== null && 'size' in fileData
+          ? formatFileSize(fileData.size as number)
+          : ''
+
+      return (
+        <div className={cn('space-y-2', className)}>
+          <div className='flex items-center gap-2 w-full'>
+            <Badge
+              variant='outline'
+              className={cn(
+                'flex h-auto items-center bg-gray-50 hover:bg-gray-100 w-full',
+                error && 'border-red-500'
+              )}
+            >
+              {isImage ? (
+                <div className='flex flex-col items-center'>
+                  <img
+                    src={assetUrl}
+                    alt={fileName}
+                    className='h-38 w-40 object-contain'
+                  />
+                  <span className='mt-1 text-xs'>
+                    {fileName} {fileSize && `(${fileSize})`}
+                  </span>
+                </div>
+              ) : (
+                <div className='flex items-center gap-2'>
+                  <FileIcon className='h-4 w-4' />
+                  <span>
+                    {fileName} {fileSize && `(${fileSize})`}
+                  </span>
+                </div>
+              )}
+            </Badge>
+
+            {!disabled && (
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={handleRemoveFile}
+                className='h-8 w-8 p-0'
+              >
+                <X className='h-4 w-4' />
+              </Button>
+            )}
+          </div>
+
+          {!disabled && (
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button variant='outline' size='sm' className='text-xs'>
+                  Change {isImage ? 'Image' : 'File'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className='w-80'>
+                <div className='space-y-4'>
+                  <h4 className='font-medium'>
+                    Upload {isImage ? 'Image' : 'File'}
+                  </h4>
+
+                  <Input
+                    ref={fileInputRef}
+                    type='file'
+                    accept={isImage ? 'image/*' : undefined}
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+
+                  {isUploading && (
+                    <div className='space-y-2'>
+                      <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
+                        <div
+                          className='bg-primary h-full transition-all duration-300 ease-in-out'
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                      <p className='text-muted-foreground text-center text-xs'>
+                        {uploadProgress < 100
+                          ? 'Uploading...'
+                          : 'Upload complete!'}
+                      </p>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <p className='text-destructive text-xs'>{uploadError}</p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
+      )
     }
 
-    // If we have existing file data and a URL, pass the URL to the preview
-    const urlProp =
-      fileData && assetUrl && fileObjects.length === 0 ? { url: assetUrl } : {}
-
+    // Display upload button if no file exists
     return (
-      <div className={cn('space-y-2', className, error && 'border-red-500')}>
-        {uploadError && (
-          <p className='text-destructive text-xs'>{uploadError}</p>
-        )}
-        <div className='min-h-60 overflow-hidden rounded-md flex flex-row'>
-          <ReactFilesPreview {...previewProps} {...urlProp} />
-        </div>
+      <div className={cn('space-y-2', className)}>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant='outline'
+              className={cn('w-full justify-center', error && 'border-red-500')}
+              disabled={disabled}
+            >
+              <Upload className='mr-2 h-4 w-4' />
+              Upload {isImage ? 'Image' : 'File'}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className='w-80'>
+            <div className='space-y-4'>
+              <h4 className='font-medium'>
+                Upload {isImage ? 'Image' : 'File'}
+              </h4>
+
+              <Input
+                ref={fileInputRef}
+                type='file'
+                accept={isImage ? 'image/*' : undefined}
+                onChange={handleFileUpload}
+                disabled={isUploading}
+              />
+
+              {isUploading && (
+                <div className='space-y-2'>
+                  <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
+                    <div
+                      className='bg-primary h-full transition-all duration-300 ease-in-out'
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className='text-muted-foreground text-center text-xs'>
+                    {uploadProgress < 100 ? 'Uploading...' : 'Upload complete!'}
+                  </p>
+                </div>
+              )}
+
+              {uploadError && (
+                <p className='text-destructive text-xs'>{uploadError}</p>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     )
   }
