@@ -102,7 +102,7 @@ export function SingleEntitySummaryViewComponent({
   }, [columns, entityItem])
 
   return (
-    <div className='grid gap-6 md:grid-cols-2'>
+    <div className='grid gap-6 grid-cols-2 grid-2'>
       {fieldGroups.slice(0, 2).map((group) => {
         return (
           <Card key={group.id} className='h-fit'>

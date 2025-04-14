@@ -29,14 +29,15 @@ export function VisualPermissionEditor({
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as PermissionScope)}
       >
-        <TabsList className='mb-4 grid grid-cols-3'>
-          {Object.values(PermissionScope).map((scope) => {
-            const colors = PERMISSION_COLORS[scope]
+        <TabsList className='mb-4 grid grid-cols-2'>
+          {Object.values([PermissionScope.Guest, PermissionScope.User]).map((scope) => {
             return (
               <TabsTrigger
                 key={scope}
                 value={scope}
-                className={`data-[state=active]:${colors.selected} data-[state=active]:${colors.text}`}
+                className={`data-[state=active]:bg-gray-400 
+                hover:bg-gray-200
+                cursor-pointer data-[state=active]:text-white`}
               >
                 {scope}
               </TabsTrigger>
@@ -44,7 +45,7 @@ export function VisualPermissionEditor({
           })}
         </TabsList>
 
-        {Object.values(PermissionScope).map((scope) => {
+        {Object.values([PermissionScope.Guest, PermissionScope.User]).map((scope) => {
           const colors = PERMISSION_COLORS[scope]
 
           return (
