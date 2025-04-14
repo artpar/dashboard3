@@ -1,8 +1,8 @@
 import { daptinClient } from '@/daptin'
+import { TableInfo } from '@/hooks/use-world-entities.tsx'
+import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
-import { TableInfo } from '@/hooks/use-world-entities.tsx'
 
 /**
  * Centralized service for all entity API operations
@@ -68,13 +68,7 @@ export class EntityApiService {
               const actionsResponse = await daptinClient.jsonApi.findAll(
                 'action',
                 {
-                  query: JSON.stringify([
-                    {
-                      column: 'entity_name',
-                      operator: 'eq',
-                      value: entityName,
-                    },
-                  ]),
+                  world_id: schema['reference_id'],
                 }
               )
 
@@ -131,12 +125,12 @@ export class EntityApiService {
   static async fetchRelatedEntities(
     entityName: string,
     entityId: string,
-    relations: TableRelation[],
+    relations: TableRelation[]
   ): Promise<Record<string, any[]>> {
     const relatedData: Record<string, any[]> = {}
 
     try {
-      relations = relations || [];
+      relations = relations || []
       for (const relation of relations) {
         let relationEntityName: string
         let queryParam: any
@@ -145,14 +139,14 @@ export class EntityApiService {
           // This entity is the subject, we need to find objects
           relationEntityName = relation.Object
           queryParam = {}
-          queryParam[relationEntityName + "_id"] = entityId
-          queryParam[relationEntityName + "Name"] = relation.SubjectName
+          queryParam[relationEntityName + '_id'] = entityId
+          queryParam[relationEntityName + 'Name'] = relation.SubjectName
         } else {
           // This entity is the object, we need to find subjects
           relationEntityName = relation.Subject
           queryParam = {}
-          queryParam[relationEntityName + "_id"] = entityId
-          queryParam[relationEntityName + "Name"] = relation.ObjectName
+          queryParam[relationEntityName + '_id'] = entityId
+          queryParam[relationEntityName + 'Name'] = relation.ObjectName
         }
 
         try {
@@ -288,7 +282,10 @@ export class EntityApiService {
   /**
    * Delete an entity
    */
-  static async deleteEntity(entityName: string, entityId: string): Promise<any> {
+  static async deleteEntity(
+    entityName: string,
+    entityId: string
+  ): Promise<any> {
     try {
       const response = await daptinClient.jsonApi.destroy(entityName, entityId)
 

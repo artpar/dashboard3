@@ -97,6 +97,7 @@ export interface ColumnViewerProps {
 // Interface for column editor component props
 export interface ColumnEditorProps {
   value: any
+  entity: any
   column: ColumnDefinition
   onChange: (value: any) => void
   onBlur?: () => void

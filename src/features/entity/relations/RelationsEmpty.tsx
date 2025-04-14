@@ -3,7 +3,6 @@ import { LinkIcon } from 'lucide-react'
 
 interface RelationsEmptyProps {
   entityName: string
-  relatedEntityName: string
 }
 
 /**

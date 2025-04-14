@@ -31,9 +31,10 @@ export const SingleEntityDataProvider: React.FC<{
   children: React.ReactNode
   entityName: string
   entityId: string
+  entity: any
   relations?: TableRelation[]
-}> = ({ children, entityName, entityId, relations = [] }) => {
-  const [selectedItem, setSelectedItem] = useState<any | null>(null)
+}> = ({ children, entityName, entity, entityId, relations = [] }) => {
+  const [selectedItem, setSelectedItem] = useState<any | null>(entity)
   const [relatedEntities, setRelatedEntities] = useState<Record<string, any[]>>(
     {}
   )

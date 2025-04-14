@@ -172,7 +172,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             <Badge
               variant='outline'
               className={cn(
-                'flex items-center bg-amber-50 hover:bg-amber-100 h-42 w-max',
+                'flex items-center bg-gray-50 hover:bg-gray-100 h-42 w-max',
                 className
               )}
               onClick={() => {

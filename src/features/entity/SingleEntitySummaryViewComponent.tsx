@@ -8,8 +8,9 @@ import {
 } from '@/components/ui/card.tsx'
 import { FieldGroup } from '@/features/entity/FieldGroup.tsx'
 import { getFieldLabel } from '@/features/entity/GetFieldLabel.tsx'
-import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
+import { ColumnDefinition } from '@/features/entity/columns'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
+import { EditableEntityField } from './detail-view/EditableEntityField'
 
 export function SingleEntitySummaryViewComponent({
   columns,
@@ -114,11 +115,10 @@ export function SingleEntitySummaryViewComponent({
             <CardContent className='space-y-4'>
               {group.fields.slice(0, 5).map((fieldName) => (
                 <div key={fieldName} className='flex flex-col space-y-1'>
-                  <div className='text-muted-foreground flex text-sm font-medium'>
-                    {getFieldLabel(columns, fieldName)}
-                  </div>
                   <div className='flex justify-start text-sm'>
-                    <ColumnViewer
+                    <EditableEntityField
+                      fieldName={fieldName}
+                      showLabel={true}
                       column={
                         columns.filter((e) => e.ColumnName === fieldName)[0]
                       }
@@ -144,10 +144,12 @@ export function SingleEntitySummaryViewComponent({
               {getFieldLabel(columns, 'permission')}
             </div>
             <div className='flex justify-start text-sm'>
-              <ColumnViewer
+              <EditableEntityField
+                fieldName='permission'
                 column={columns.filter((e) => e.ColumnName === 'permission')[0]}
                 value={entityItem['permission']}
                 entity={entityItem}
+                disabled={true} /* Permissions are handled by a specialized editor */
               />
             </div>
           </div>

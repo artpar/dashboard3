@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin.ts'
 import {
@@ -62,6 +62,7 @@ export const SingleEntityManagementComponent: React.FC<
   EntityDetailsContentProps
 > = ({}) => {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { columns, setSelectedItem, entityName, entityId, relations } =
     useEntitySingleData()
 
@@ -103,8 +104,14 @@ export const SingleEntityManagementComponent: React.FC<
     setSelectedItem(null)
     refetch()
 
+    // Set up an interval to periodically check for updates
+    const refreshInterval = setInterval(() => {
+      refetch()
+    }, 30000) // Check for updates every 30 seconds
+
     return () => {
       // Cleanup
+      clearInterval(refreshInterval)
     }
   }, [entityName, entityId, refetch, setSelectedItem])
 
@@ -114,6 +121,27 @@ export const SingleEntityManagementComponent: React.FC<
       setSelectedItem(entityItem)
     }
   }, [entityItem, setSelectedItem])
+  
+  // Setup a refresh function for child components to call after updates
+  const refreshEntityData = useCallback(() => {
+    refetch();
+  }, [refetch]);
+  
+  // Add the refresh function to the context
+  useEffect(() => {
+    if (setSelectedItem && typeof setSelectedItem === 'function') {
+      // This is a bit of a hack, but we're using the setSelectedItem function
+      // to pass the refreshEntityData function to child components
+      // Child components can access it via the useEntitySingleData hook
+      const contextValue = {
+        refreshEntityData
+      };
+      queryClient.setQueryData(
+        [`entity-${entityName}-${entityId}-context`],
+        contextValue
+      );
+    }
+  }, [entityName, entityId, queryClient, refreshEntityData, setSelectedItem]);
 
   // Handle edit action
   const handleEdit = () => {

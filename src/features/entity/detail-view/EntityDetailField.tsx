@@ -9,7 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
+import { ColumnDefinition } from '@/features/entity/columns'
+import { EditableEntityField } from './EditableEntityField'
 import { getFieldLabel } from './entity-detail-utils'
 
 interface EntityDetailFieldProps {
@@ -24,7 +25,7 @@ interface EntityDetailFieldProps {
 }
 
 /**
- * Displays a single field in the entity detail view
+ * Displays a single field in the entity detail view with in-place editing capability
  */
 export function EntityDetailField({
   fieldName,
@@ -122,75 +123,20 @@ export function EntityDetailField({
           </div>
         </div>
 
-        {/* Field Value */}
+        {/* Field Value with Editable Capability */}
         <div
           className={cn(
-            'relative flex w-full px-4 py-3 sm:w-2/3',
-            isExpanded ? 'min-h-[80px]' : ''
+            'group relative flex w-full px-4 py-3',
           )}
         >
-          <div
-            className={cn(
-              'w-full',
-              isExpanded ? 'whitespace-pre-wrap' : 'truncate'
-            )}
-          >
-            <ColumnViewer
-              column={column}
-              value={value}
-              className={cn('text-sm', isExpanded && 'break-words')}
-              entity={entity}
-            />
-          </div>
-
-          <div className='ml-auto flex items-start gap-1'>
-            {value !== null && value !== undefined && (
-              <Button
-                variant='ghost'
-                size='sm'
-                className='hover:bg-muted-foreground/10 h-7 w-7 rounded-full p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100'
-                onClick={handleCopyValue}
-              >
-                <CopyIcon className='h-3.5 w-3.5' />
-                <span className='sr-only'>Copy</span>
-              </Button>
-            )}
-
-            {isExpandable && (
-              <Button
-                variant='ghost'
-                size='sm'
-                className='hover:bg-muted-foreground/10 hidden h-7 w-7 rounded-full p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100 sm:flex'
-                onClick={onToggleExpand}
-              >
-                <ChevronRightIcon
-                  className={cn(
-                    'h-4 w-4 transition-transform',
-                    isExpanded ? 'rotate-90' : ''
-                  )}
-                />
-                <span className='sr-only'>
-                  {isExpanded ? 'Collapse' : 'Expand'}
-                </span>
-              </Button>
-            )}
-          </div>
+          <EditableEntityField
+            fieldName={fieldName}
+            column={column}
+            value={value}
+            entity={entity}
+          />
         </div>
       </div>
-
-      {/* Expanded section */}
-      {isExpanded && isExpandable && (
-        <div className='px-4 pb-3'>
-          <div className='bg-background rounded-md p-3'>
-            <ColumnViewer
-              column={column}
-              value={value}
-              className='text-sm break-words whitespace-pre-wrap'
-              entity={entity}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
