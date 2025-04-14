@@ -36,7 +36,6 @@ export function PermissionActionToggle({
     <div
       className={`flex items-center space-x-2 rounded-md p-2 ${isChecked ? colors.selected : 'bg-background'} transition-colors`}
     >
-      {JSON.stringify(isChecked)}&nbsp;
       <Checkbox
         id={`${scope}-${action}`}
         checked={isChecked}

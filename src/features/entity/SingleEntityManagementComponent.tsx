@@ -8,7 +8,7 @@ import {
   Clock,
   Edit,
   ExternalLink,
-  FileText,
+  FileText, Key,
   Layers,
   List,
   MoreHorizontal,
@@ -43,6 +43,7 @@ import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData
 import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEntityDataProvider.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 import { formatDate, formatDateTime } from './utils/entityFormatters'
+import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
 
 interface EntityDetailsContentProps {
   entityName: string
@@ -310,6 +311,11 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
               All Fields
             </TabsTrigger>
 
+            <TabsTrigger value='permissions'>
+              <Key className='mr-2 h-4 w-4' />
+              Permissions
+            </TabsTrigger>
+
             {relations.length > 0 && (
               <TabsTrigger value='relations'>
                 <Layers className='mr-2 h-4 w-4' />
@@ -335,6 +341,15 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
             <EntityDetailView columns={columns} entityItem={entityItem} />
+          </TabsContent>
+          <TabsContent
+            value='permissions'
+            className='flex flex-col space-y-6 overflow-y-auto pb-6'
+          >
+            <PermissionColumnEditor onChange={(v) => {
+              console.log("Permission value changed", v)
+            }} value={entityItem["permission"]
+             } />
           </TabsContent>
 
           {/* Relations Tab */}

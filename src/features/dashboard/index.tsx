@@ -268,20 +268,18 @@ const Dashboard = () => {
   return (
     <div className="w-full space-y-6 overflow-y-auto pb-8">
       {/* User welcome section */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-2xl">
+        <div className="pb-2">
+          <div className="text-2xl">
             Welcome,{' '}
             {creator?.creator_name ||
               customer?.customer_name ||
               user?.name ||
               'User'}
-          </CardTitle>
-          <CardDescription>
+          </div>
+          <div className="text-sm text-gray-500">
             Dashboard overview of your system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </div>
+        </div>
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="overview">
@@ -689,8 +687,6 @@ const Dashboard = () => {
               </Card>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
     </div>
   )
 }

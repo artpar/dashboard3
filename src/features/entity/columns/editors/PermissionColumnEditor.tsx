@@ -47,9 +47,9 @@ export default function PermissionColumnEditor({
   const [displayMode, setDisplayMode] = useState<'visual' | 'groups'>('visual')
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`flex flex-col space-y-4 ${className}`}>
       {/* Preset selector and view toggle */}
-      <div className='flex items-center space-x-2'>
+      <div className='flex w-full items-center space-x-2'>
         <PermissionPresetSelector
           value={permissionValue}
           onValueChange={handlePresetChange}

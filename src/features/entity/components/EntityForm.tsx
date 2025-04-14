@@ -20,6 +20,7 @@ import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'
 import { ColumnDefinition } from '@/features/entity/columns/types'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
+import { Link } from '@tanstack/react-router'
 
 interface EntityFormProps {
   mode: 'create' | 'edit'
@@ -360,14 +361,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
         </Tabs>
 
         <DialogFooter className={cn('pt-4', isSubmitting && 'opacity-50')}>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
+          <Link className="border border-black rounded pt-2 px-4 text-sm" to="..">Cancel</Link>
           <Button type='submit' disabled={isSubmitting}>
             {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {mode === 'create' ? 'Create' : 'Update'} {entityName}

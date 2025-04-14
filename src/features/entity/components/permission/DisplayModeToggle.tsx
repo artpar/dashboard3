@@ -15,11 +15,11 @@ export function DisplayModeToggle({
   disabled,
 }: DisplayModeToggleProps) {
   return (
-    <div className='flex overflow-hidden rounded-md border'>
+    <div className='flex flex-wrap w-full max-w-full'>
       <Button
         type='button'
         variant={mode === 'visual' ? 'default' : 'outline'}
-        className='rounded-none px-3'
+        className='flex-1 rounded-l-md rounded-r-none px-2 min-w-0'
         onClick={() => onChange('visual')}
         disabled={disabled}
       >
@@ -28,7 +28,7 @@ export function DisplayModeToggle({
       <Button
         type='button'
         variant={mode === 'groups' ? 'default' : 'outline'}
-        className='rounded-none px-3'
+        className='flex-1 rounded-r-md rounded-l-none px-2 min-w-0'
         onClick={() => onChange('groups')}
         disabled={disabled}
       >
