@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Check, Edit2, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -101,9 +101,11 @@ export function EditableEntityField({
   if (isEditing) {
     return (
       <div className={`flex w-full flex-col space-y-2 ${className}`}>
-        {showLabel && <div className="text-muted-foreground flex text-sm font-medium">
-          {fieldName}
-        </div>}
+        {showLabel && (
+          <div className='text-muted-foreground flex text-sm font-medium'>
+            {fieldName}
+          </div>
+        )}
         <ColumnEditor
           value={editValue}
           column={column}
@@ -112,9 +114,9 @@ export function EditableEntityField({
           entity={entity}
           className='w-full'
         />
-        <div className='mt-2 flex items-center space-x-2'>
+        <div className='p-2 flex !space-x-4 w-full rounded !border !border-black'>
           <Button
-            variant='outline'
+            variant='secondary'
             size='sm'
             onClick={saveChanges}
             disabled={isSubmitting}
@@ -142,17 +144,17 @@ export function EditableEntityField({
       className={`group relative flex w-full flex-col items-start space-x-2 ${className}`}
       data-field-name={fieldName}
     >
-      {showLabel && <div className="text-muted-foreground flex py-1 text-sm font-medium">
-        {fieldName}
-      </div>}
-      <div className='w-full'>
-        <ColumnViewer
-          column={column}
-          value={currentValue}
-          entity={entity}
-          className='w-full px-2'
-        />
-      </div>
+      {showLabel && (
+        <div className='flex text-muted-foreground py-1 text-sm font-medium'>
+          {fieldName}
+        </div>
+      )}
+      <ColumnViewer
+        column={column}
+        value={currentValue}
+        entity={entity}
+        className='w-full px-2'
+      />
       {!isReadOnly && (
         <Button
           variant='ghost'

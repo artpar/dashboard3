@@ -1,12 +1,8 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import {
-  AlertCircle,
-  ExternalLink,
-  FileIcon,
-  Image as ImageIcon,
-} from 'lucide-react'
+import { AlertCircle, ExternalLink } from 'lucide-react'
+import { ReactFilesPreview } from 'react-files-preview'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -30,7 +26,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   className,
   entity,
 }) => {
-  // console.log('ForeignKeyColumnViewer', value, column)
   const navigate = useNavigate()
   const [referenceData, setReferenceData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -40,7 +35,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   const foreignKeyData = column.ForeignKeyData
   const namespace = foreignKeyData?.Namespace
   const dataSource = foreignKeyData?.DataSource
-  const keyName = foreignKeyData?.KeyName
   const columnType = column.ColumnType || ''
 
   // If the value is null or undefined, show a placeholder
@@ -84,31 +78,10 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     if (!referenceId) return
 
     const fetchReferenceData = async () => {
-      // setIsLoading(true)
-      // setError(null)
       setReferenceData({
         __type: namespace,
         reference_id: referenceId,
       })
-
-      // try {
-      //   // Attempt to fetch the referenced object using its ID
-      //   const response = await daptinClient.jsonApi.find(namespace, referenceId)
-      //   if (response.errors && response.errors.length) {
-      //     throw new Error(
-      //       response.errors[0].detail || 'Failed to load reference data'
-      //     )
-      //   }
-      //
-      //   setReferenceData(response.data)
-      // } catch (err) {
-      //   console.error('Error fetching foreign key data:', err)
-      //   setError(
-      //     err instanceof Error ? err.message : 'Failed to load reference data'
-      //   )
-      // } finally {
-      //   setIsLoading(false)
-      // }
     }
 
     fetchReferenceData()
@@ -151,71 +124,68 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       columnType.includes('webp') ||
       columnType.includes('gif')
 
+    // Get asset URL
     const assetUrl =
-      DAPTIN_ENDPOINT + '/asset/' +
+      DAPTIN_ENDPOINT +
+      '/asset/' +
       entity['__type'] +
       '/' +
       entity.reference_id +
       '/' +
       column.ColumnName +
-      '.png'
+      (isImage ? '.png' : '')
+
     // Get file name or use placeholder
     const fileName =
       typeof fileData === 'object' && fileData !== null && 'name' in fileData
         ? fileData.name
         : 'File'
 
+    // Using ReactFilesPreview for viewing files
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge
-              variant='outline'
-              className={cn(
-                'flex items-center bg-gray-50 hover:bg-gray-100 h-42 w-max',
-                className
-              )}
-              onClick={() => {
-                // Handle file preview or download
-                if (
-                  typeof fileData === 'object' &&
-                  fileData !== null &&
-                  'url' in fileData
-                ) {
-                  window.open(fileData.url, '_blank')
-                }
-              }}
-            >
-              {/*{isImage ? (*/}
-              {/*  <ImageIcon className='mr-1 h-3 w-3' />*/}
-              {/*) : (*/}
-              {/*  <FileIcon className='mr-1 h-3 w-3' />*/}
-              {/*)}*/}
-              <span className='max-w-[150px]'>
-                {isImage && <img className="w-40 h-38"
-                  alt={column.ColumnName + ' ' + column.ColumnDescription}
-                  src={assetUrl}
-                />}
-                {!isImage && <a
-                  target="_blank"
-                  href={assetUrl}
-                >{column.ColumnName}</a>}
-              </span>
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className='text-xs'>
-              <p className='font-bold'>{isImage ? 'Image' : 'File'}</p>
-              <p>{fileName}</p>
-              {typeof fileData === 'object' &&
-                fileData !== null &&
-                'size' in fileData && (
-                  <p>Size: {formatFileSize(fileData.size)}</p>
-                )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className={cn('flex w-full flex-col', className)}>
+        {isImage ? (
+          <div className='flex min-h-60 w-full flex-row overflow-hidden rounded-md'>
+            <ReactFilesPreview
+              url={assetUrl}
+              removeFile={false}
+              disabled={true}
+              fileWidth='rfp-w-40'
+              fileHeight='rfp-h-30'
+              showFileSize={true}
+              showSliderCount={false}
+            />
+          </div>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant='outline'
+                  className={cn(
+                    'flex h-auto w-max cursor-pointer items-center bg-gray-50 hover:bg-gray-100',
+                    className
+                  )}
+                  onClick={() => window.open(assetUrl, '_blank')}
+                >
+                  <span className='max-w-[150px]'>{fileName}</span>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className='text-xs'>
+                  <p className='font-bold'>File</p>
+                  <p>{fileName}</p>
+                  {typeof fileData === 'object' &&
+                    fileData !== null &&
+                    'size' in fileData && (
+                      <p>Size: {formatFileSize(fileData.size)}</p>
+                    )}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
     )
   }
 
@@ -223,27 +193,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   if (isUuidReference) {
     // If we have reference data, use it
     if (referenceData) {
-      // Try to find a display name from the reference data
-      // const displayName = Object.keys(referenceData)
-      //   .map((columnName) => {
-      //     if (["created_at", "updated_at", "type", "__type", "user_account_id"].includes(columnName)) {
-      //       return null;
-      //     }
-      //     if (columnName.endsWith('_id') && columnName !== "id") {
-      //       return null;
-      //     }
-      //     if (
-      //       typeof referenceData[columnName] === 'string' &&
-      //       referenceData[columnName].length < 50
-      //     ) {
-      //       return columnName + '\n' + referenceData[columnName]
-      //     } else {
-      //       return null
-      //     }
-      //   })
-      //   .filter((e) => e !== null)
-      //   .join('\n')
-
       return (
         <TooltipProvider>
           <Tooltip>
@@ -300,17 +249,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   // Handle object references with reference_id
   if (typeof value === 'object' && 'reference_id' in value) {
     if (referenceData) {
-      // Try to find a display name from the reference data
-      // const displayName =
-      //   referenceData.name ||
-      //   referenceData.title ||
-      //   referenceData.label ||
-      //   (referenceData.attributes &&
-      //     (referenceData.attributes.name ||
-      //       referenceData.attributes.title ||
-      //       referenceData.attributes.label)) ||
-      //   `${namespace}:${value.reference_id}`
-
       return (
         <TooltipProvider>
           <Tooltip>

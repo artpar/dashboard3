@@ -53,6 +53,7 @@
     "react": "^19.0.0",
     "react-day-picker": "8.10.1",
     "react-dom": "^19.0.0",
+    "react-files-preview": "^3.0.0",
     "react-hook-form": "^7.54.0",
     "recharts": "^2.14.1",
     "tailwind-merge": "^2.5.5",
@@ -63,6 +64,7 @@
   "devDependencies": {
     "@eslint/js": "^9.16.0",
     "@faker-js/faker": "^9.3.0",
+    "@tailwindcss/postcss": "^4.0.17",
     "@tanstack/eslint-plugin-query": "^5.62.1",
     "@tanstack/react-query-devtools": "^5.62.3",
     "@tanstack/router-devtools": "^1.86.1",
@@ -80,7 +82,6 @@
     "knip": "^5.41.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
-    "@tailwindcss/postcss": "^4.0.17",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.0.17",
     "typescript": "~5.7.2",
