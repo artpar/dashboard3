@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
-import { TableRelation } from '@/features/entity/EntityRelations'
+import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 // Import icon packs as needed
 import { ColumnDefinition } from '@/features/entity/columns'
 

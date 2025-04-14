@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { EntityApiService } from '../services/EntityApiService'
-import { TableRelation } from '@/features/entity/EntityRelations'
+import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import {
   BaseEntityContextType,
   BaseEntityDataProvider,

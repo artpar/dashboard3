@@ -22,7 +22,7 @@ export interface EntityDetailViewProps {
 /**
  * Main component to display entity details in organized field groups
  */
-export function EntityDetailView({
+export function SingleEntityAllFieldsViewComponent({
   columns,
   entityItem,
   title,
@@ -293,4 +293,4 @@ export function EntityDetailView({
   )
 }
 
-export default EntityDetailView
+export default SingleEntityAllFieldsViewComponent

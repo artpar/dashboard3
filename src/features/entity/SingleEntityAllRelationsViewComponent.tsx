@@ -29,7 +29,7 @@ export interface TableRelation {
 /**
  * Main component for displaying and interacting with entity relations
  */
-export function EntityRelations({
+export function SingleEntityAllRelationsViewComponent({
   entityName,
   entityId,
   relations,
@@ -57,4 +57,4 @@ export function EntityRelations({
   )
 }
 
-export default EntityRelations
+export default SingleEntityAllRelationsViewComponent

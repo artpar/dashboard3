@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { daptinClient } from '@/daptin'
+import { daptinClient } from '@/daptin.ts'
 import {
   ArrowLeft,
   ChevronRight,
   Clock,
   Edit,
   ExternalLink,
-  FileText, Key,
+  FileText,
+  Key,
   Layers,
   List,
   MoreHorizontal,
@@ -16,52 +17,50 @@ import {
   Trash2,
   User,
 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
+import { Badge } from '@/components/ui/badge.tsx'
+import { Button } from '@/components/ui/button.tsx'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/dropdown-menu.tsx'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs.tsx'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { Main } from '@/components/layout/main'
-import { EntityRelations } from '@/features/entity/EntityRelations.tsx'
+} from '@/components/ui/tooltip.tsx'
+import { Main } from '@/components/layout/main.tsx'
+import SingleEntityAllRelationsViewComponent from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPanel.tsx'
 import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
 import { SingleEntitySummaryViewComponent } from '@/features/entity/SingleEntitySummaryViewComponent.tsx'
-import { EntityDetailView } from '@/features/entity/detail-view'
-import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
-import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEntityDataProvider.tsx'
-import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import { formatDate, formatDateTime } from './utils/entityFormatters'
 import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
+import { SingleEntityAllFieldsViewComponent } from '@/features/entity/detail-view'
+import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
+import {
+  formatDate,
+  formatDateTime,
+} from '@/features/entity/utils/entityFormatters.tsx'
+import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
 
 interface EntityDetailsContentProps {
   entityName: string
   entityId: string
 }
 
-export const SingleEntityManagementComponent: React.FC<{
-  entityName: string
-  referenceId: string
-}> = ({ entityName, referenceId }) => {
-  return (
-    <SingleEntityDataProvider entityName={entityName} entityId={referenceId}>
-      <EntityDetailsContent entityName={entityName} entityId={referenceId} />
-    </SingleEntityDataProvider>
-  )
-}
-
-const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
+export const SingleEntityManagementComponent: React.FC<
+  EntityDetailsContentProps
+> = ({}) => {
   const navigate = useNavigate()
   const { columns, setSelectedItem, entityName, entityId, relations } =
     useEntitySingleData()
@@ -340,16 +339,18 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
             value='details'
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
-            <EntityDetailView columns={columns} entityItem={entityItem} />
+            <SingleEntityAllFieldsViewComponent columns={columns} entityItem={entityItem} />
           </TabsContent>
           <TabsContent
             value='permissions'
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
-            <PermissionColumnEditor onChange={(v) => {
-              console.log("Permission value changed", v)
-            }} value={entityItem["permission"]
-             } />
+            <PermissionColumnEditor
+              onChange={(v) => {
+                console.log('Permission value changed', v)
+              }}
+              value={entityItem['permission']}
+            />
           </TabsContent>
 
           {/* Relations Tab */}
@@ -358,7 +359,7 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
               value='relations'
               className='flex flex-col space-y-6 overflow-y-auto pb-6'
             >
-              <EntityRelations
+              <SingleEntityAllRelationsViewComponent
                 entityId={entityId}
                 entityName={entityName}
                 relations={relations}
@@ -370,5 +371,3 @@ const EntityDetailsContent: React.FC<EntityDetailsContentProps> = ({}) => {
     </>
   )
 }
-
-export default SingleEntityManagementComponent

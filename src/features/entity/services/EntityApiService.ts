@@ -1,7 +1,7 @@
 import { daptinClient } from '@/daptin'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import { TableRelation } from '@/features/entity/EntityRelations.tsx'
+import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { TableInfo } from '@/hooks/use-world-entities.tsx'
 
 /**

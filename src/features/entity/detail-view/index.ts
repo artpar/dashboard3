@@ -1,8 +1,8 @@
 // src/features/entity/components/detail-view/index.ts
 
 // Export the main components
-export { EntityDetailView } from './EntityDetailView'
-export type { EntityDetailViewProps } from './EntityDetailView'
+export { SingleEntityAllFieldsViewComponent } from './SingleEntityAllFieldsViewComponent.tsx'
+export type { EntityDetailViewProps } from './SingleEntityAllFieldsViewComponent.tsx'
 export { EntityFieldGroup } from './EntityFieldGroup'
 export { EntityDetailField } from './EntityDetailField'
 export { EntityViewHeader } from './EntityViewHeader'
