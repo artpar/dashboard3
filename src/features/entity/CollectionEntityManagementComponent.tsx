@@ -1,14 +1,16 @@
-import React from 'react'
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Main } from '@/components/layout/main'
-import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx'
-import EntityHeader from './components/EntityHeader'
-import EntityFilterDialog from './components/dialogs/EntityFilterDialog'
-import EntityPagination from './components/pagination/EntityPagination'
+import React from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Main } from '@/components/layout/main';
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx';
+import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx';
+import EntityHeader from './components/EntityHeader';
+import EntityFilterDialog from './components/dialogs/EntityFilterDialog';
+import EntityPagination from './components/pagination/EntityPagination';
 import EntityDataTable from './components/table/EntityDataTable'
+
 
 interface EntityManagementProps {
   entityName: string
@@ -90,6 +92,7 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
     )
   }
 
+  const navigate = useNavigate();
   return (
     <>
       <Main className='flex h-full w-full flex-col overflow-hidden'>
@@ -99,7 +102,9 @@ const EntityManagementContent: React.FC<EntityManagementProps> = ({
             description={description || ''}
             availableActions={availableActions}
             onRefresh={refresh}
-            onCreateNew={() => setShowCreateDialog(true)}
+            onCreateNew={() => {
+              navigate({to: "/create/" + entityName})
+            }}
             onShowFilters={() => setShowFilterDialog(true)}
             entityName={entityName}
           />

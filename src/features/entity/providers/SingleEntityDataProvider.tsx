@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { EntityApiService } from '../services/EntityApiService'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
+import { EntityApiService } from '../services/EntityApiService'
 import {
   BaseEntityContextType,
   BaseEntityDataProvider,
@@ -57,6 +57,9 @@ export const SingleEntityDataProvider: React.FC<{
   } = useQuery({
     queryKey: [`entity-${entityName}-${entityId}`],
     queryFn: async () => {
+      if (entityId === 'new') {
+        return {}
+      }
       return EntityApiService.fetchSingleEntity(entityName, entityId)
     },
     staleTime: 30000,
@@ -139,16 +142,26 @@ export const SingleEntityDataProvider: React.FC<{
 
   // Fetch related entities when the main entity data and relations are loaded
   const { data: relationsData, isLoading: isLoadingRelationsData } = useQuery({
-    queryKey: [`entity-${entityName}-${entityId}-relations`, entityName, entityId, relations],
+    queryKey: [
+      `entity-${entityName}-${entityId}-relations`,
+      entityName,
+      entityId,
+      relations,
+    ],
     queryFn: async ({ queryKey }) => {
       const [_, entityName, entityId, relations] = queryKey
+      if (entityId === 'new') {
+        return {};
+      }
+
       return EntityApiService.fetchRelatedEntities(
         entityName as string,
         entityId as string,
         relations as TableRelation[]
       )
     },
-    enabled: !!selectedItem && !!entityName && !!entityId && relations.length > 0,
+    enabled:
+      !!selectedItem && !!entityName && !!entityId && relations.length > 0,
   })
 
   // Update related entities when data changes
