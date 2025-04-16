@@ -5,17 +5,18 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRelationRecords } from '../hooks/useRelationRecords'
 import { RelationRecordsList } from './RelationRecordsList'
+import { AddRelatedEntityDialog } from './AddRelatedEntityDialog'
 import {
   getRelationDirectionStyles,
   getRelationLabel,
-  Relation,
+  TableRelation,
   RelationDirection,
 } from './relations-utils'
 
 interface RelationGroupProps {
   entityName: string
   entityId?: string
-  relation: Relation
+  relation: TableRelation
   direction?: RelationDirection
 }
 
@@ -51,6 +52,18 @@ export function RelationGroup({
     }
   }
 
+  const handleRelationChange = () => {
+    refetch()
+  }
+
+  // Show add button for has_many, many_to_many relations and when we have an entityId
+  // belongs_to relations can't be modified this way as they are non-nullable FKs
+  const showAddButton = (
+    relation.Relation !== 'belongs_to' &&
+    ['has_many', 'has_one', 'many_to_many', 'has_many_and_belongs_to_many'].includes(relation.Relation) &&
+    entityId
+  )
+
   return (
     <Card>
       <CardHeader className={`bg-background py-3`}>
@@ -58,30 +71,44 @@ export function RelationGroup({
           <CardTitle
             className={`text-base ${dirStyles.textClass} flex items-center`}
           >
+            <span className='text-sm font-normal'>
+              {getRelationLabel(relation.Relation, direction || RelationDirection.Outbound, entityName, relation)}
+            </span>
+            <span className='mx-2'>•</span>
             <span className='font-medium'>{relatedEntityName}</span>
             <span className='mx-2'>•</span>
-            <span className='text-sm font-normal'>
-              {getRelationLabel(relation.Relation)}
-            </span>
+            <span className='font-light text-xs'>{relation.Subject === entityName ? relation.ObjectName : relation.SubjectName}</span>
           </CardTitle>
 
-          <Button
-            variant='ghost'
-            size='sm'
-            className={dirStyles.textClass}
-            onClick={toggleExpand}
-          >
-            {isExpanded ? (
-              <ChevronUp className='h-5 w-5' />
-            ) : (
-              <div className='flex items-center'>
-                <span className='mr-2 text-xs font-medium'>
-                  {isLoading ? 'Loading...' : `${totalCount || '?'} items`}
-                </span>
-                <ChevronDown className='h-5 w-5' />
-              </div>
+          <div className='flex items-center space-x-2'>
+            {showAddButton && isExpanded && entityId && (
+              <AddRelatedEntityDialog
+                entityName={entityName}
+                entityId={entityId}
+                relation={relation}
+                direction={direction || RelationDirection.Outbound}
+                onSuccess={handleRelationChange}
+              />
             )}
-          </Button>
+
+            <Button
+              variant='ghost'
+              size='sm'
+              className={dirStyles.textClass}
+              onClick={toggleExpand}
+            >
+              {isExpanded ? (
+                <ChevronUp className='h-5 w-5' />
+              ) : (
+                <div className='flex items-center'>
+                  <span className='mr-2 text-xs font-medium'>
+                    {isLoading ? 'Loading...' : `${totalCount || '?'} items`}
+                  </span>
+                  <ChevronDown className='h-5 w-5' />
+                </div>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
@@ -94,10 +121,29 @@ export function RelationGroup({
           ) : records && records.length > 0 ? (
             <RelationRecordsList
               data={records}
+              entityName={entityName}
+              entityId={entityId || ''}
               relatedEntityName={relatedEntityName}
+              relation={relation}
+              direction={direction || RelationDirection.Outbound}
+              onRelationDeleted={handleRelationChange}
             />
           ) : (
-            <div className='m-2 flex p-2'>No records for this relation</div>
+            <div className='flex flex-col items-center justify-center p-6 space-y-4'>
+              <p className='text-muted-foreground text-sm'>
+                No records for this relation
+              </p>
+
+              {showAddButton && entityId && (
+                <AddRelatedEntityDialog
+                  entityName={entityName}
+                  entityId={entityId}
+                  relation={relation}
+                  direction={direction || RelationDirection.Outbound}
+                  onSuccess={handleRelationChange}
+                />
+              )}
+            </div>
           )}
         </CardContent>
       )}

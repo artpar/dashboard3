@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { categorizeRelations, Relation } from '../relations/relations-utils'
+import { categorizeRelations, TableRelation } from '../relations/relations-utils'
 import { RelationsApiService } from '../services/RelationsApiService'
 import { BaseEntityContextType } from '@/features/entity/providers/BaseEntityDataProvider.tsx'
 
 // Base relations context type
 export interface BaseRelationsContextType extends BaseEntityContextType {
   entityName: string
-  relations: Relation[]
-  inboundRelations: Relation[]
-  outboundRelations: Relation[]
+  relations: TableRelation[]
+  inboundRelations: TableRelation[]
+  outboundRelations: TableRelation[]
   isLoading: boolean
   error: Error | null
 }
@@ -21,9 +21,9 @@ export const BaseRelationsProvider: React.FC<{
   context: React.Context<any>
   contextValue: Partial<BaseRelationsContextType>
 }> = ({ children, entityName, context, contextValue }) => {
-  const [relations, setRelations] = useState<Relation[]>([])
-  const [inboundRelations, setInboundRelations] = useState<Relation[]>([])
-  const [outboundRelations, setOutboundRelations] = useState<Relation[]>([])
+  const [relations, setRelations] = useState<TableRelation[]>([])
+  const [inboundRelations, setInboundRelations] = useState<TableRelation[]>([])
+  const [outboundRelations, setOutboundRelations] = useState<TableRelation[]>([])
 
   // Fetch relations for the entity
   const {

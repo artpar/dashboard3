@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Relation } from '../relations/relations-utils'
+import { TableRelation } from '../relations/relations-utils'
 import { RelationsApiService } from '@/features/entity/services/RelationsApiService.ts'
 
 interface UseRelationRecordsOptions {
@@ -14,7 +14,7 @@ interface UseRelationRecordsOptions {
  * Hook to fetch and manage related records for a specific relation
  */
 export const useRelationRecords = (
-  relation: Relation | null,
+  relation: TableRelation | null,
   entityName: string,
   entityId?: string,
   options: UseRelationRecordsOptions = {}

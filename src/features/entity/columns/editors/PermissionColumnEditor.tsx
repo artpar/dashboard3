@@ -1,12 +1,10 @@
 import { useState } from 'react'
+import { DisplayModeToggle } from '@/features/entity/components/permission/DisplayModeToggle.tsx'
 import { GroupPermissionManager } from '@/features/entity/components/permission/GroupPermissionManager.tsx'
 import { VisualPermissionEditor } from '@/features/entity/components/permission/VisualPermissionEditor.tsx'
-import {
-  usePermissionValue,
-} from '@/features/entity/hooks/usePermissionValue.ts'
-import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
-import { DisplayModeToggle } from '@/features/entity/components/permission/DisplayModeToggle.tsx'
 import { useGroupData } from '@/features/entity/hooks/useGroupData.ts'
+import { usePermissionValue } from '@/features/entity/hooks/usePermissionValue.ts'
+import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
 
 interface PermissionColumnEditorProps {
   value: number

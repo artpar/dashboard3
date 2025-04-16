@@ -50,12 +50,13 @@ export function EntityFieldGroup({
     <Collapsible
       open={isGroupOpen}
       onOpenChange={setIsGroupOpen}
-      className={cn('transition-all duration-200', group.colorClass)}
+      className={cn('transition-all duration-200 h-full', group.colorClass)}
     >
       <Card
         className={cn(
           group.variant === 'flat' ? 'border-0 bg-transparent shadow-none' : '',
-          group.highlighted && 'border-primary/20'
+          group.highlighted && 'border-primary/20',
+          "h-full"
         )}
       >
         <CollapsibleTrigger asChild>

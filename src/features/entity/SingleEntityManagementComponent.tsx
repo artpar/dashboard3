@@ -8,7 +8,6 @@ import {
   Clock,
   Edit,
   ExternalLink,
-  FileText,
   Key,
   Layers,
   List,
@@ -40,10 +39,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip.tsx'
 import { Main } from '@/components/layout/main.tsx'
-import SingleEntityAllRelationsViewComponent from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPanel.tsx'
 import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
-import { SingleEntitySummaryViewComponent } from '@/features/entity/SingleEntitySummaryViewComponent.tsx'
+import SingleEntityAllRelationsViewComponent from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
 import { SingleEntityAllFieldsViewComponent } from '@/features/entity/detail-view'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
@@ -66,7 +64,7 @@ export const SingleEntityManagementComponent: React.FC<
   const { columns, setSelectedItem, entityName, entityId, relations } =
     useEntitySingleData()
 
-  const [activeTab, setActiveTab] = useState<string>('overview')
+  const [activeTab, setActiveTab] = useState<string>('details')
 
   // Fetch the specific entity item
   const {
@@ -121,12 +119,12 @@ export const SingleEntityManagementComponent: React.FC<
       setSelectedItem(entityItem)
     }
   }, [entityItem, setSelectedItem])
-  
+
   // Setup a refresh function for child components to call after updates
   const refreshEntityData = useCallback(() => {
-    refetch();
-  }, [refetch]);
-  
+    refetch()
+  }, [refetch])
+
   // Add the refresh function to the context
   useEffect(() => {
     if (setSelectedItem && typeof setSelectedItem === 'function') {
@@ -134,14 +132,14 @@ export const SingleEntityManagementComponent: React.FC<
       // to pass the refreshEntityData function to child components
       // Child components can access it via the useEntitySingleData hook
       const contextValue = {
-        refreshEntityData
-      };
+        refreshEntityData,
+      }
       queryClient.setQueryData(
         [`entity-${entityName}-${entityId}-context`],
         contextValue
-      );
+      )
     }
-  }, [entityName, entityId, queryClient, refreshEntityData, setSelectedItem]);
+  }, [entityName, entityId, queryClient, refreshEntityData, setSelectedItem])
 
   // Handle edit action
   const handleEdit = () => {
@@ -328,11 +326,6 @@ export const SingleEntityManagementComponent: React.FC<
           className='flex h-full w-full flex-col overflow-hidden'
         >
           <TabsList className='flex w-full justify-start'>
-            <TabsTrigger value='overview' className='flex items-center'>
-              <FileText className='mr-2 h-4 w-4' />
-              Overview
-            </TabsTrigger>
-
             <TabsTrigger value='details'>
               <List className='mr-2 h-4 w-4' />
               All Fields
@@ -351,23 +344,15 @@ export const SingleEntityManagementComponent: React.FC<
             )}
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent
-            value='overview'
-            className='flex flex-col space-y-6 overflow-y-auto pb-6'
-          >
-            <SingleEntitySummaryViewComponent
-              columns={columns}
-              entityItem={entityItem}
-            />
-          </TabsContent>
-
           {/* Details Tab (All Fields) */}
           <TabsContent
             value='details'
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
-            <SingleEntityAllFieldsViewComponent columns={columns} entityItem={entityItem} />
+            <SingleEntityAllFieldsViewComponent
+              columns={columns}
+              entityItem={entityItem}
+            />
           </TabsContent>
           <TabsContent
             value='permissions'

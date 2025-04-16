@@ -3,64 +3,54 @@ import { safelySerializeData } from '@/features/entity/utils/serializer'
 import {
   categorizeRelations,
   getRelationQueryParams,
-  Relation,
+  TableRelation,
 } from '../relations/relations-utils'
 
 /**
  * Centralized service for all relation API operations
+ * Uses daptinClient.worldModel methods for consistent data access
  */
 export class RelationsApiService {
   /**
    * Fetch relations for an entity
    */
-  static async fetchEntityRelations(entityName: string): Promise<Relation[]> {
+  static async fetchEntityRelations(
+    entityName: string
+  ): Promise<TableRelation[]> {
     try {
-      // Fetch schema information from world entity
-      const worldResponse = await daptinClient.jsonApi.findAll('world', {
-        query: JSON.stringify([
-          {
-            column: 'table_name',
-            operator: 'eq',
-            value: entityName,
-          },
-        ]),
-      })
+      // Fetch world model using the worldManager API
+      const worldModel = await daptinClient.worldManager.getWorldByName(entityName)
 
-      if (worldResponse.errors && worldResponse.errors.length) {
-        throw new Error(
-          worldResponse.errors[0].detail ||
-            `Failed to get relations for ${entityName}`
-        )
+      if (!worldModel) {
+        throw new Error(`Failed to get world model for ${entityName}`)
       }
 
-      let relations: Relation[] = []
+      let relations: TableRelation[] = []
 
-      if (worldResponse.data && worldResponse.data.length > 0) {
-        const schema = worldResponse.data[0]
+      // Extract relations from the world_schema_json
+      if (worldModel.world_schema_json) {
+        try {
+          const parsedSchema = typeof worldModel.world_schema_json === 'string'
+            ? JSON.parse(worldModel.world_schema_json)
+            : worldModel.world_schema_json
 
-        // Parse relation information from schema
-        if (schema.world_schema_json) {
-          try {
-            const parsedSchema = JSON.parse(schema.world_schema_json)
+          // Extract relations
+          if (parsedSchema.Relations) {
+            relations = parsedSchema.Relations.filter(
+              (relation: any) =>
+                relation.Subject === entityName ||
+                relation.Object === entityName
+            )
 
-            // Extract relations
-            if (parsedSchema.Relations) {
-              relations = parsedSchema.Relations.filter(
-                (relation: any) =>
-                  relation.Subject === entityName ||
-                  relation.Object === entityName
-              )
-
-              // Categorize relations by direction
-              const { allRelations } = categorizeRelations(
-                relations,
-                entityName
-              )
-              return allRelations
-            }
-          } catch (jsonParseError) {
-            console.error('Error parsing world_schema_json:', jsonParseError)
+            // Categorize relations by direction
+            const { allRelations } = categorizeRelations(
+              relations,
+              entityName
+            )
+            return allRelations
           }
+        } catch (jsonParseError) {
+          console.error('Error parsing world_schema_json:', jsonParseError)
         }
       }
 
@@ -75,7 +65,7 @@ export class RelationsApiService {
    * Fetch related records for a specific relation
    */
   static async fetchRelatedRecords(
-    relation: Relation,
+    relation: TableRelation,
     entityName: string,
     entityId: string,
     params: {
@@ -141,28 +131,103 @@ export class RelationsApiService {
     sourceEntityId: string,
     targetEntityName: string,
     targetEntityId: string,
-    relationName: string
+    relation: TableRelation
   ): Promise<any> {
     try {
-      // Implementation depends on how Daptin handles relation creation
-      // This is a placeholder for the actual implementation
-      const payload = {
-        source_entity_name: sourceEntityName,
-        source_entity_id: sourceEntityId,
-        target_entity_name: targetEntityName,
-        target_entity_id: targetEntityId,
-        relation_name: relationName,
+      // Get the world model which contains all entity metadata
+      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+
+      if (!worldModel) {
+        throw new Error(`Failed to get world model for ${sourceEntityName}`)
       }
 
-      const response = await daptinClient.actionManager.doAction(
-        'world',
-        'create_relation',
-        payload
-      )
+      // If it's a belongs_to or has_one relation, use direct update
+      if (
+        relation &&
+        (relation.Relation === 'belongs_to' || relation.Relation === 'has_one')
+      ) {
+        // For belongs_to, we update the foreign key on the source entity
+        const foreignKeyField =
+          relation.Relation === 'belongs_to'
+            ? `${targetEntityName}_id`
+            : `${relation.SubjectName || targetEntityName}_id`
+
+        // Update the entity with the new foreign key
+        const updateResponse = await daptinClient.jsonApi.update(
+          sourceEntityName,
+          {
+            id: sourceEntityId,
+            [foreignKeyField]: targetEntityId,
+          }
+        )
+
+        return updateResponse
+      }
+
+      // For many-to-many relations, use the relationships API
+      const relationName = relation.ObjectName === sourceEntityName
+        ? relation.SubjectName
+        : relation.ObjectName
+
+      const response = await daptinClient.jsonApi
+        .one(sourceEntityName, sourceEntityId)
+        .relationships(relationName)
+        .patch([
+          {
+            type: targetEntityName,
+            id: targetEntityId,
+          },
+        ])
 
       return response
     } catch (err) {
       console.error('Error creating relation:', err)
+      throw err
+    }
+  }
+
+  /**
+   * Update a belongs_to relation between entities
+   * For belongs_to relations, the foreign key is on the source entity
+   */
+  static async updateBelongsToRelation(
+    sourceEntityName: string,
+    sourceEntityId: string,
+    targetEntityName: string,
+    targetEntityId: string,
+    relation: TableRelation
+  ): Promise<any> {
+    try {
+      // Get the world model which contains all entity metadata
+      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+
+      if (!worldModel) {
+        throw new Error(`Failed to get world model for ${sourceEntityName}`)
+      }
+
+      // Determine the foreign key field based on relation type
+      let foreignKeyField: string
+
+      if (relation.Relation === 'belongs_to') {
+        // For belongs_to, the FK is on the source entity pointing to the target
+        foreignKeyField = `${targetEntityName}_id`
+      } else {
+        // For other relations, use the SubjectName if available
+        foreignKeyField = `${relation.SubjectName || targetEntityName}_id`
+      }
+
+      // Update the entity with the new foreign key
+      const updateResponse = await daptinClient.jsonApi.update(
+        sourceEntityName,
+        {
+          id: sourceEntityId,
+          [foreignKeyField]: targetEntityId,
+        }
+      )
+
+      return updateResponse
+    } catch (err) {
+      console.error('Error updating belongs_to relation:', err)
       throw err
     }
   }
@@ -175,26 +240,103 @@ export class RelationsApiService {
     sourceEntityId: string,
     targetEntityName: string,
     targetEntityId: string,
-    relationName: string
+    relation: TableRelation
   ): Promise<any> {
     try {
-      // Implementation depends on how Daptin handles relation deletion
-      // This is a placeholder for the actual implementation
-      const payload = {
-        source_entity_name: sourceEntityName,
-        source_entity_id: sourceEntityId,
-        target_entity_name: targetEntityName,
-        target_entity_id: targetEntityId,
-        relation_name: relationName,
+      // Get the world model which contains all entity metadata
+      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+
+      if (!worldModel) {
+        throw new Error(`Failed to get world model for ${sourceEntityName}`)
       }
 
-      const response = await daptinClient.actionManager.doAction(
-        'world',
-        'delete_relation',
-        payload
-      )
+      // Handle different relation types
+      if (relation) {
+        switch (relation.Relation) {
+          case 'belongs_to':
+            // belongs_to relations are non-nullable FKs and can't be set to null
+            // We need to find another valid value to set it to or throw an error
+            throw new Error(
+              `Cannot delete 'belongs_to' relation from ${sourceEntityName} to ${targetEntityName}. ` +
+              `This is a required foreign key and must be set to a valid value. Use updateBelongsToRelation instead.`
+            )
 
-      return response
+          case 'has_one':
+            // has_one relations can be set to null
+            const foreignKeyField = `${relation.SubjectName || targetEntityName}_id`
+
+            // Update the entity with null for the foreign key
+            const updateResponse = await daptinClient.jsonApi.update(
+              sourceEntityName,
+              {
+                id: sourceEntityId,
+                [foreignKeyField]: null,
+              }
+            )
+            return updateResponse
+
+          case 'has_many':
+          case 'many_to_many':
+          case 'has_many_and_belongs_to_many':
+            // For many-to-many relations, use the relationships API
+            const relationName = relation.Object === sourceEntityName
+              ? relation.SubjectName
+              : relation.ObjectName
+
+            const response = await daptinClient.jsonApi
+              .one(sourceEntityName, sourceEntityId)
+              .relationships(relationName)
+              .destroy([
+                {
+                  type: targetEntityName,
+                  id: targetEntityId,
+                },
+              ])
+            return response
+
+          default:
+            // For file type foreign keys, use direct update
+            if (worldModel.columns) {
+              // Find file columns that reference the target entity
+              const fileColumn = Object.entries(worldModel.columns).find(
+                ([_, colDef]: [string, any]) =>
+                  colDef.ColumnType?.startsWith('file.') &&
+                  colDef.ForeignKeyData?.Namespace === targetEntityName
+              )
+
+              if (fileColumn) {
+                const [columnName] = fileColumn
+                // Update the entity with null for the file column
+                const fileUpdateResponse = await daptinClient.jsonApi.update(
+                  sourceEntityName,
+                  {
+                    id: sourceEntityId,
+                    [columnName]: null,
+                  }
+                )
+                return fileUpdateResponse
+              }
+            }
+
+            // Default to relationships API for unknown relation types
+            const defaultRelationName = relation.Object === sourceEntityName
+              ? relation.Subject
+              : relation.Object
+
+            const defaultResponse = await daptinClient.jsonApi
+              .one(sourceEntityName, sourceEntityId)
+              .relationships(defaultRelationName)
+              .destroy([
+                {
+                  type: targetEntityName,
+                  id: targetEntityId,
+                },
+              ])
+            return defaultResponse
+        }
+      }
+
+      throw new Error(`Invalid relation between ${sourceEntityName} and ${targetEntityName}`)
     } catch (err) {
       console.error('Error deleting relation:', err)
       throw err

@@ -1,9 +1,8 @@
-// src/features/entity/components/relations/RelationRecordsList.tsx
-import React from 'react'
+// src/features/entity/relations/RelationRecordsList.tsx
 import { useNavigate } from '@tanstack/react-router'
 import { CornerDownRightIcon, ExternalLinkIcon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge.tsx'
-import { Button } from '@/components/ui/button.tsx'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -11,14 +10,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table.tsx'
-import { RelationActionsMenu } from './RelationActionsMenu.tsx'
-import { getDisplayFields, RelatedRecord } from './relations-utils.ts'
-
+} from '@/components/ui/table'
+import { RelationActionsMenu } from './RelationActionsMenu'
+import { 
+  getDisplayFields, 
+  getRelationLabel, 
+  TableRelation, 
+  RelatedRecord, 
+  RelationDirection 
+} from './relations-utils'
 
 interface RelationRecordsListProps {
   data: RelatedRecord[]
+  entityName: string
+  entityId: string
   relatedEntityName: string
+  relation: TableRelation
+  direction: RelationDirection
+  onRelationDeleted: () => void
 }
 
 /**
@@ -26,7 +35,12 @@ interface RelationRecordsListProps {
  */
 export function RelationRecordsList({
   data,
+  entityName,
+  entityId,
   relatedEntityName,
+  relation,
+  direction,
+  onRelationDeleted,
 }: RelationRecordsListProps) {
   const navigate = useNavigate()
 
@@ -34,6 +48,7 @@ export function RelationRecordsList({
   const handleViewEntity = (entityType: string, entityId: string) => {
     navigate({ to: `/${entityType}/${entityId}` })
   }
+
   // Show empty state
   if (!data?.length) {
     return (
@@ -57,7 +72,7 @@ export function RelationRecordsList({
           <TableRow>
             <TableHead className='w-64'>Identifier</TableHead>
             <TableHead>Details</TableHead>
-            <TableHead className='text-right'>Actions</TableHead>
+            <TableHead className='text-right w-[180px]'>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,9 +86,16 @@ export function RelationRecordsList({
                     <Badge variant='outline' className='w-fit'>
                       {item.reference_id.substring(0, 8)}...
                     </Badge>
-                    <span className='text-muted-foreground text-xs'>
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
+                    <div className='flex items-center space-x-2'>
+                      <span className='text-muted-foreground text-xs'>
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                      {relation.Relation && (
+                        <Badge variant='secondary' className='text-xs'>
+                          {getRelationLabel(relation.Relation)}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -103,8 +125,13 @@ export function RelationRecordsList({
                     </Button>
 
                     <RelationActionsMenu
+                      entityName={entityName}
+                      entityId={entityId}
                       relatedEntityName={relatedEntityName}
                       record={item}
+                      relation={relation}
+                      direction={direction}
+                      onRelationDeleted={onRelationDeleted}
                     />
                   </div>
                 </TableCell>
@@ -113,14 +140,6 @@ export function RelationRecordsList({
           })}
         </TableBody>
       </Table>
-
-      {/* Load more button - uncomment when implementing pagination
-      <div className="flex items-center justify-center p-2 border-t">
-        <Button variant="ghost" size="sm">
-          Load More Records
-        </Button>
-      </div>
-      */}
     </div>
   )
 }

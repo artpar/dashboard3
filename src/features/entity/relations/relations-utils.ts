@@ -13,7 +13,7 @@ export enum RelationDirection {
 /**
  * Relation type with direction information
  */
-export interface Relation {
+export interface TableRelation {
   Subject: string
   SubjectName?: string
   Object: string
@@ -31,10 +31,10 @@ export interface RelatedRecord {
 /**
  * Categorize relations as inbound or outbound relative to the current entity
  */
-export function categorizeRelations(relations: Relation[], entityName: string) {
-  const inbound: Relation[] = []
-  const outbound: Relation[] = []
-  const allRelations: Relation[] = []
+export function categorizeRelations(relations: TableRelation[], entityName: string) {
+  const inbound: TableRelation[] = []
+  const outbound: TableRelation[] = []
+  const allRelations: TableRelation[] = []
 
   relations.forEach(relation => {
     const clone = { ...relation }
@@ -58,21 +58,21 @@ export function categorizeRelations(relations: Relation[], entityName: string) {
 /**
  * Get a unique key for a relation
  */
-export function getRelationKey(relation: Relation): string {
+export function getRelationKey(relation: TableRelation): string {
   return `${relation.Subject}-${relation.SubjectName || 'default'}-${relation.Relation}-${relation.Object}-${relation.ObjectName || 'default'}`
 }
 
 /**
  * Get the name of the related entity
  */
-export function getRelatedEntityName(relation: Relation, entityName: string): string {
+export function getRelatedEntityName(relation: TableRelation, entityName: string): string {
   return relation.Object === entityName ? relation.Subject : relation.Object
 }
 
 /**
  * Get the query parameters for fetching related records
  */
-export function getRelationQueryParams(relation: Relation, entityName: string, entityId?: string): Record<string, any> {
+export function getRelationQueryParams(relation: TableRelation, entityName: string, entityId?: string): Record<string, any> {
   if (!entityId) return {}
 
   // If the current entity is the Object, query using ObjectName, otherwise use SubjectName
@@ -124,9 +124,9 @@ export function getDisplayFields(data: RelatedRecord, maxFields: number = 3): Re
 }
 
 /**
- * Get a human-readable name for a relation type
+ * Get a human-readable name for a relation type based on direction
  */
-export function getRelationLabel(relationType: string): string {
+export function getRelationLabel(relationType: string, direction?: RelationDirection, currentEntity?: string, relation?: TableRelation): string {
   // Map of relation types to human-readable labels
   const relationLabels: Record<string, string> = {
     'belongs_to': 'Belongs To',
@@ -134,6 +134,20 @@ export function getRelationLabel(relationType: string): string {
     'has_many': 'Has Many',
     'many_to_many': 'Many to Many',
     'has_many_and_belongs_to_many': 'Has and Belongs to Many',
+  }
+
+  // If we don't have direction or relation info, just return the basic label
+  if (!direction || !relation || !currentEntity) {
+    return relationLabels[relationType] || relationType
+  }
+
+  // Adjust the label based on direction and current entity
+  if (direction === RelationDirection.Inbound) {
+    if (relationType === 'belongs_to') {
+      return 'Referenced By' // Something belongs to this entity
+    } else if (relationType === 'has_one' || relationType === 'has_many') {
+      return 'Parent Of' // This entity has the other entity
+    }
   }
 
   return relationLabels[relationType] || relationType
