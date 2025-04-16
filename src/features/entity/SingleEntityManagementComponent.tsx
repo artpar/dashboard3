@@ -50,6 +50,9 @@ import {
   formatDateTime,
 } from '@/features/entity/utils/entityFormatters.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
+import {
+  SingleEntityAllGroupsListWithPermission
+} from '@/features/entity/components/permission/SingleEntityAllGroupsListWithPermission.tsx'
 
 interface EntityDetailsContentProps {
   entityName: string
@@ -336,6 +339,11 @@ export const SingleEntityManagementComponent: React.FC<
               Permissions
             </TabsTrigger>
 
+            <TabsTrigger value='groups'>
+              <Key className='mr-2 h-4 w-4' />
+              Groups
+            </TabsTrigger>
+
             {relations.length > 0 && (
               <TabsTrigger value='relations'>
                 <Layers className='mr-2 h-4 w-4' />
@@ -364,6 +372,17 @@ export const SingleEntityManagementComponent: React.FC<
               }}
               value={entityItem['permission']}
             />
+          </TabsContent>
+          <TabsContent
+            value='groups'
+            className='flex flex-col space-y-6 overflow-y-auto pb-6'
+          >
+            <SingleEntityAllGroupsListWithPermission
+              entityName={entityName}
+              entityId={entityId}
+              disabled={false}
+            />
+
           </TabsContent>
 
           {/* Relations Tab */}

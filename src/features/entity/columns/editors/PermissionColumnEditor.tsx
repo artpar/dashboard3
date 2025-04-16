@@ -1,8 +1,4 @@
-import { useState } from 'react'
-import { DisplayModeToggle } from '@/features/entity/components/permission/DisplayModeToggle.tsx'
-import { GroupPermissionManager } from '@/features/entity/components/permission/GroupPermissionManager.tsx'
 import { VisualPermissionEditor } from '@/features/entity/components/permission/VisualPermissionEditor.tsx'
-import { useGroupData } from '@/features/entity/hooks/useGroupData.ts'
 import { usePermissionValue } from '@/features/entity/hooks/usePermissionValue.ts'
 import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
 
@@ -38,11 +34,11 @@ export default function PermissionColumnEditor({
     handlePresetChange,
   } = usePermissionValue(value, onChange)
 
-  // Group data management
-  const groupData = useGroupData()
-
-  // Display mode state
-  const [displayMode, setDisplayMode] = useState<'visual' | 'groups'>('visual')
+  // Log entity information
+  console.log('PermissionColumnEditor entity info:', {
+    entityType,
+    entityId,
+  })
 
   return (
     <div className={`flex flex-col space-y-4 ${className}`}>
@@ -54,48 +50,15 @@ export default function PermissionColumnEditor({
           disabled={disabled}
           error={error}
         />
-
-        <DisplayModeToggle
-          mode={displayMode}
-          onChange={setDisplayMode}
-          disabled={disabled}
-        />
       </div>
 
       {/* Visual editor */}
-      {displayMode === 'visual' && (
-        <VisualPermissionEditor
-          permissionValue={permissionValue}
-          togglePermission={togglePermission}
-          toggleAllForScope={toggleAllForScope}
-          disabled={disabled}
-        />
-      )}
-
-      {/* Group permissions mode */}
-      {displayMode === 'groups' && (
-        <GroupPermissionManager
-          selectedGroup={groupData.selectedGroup}
-          setSelectedGroup={groupData.setSelectedGroup}
-          entityFilter={groupData.entityFilter}
-          setEntityFilter={groupData.setEntityFilter}
-          objectTypeToAdd={groupData.objectTypeToAdd}
-          setObjectTypeToAdd={groupData.setObjectTypeToAdd}
-          selectedEntities={groupData.selectedEntities}
-          setSelectedEntities={groupData.setSelectedEntities}
-          showAddObjectDialog={groupData.showAddObjectDialog}
-          setShowAddObjectDialog={groupData.setShowAddObjectDialog}
-          groups={groupData.groups || []}
-          filteredTables={groupData.filteredTables}
-          groupObjects={groupData.groupObjects || {}}
-          entityOptions={groupData.entityOptions || []}
-          refetchEntityOptions={groupData.refetchEntityOptions}
-          addEntityToGroup={groupData.addEntityToGroup}
-          removeEntityFromGroup={groupData.removeEntityFromGroup}
-          toggleObjectPermission={groupData.toggleObjectPermission}
-          disabled={disabled}
-        />
-      )}
+      <VisualPermissionEditor
+        permissionValue={permissionValue}
+        togglePermission={togglePermission}
+        toggleAllForScope={toggleAllForScope}
+        disabled={disabled}
+      />
 
       {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>

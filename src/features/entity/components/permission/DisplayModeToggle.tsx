@@ -1,7 +1,7 @@
 // components/DisplayModeToggle.tsx
 import { Button } from '@/components/ui/button'
 
-type DisplayMode = 'visual' | 'groups'
+export type DisplayMode = 'visual' | 'groups' | 'entity-groups'
 
 interface DisplayModeToggleProps {
   mode: DisplayMode
@@ -28,11 +28,20 @@ export function DisplayModeToggle({
       <Button
         type='button'
         variant={mode === 'groups' ? 'default' : 'outline'}
-        className='flex-1 rounded-r-md rounded-l-none px-2 min-w-0'
+        className='flex-1 rounded-none px-2 min-w-0'
         onClick={() => onChange('groups')}
         disabled={disabled}
       >
         Groups
+      </Button>
+      <Button
+        type='button'
+        variant={mode === 'entity-groups' ? 'default' : 'outline'}
+        className='flex-1 rounded-r-md rounded-l-none px-2 min-w-0'
+        onClick={() => onChange('entity-groups')}
+        disabled={disabled}
+      >
+        Entity Groups
       </Button>
     </div>
   )
