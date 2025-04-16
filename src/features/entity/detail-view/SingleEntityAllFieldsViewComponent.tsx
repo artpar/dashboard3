@@ -59,10 +59,10 @@ export function SingleEntityAllFieldsViewComponent({
               col.ForeignKeyData.Namespace.length > 0) ||
             (col.ColumnName.endsWith('_id') &&
               !['reference_id'].includes(col.ColumnName))
-        )
+        ).filter(col => col.ColumnName !== "user_account_id")
         .map((col) => col.ColumnName)
 
-      const metadataFields = ['reference_id', 'permission', 'version'].filter(
+      const metadataFields = ['reference_id', 'user_account_id', 'permission', 'version'].filter(
         (fieldName) =>
           entityItem[fieldName] !== null && entityItem[fieldName] !== undefined
       )
