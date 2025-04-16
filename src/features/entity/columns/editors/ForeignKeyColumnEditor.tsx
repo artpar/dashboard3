@@ -464,7 +464,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
                             : 'opacity-0'
                         )}
                       />
-                      {option.label}
+                      <p className="font-mono">{option.label}</p>
                     </CommandItem>
                   ))}
                 </CommandGroup>

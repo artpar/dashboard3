@@ -144,13 +144,6 @@ export const SingleEntityManagementComponent: React.FC<
     }
   }, [entityName, entityId, queryClient, refreshEntityData, setSelectedItem])
 
-  // Handle edit action
-  const handleEdit = () => {
-    navigate({
-      to: '/' + entityName + '/' + entityId + '/edit',
-    })
-  }
-
   // Handle delete action
   const handleDelete = () => {
     alert('TODO: handleDelete')
@@ -231,10 +224,6 @@ export const SingleEntityManagementComponent: React.FC<
             </div>
 
             <div className='flex space-x-2'>
-              <Button variant='outline' size='sm' onClick={handleEdit}>
-                <Edit className='mr-2 h-4 w-4' />
-                Edit
-              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -244,17 +233,7 @@ export const SingleEntityManagementComponent: React.FC<
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56'>
-                  <DropdownMenuItem>
-                    <ExternalLink className='mr-2 h-4 w-4' />
-                    Open in new tab
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <Star className='mr-2 h-4 w-4' />
-                    Add to favorites
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
+                  {/*<DropdownMenuSeparator />*/}
 
                   <DropdownMenuItem
                     onClick={handleDelete}
