@@ -1,12 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import {
-  AlertCircle,
-  ExternalLink,
-  FileIcon,
-  Image as ImageIcon,
-} from 'lucide-react'
+import { AlertCircle, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -25,11 +20,11 @@ export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
  * Component for displaying foreign key values with reference data
  */
 export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
-                                                                      value,
-                                                                      column,
-                                                                      className,
-                                                                      entity,
-                                                                    }) => {
+  value,
+  column,
+  className,
+  entity,
+}) => {
   // console.log('ForeignKeyColumnViewer', value, column)
   const navigate = useNavigate()
   const [referenceData, setReferenceData] = useState<any>(null)
@@ -152,7 +147,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       columnType.includes('gif')
 
     const assetUrl =
-      DAPTIN_ENDPOINT + '/asset/' +
+      DAPTIN_ENDPOINT +
+      '/asset/' +
       entity['__type'] +
       '/' +
       entity.reference_id +
@@ -172,7 +168,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             <Badge
               variant='outline'
               className={cn(
-                'flex items-center bg-gray-50 hover:bg-gray-100 h-42 w-max',
+                'flex h-42 w-max items-center bg-gray-50 hover:bg-gray-100',
                 className
               )}
               onClick={() => {
@@ -192,14 +188,18 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
               {/*  <FileIcon className='mr-1 h-3 w-3' />*/}
               {/*)}*/}
               <span className='max-w-[150px]'>
-                {isImage && <img className="w-40 h-38"
-                                 alt={column.ColumnName + ' ' + column.ColumnDescription}
-                                 src={assetUrl}
-                />}
-                {!isImage && <a
-                  target="_blank"
-                  href={assetUrl}
-                >{column.ColumnName}</a>}
+                {isImage && (
+                  <img
+                    className='h-38 w-40'
+                    alt={column.ColumnName + ' ' + column.ColumnDescription}
+                    src={assetUrl}
+                  />
+                )}
+                {!isImage && (
+                  <a target='_blank' href={assetUrl}>
+                    {column.ColumnName}
+                  </a>
+                )}
               </span>
             </Badge>
           </TooltipTrigger>

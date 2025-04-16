@@ -36,6 +36,7 @@ export function SingleEntityAllFieldsViewComponent({
   )
   const [fieldGroups, setFieldGroups] = useState<FieldGroup[]>([])
   useEffect(() => {
+    console.log("SingleEntityAllFields.usHook", columns, entityItem)
     if (columns && columns.length > 0 && entityItem) {
       // Categorize fields into groups
       const basicFields = columns
@@ -111,6 +112,7 @@ export function SingleEntityAllFieldsViewComponent({
         })
       }
 
+      console.log('groups', groups)
       setFieldGroups(groups)
     }
   }, [columns, entityItem])
@@ -188,18 +190,21 @@ export function SingleEntityAllFieldsViewComponent({
     )
   }
 
-  // Determine which groups go in which tabs
-  const mainGroups = fieldGroups.filter(
-    (group) => !group.tabName || group.tabName === 'main'
-  )
+  // const [mainGroups, setMainGroups] = useState([])
   const otherTabs: Record<string, FieldGroup[]> = {}
 
+  // Determine which groups go in which tabs
+  const mainGroups = fieldGroups.filter(
+    (group) => !group.id || group.id === 'main'
+  )
+
+  console.log("fieldGroups", fieldGroups)
   fieldGroups.forEach((group) => {
-    if (group.tabName && group.tabName !== 'main') {
-      if (!otherTabs[group.tabName]) {
-        otherTabs[group.tabName] = []
+    if (group.id && group.id !== 'main') {
+      if (!otherTabs[group.id]) {
+        otherTabs[group.id] = []
       }
-      otherTabs[group.tabName].push(group)
+      otherTabs[group.id].push(group)
     }
   })
 
@@ -258,10 +263,10 @@ export function SingleEntityAllFieldsViewComponent({
           </div>
         </TabsContent>
 
-        {Object.entries(otherTabs).map(([tabName, groups]) => (
+        {Object.entries(otherTabs).map(([id, groups]) => (
           <TabsContent
-            key={tabName}
-            value={tabName}
+            key={id}
+            value={id}
             className='animate-in fade-in-50 duration-300'
           >
             <div className='space-y-6'>

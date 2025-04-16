@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { GroupPermissionManager } from '@/features/entity/components/permission/GroupPermissionManager.tsx'
 import { VisualPermissionEditor } from '@/features/entity/components/permission/VisualPermissionEditor.tsx'
 import {
-  useGroupData,
   usePermissionValue,
 } from '@/features/entity/hooks/usePermissionValue.ts'
 import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
 import { DisplayModeToggle } from '@/features/entity/components/permission/DisplayModeToggle.tsx'
+import { useGroupData } from '@/features/entity/hooks/useGroupData.ts'
 
 interface PermissionColumnEditorProps {
   value: number

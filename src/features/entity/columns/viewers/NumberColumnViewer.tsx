@@ -69,7 +69,7 @@ export const NumberColumnViewer: React.FC<ColumnViewerProps> = ({
     <span
       className={cn(
         // Right-align numbers by default
-        'text-right',
+        'text-left',
         className
       )}
     >
