@@ -6,13 +6,10 @@ import {
   ArrowLeft,
   ChevronRight,
   Clock,
-  Edit,
-  ExternalLink,
   Key,
   Layers,
   List,
   MoreHorizontal,
-  Star,
   Trash2,
   User,
 } from 'lucide-react'
@@ -23,7 +20,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx'
 import {
@@ -43,16 +39,15 @@ import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPan
 import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
 import SingleEntityAllRelationsViewComponent from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
+import { SingleEntityAllGroupsListWithPermission } from '@/features/entity/components/permission/SingleEntityAllGroupsListWithPermission.tsx'
 import { SingleEntityAllFieldsViewComponent } from '@/features/entity/detail-view'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
+import { EntityApiService } from '@/features/entity/services/EntityApiService'
 import {
   formatDate,
   formatDateTime,
 } from '@/features/entity/utils/entityFormatters.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
-import {
-  SingleEntityAllGroupsListWithPermission
-} from '@/features/entity/components/permission/SingleEntityAllGroupsListWithPermission.tsx'
 
 interface EntityDetailsContentProps {
   entityName: string
@@ -224,7 +219,6 @@ export const SingleEntityManagementComponent: React.FC<
             </div>
 
             <div className='flex space-x-2'>
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant='outline' size='icon' className='h-8 w-8'>
@@ -346,10 +340,27 @@ export const SingleEntityManagementComponent: React.FC<
             className='flex flex-col space-y-6 overflow-y-auto pb-6'
           >
             <PermissionColumnEditor
-              onChange={(v) => {
-                console.log('Permission value changed', v)
+              onChange={async (v) => {
+                try {
+                  // Import EntityApiService
+
+                  // Update the entity with the new permission value
+                  await EntityApiService.updateEntity(entityName, entityId, {
+                    permission: v,
+                  })
+
+                  // Refresh the entity data to show the updated permissions
+                  refreshEntityData()
+
+                  console.log('Permission value updated successfully', v)
+                } catch (error) {
+                  console.error('Failed to update permission:', error)
+                  // You could add a toast notification here to inform the user of the error
+                }
               }}
               value={entityItem['permission']}
+              entityType={entityName}
+              entityId={entityId}
             />
           </TabsContent>
           <TabsContent
@@ -361,7 +372,6 @@ export const SingleEntityManagementComponent: React.FC<
               entityId={entityId}
               disabled={false}
             />
-
           </TabsContent>
 
           {/* Relations Tab */}
