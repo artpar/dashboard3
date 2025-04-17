@@ -171,7 +171,18 @@ export class EntityApiService {
       filters?: Record<string, any>
       sort?: string
     }
-  ): Promise<{ data: any[]; totalPages: number }> {
+  ): Promise<{
+    data: any[]
+    totalPages: number
+    pagination: {
+      currentPage: number
+      from: number
+      lastPage: number
+      perPage: number
+      to: number
+      total: number
+    }
+  }> {
     try {
       const { page, pageSize, filters, sort = '-created_at' } = params
       // Define requestObject with proper typing to include all possible properties
@@ -182,14 +193,14 @@ export class EntityApiService {
         sort,
       }
       console.log('fetchEntityCollection:', JSON.stringify(filters))
-      
+
       // Handle search filter separately
-      const searchTerm = filters?._search;
-      const otherFilters = { ...filters };
-      
+      const searchTerm = filters?._search
+      const otherFilters = { ...filters }
+
       if (searchTerm && typeof searchTerm === 'string') {
-        requestObject["filter"] = [searchTerm];
-        delete otherFilters._search; // Remove from other filters to avoid duplication
+        requestObject['filter'] = [searchTerm]
+        delete otherFilters._search // Remove from other filters to avoid duplication
       }
 
       // Parse filter query format for daptin
@@ -199,10 +210,17 @@ export class EntityApiService {
         const filterQuery = Object.entries(otherFilters)
           .filter(([_, value]) => value !== undefined && value !== '')
           .map(([column, value]) => {
+            // Check if the string value is numeric
+            const isNumericString = typeof value === 'string' && !isNaN(Number(value))
+
             return {
               column,
-              operator: typeof value === 'string' ? 'ilike' : 'eq',
-              value: typeof value === 'string' ? `%${value}%` : value,
+              operator: typeof value === 'string'
+                ? (isNumericString ? 'eq' : 'ilike')
+                : 'eq',
+              value: typeof value === 'string'
+                ? (isNumericString ? value : `%${value}%`)
+                : value,
             }
           })
 
@@ -210,7 +228,7 @@ export class EntityApiService {
       }
 
       // Main data query
-      requestObject["query"] = parseFilters();
+      requestObject['query'] = parseFilters()
       const response = await daptinClient.jsonApi.findAll(entityName, requestObject)
 
       if (response.errors && response.errors.length) {
@@ -219,13 +237,24 @@ export class EntityApiService {
         )
       }
 
-      // Calculate total pages
-      const totalItems = response.meta?.total || response.data.length
-      const totalPages = Math.ceil(totalItems / pageSize)
+      // Extract pagination information from response.links
+      const links = response.links || {}
+      const pagination = {
+        currentPage: links.current_page || params.page,
+        from: links.from || 0,
+        lastPage: links.last_page || 1,
+        perPage: links.per_page || params.pageSize,
+        to: links.to || (links.from ? links.from + response.data.length - 1 : response.data.length - 1),
+        total: links.total || response.meta?.total || response.data.length,
+      }
+
+      // Calculate total pages based on pagination information
+      const totalPages = pagination.lastPage || Math.ceil(pagination.total / pagination.perPage)
 
       return {
         data: safelySerializeData(response.data),
         totalPages,
+        pagination,
       }
     } catch (err) {
       console.error(`Error fetching ${entityName} data:`, err)

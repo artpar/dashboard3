@@ -15,6 +15,14 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   pageSize: number
   setPageSize: (size: number) => void
   totalPages: number
+  pagination: {
+    currentPage: number
+    from: number
+    lastPage: number
+    perPage: number
+    to: number
+    total: number
+  } | null
   filters: Record<string, any>
   setFilters: (filters: Record<string, any>) => void
   showCreateDialog: boolean
@@ -46,6 +54,14 @@ export const CollectionEntityDataProvider: React.FC<{
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
+  const [pagination, setPagination] = useState<{
+    currentPage: number
+    from: number
+    lastPage: number
+    perPage: number
+    to: number
+    total: number
+  } | null>(null)
   const [filters, setFilters] = useState<Record<string, any>>({})
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -61,6 +77,7 @@ export const CollectionEntityDataProvider: React.FC<{
     setSelectedItem(null)
     setCurrentPage(1)
     setTotalPages(1)
+    setPagination(null)
     setFilters({})
   }, [entityName])
 
@@ -90,8 +107,13 @@ export const CollectionEntityDataProvider: React.FC<{
     if (queryData) {
       setData(queryData.data)
       setTotalPages(queryData.totalPages)
+      setPagination(queryData.pagination)
+      // Ensure currentPage is in sync with pagination data
+      if (queryData.pagination && queryData.pagination.currentPage !== currentPage) {
+        setCurrentPage(queryData.pagination.currentPage)
+      }
     }
-  }, [queryData])
+  }, [queryData, currentPage])
 
   // Create mutation
   const createMutation = useMutation({
@@ -187,6 +209,7 @@ export const CollectionEntityDataProvider: React.FC<{
     pageSize,
     setPageSize,
     totalPages,
+    pagination,
     filters,
     setFilters,
     showCreateDialog,

@@ -65,7 +65,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   // Get entity data from context
   const {
-    data,
     columns,
     availableActions,
     relations,
@@ -74,20 +73,17 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     setFilters,
     setShowFilterDialog,
     executeAction,
-    currentPage,
-    totalPages,
     visibleColumns,
     toggleColumnVisibility,
     resetColumnVisibility,
     showAllColumns,
-
   } = useEntityCollectionData()
 
   // Get world entities for related navigation
   const { entities } = useWorldEntities()
 
   // Find current entity in world entities
-  const currentEntity = entities.find((e) => e.table_name === entityName)
+  const currentEntity = entities.find((e: any) => e.table_name === entityName)
 
   // Handle search
   const handleSearch = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -117,7 +113,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   const activeFilterCount = Object.keys(filters).length
 
   return (
-    <div className='mb-6 space-y-4'>
+    <div className='mb-6 space-y-4 flex flex-col'>
       {/* Header with title and description */}
       <div className='flex items-start justify-between'>
         <div>
@@ -132,21 +128,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           {description && (
             <p className='text-muted-foreground mt-1'>{description}</p>
           )}
-        </div>
-
-        {/* Quick stats */}
-        <div className='flex items-center gap-4'>
-          <div className='text-right'>
-            <p className='text-muted-foreground text-sm'>Total Records</p>
-            <p className='text-lg font-medium'>{data?.length || 0}</p>
-          </div>
-
-          <div className='text-right'>
-            <p className='text-muted-foreground text-sm'>Page</p>
-            <p className='text-lg font-medium'>
-              {currentPage} / {totalPages || 1}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -387,8 +368,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           </DropdownMenu>
         </div>
       </div>
-
-      <Separator />
     </div>
   )
 }

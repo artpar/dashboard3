@@ -25,24 +25,18 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   description,
 }) => {
   const {
-    data,
     isLoading,
     error,
-    refresh,
     currentPage,
     totalPages,
     pageSize,
     setCurrentPage,
     setPageSize,
-    showCreateDialog,
-    setShowCreateDialog,
-    showEditDialog,
-    setShowEditDialog,
+    pagination,
     showFilterDialog,
     setShowFilterDialog,
     filters,
     setFilters,
-    availableActions,
   } = useEntityCollectionData()
 
   // Early return for error state
@@ -74,7 +68,10 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
       <Main className='flex h-full w-full flex-col overflow-hidden'>
         <div className='flex-shrink-0'>
           <EntityHeader
-            title={title || `${entityName.charAt(0).toUpperCase() + entityName.slice(1)} Management`}
+            title={
+              title ||
+              `${entityName.charAt(0).toUpperCase() + entityName.slice(1)} Management`
+            }
             description={description || `Manage your ${entityName} records`}
             entityName={entityName}
           />
@@ -94,9 +91,9 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
         <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-4'>
           <EntityPagination
             currentPage={currentPage}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={data?.length || 0}
+            totalPages={pagination?.lastPage || totalPages}
+            pageSize={pagination?.perPage || pageSize}
+            totalItems={pagination?.total || 0}
             isLoading={isLoading}
             onPageChange={setCurrentPage}
             onPageSizeChange={setPageSize}

@@ -107,16 +107,16 @@ const EntityFilterDialog: React.FC<EntityFilterDialogProps> = ({
       case 'enum':
         return (
           <Select
-            value={value.toString()}
-            onValueChange={(val) => handleFilterChange(column.ColumnName, val)}
+            value={value !== undefined && value !== '' ? value.toString() : 'any'}
+            onValueChange={(val) => handleFilterChange(column.ColumnName, val === 'any' ? '' : val)}
           >
             <SelectTrigger className='w-full'>
               <SelectValue placeholder='Any value' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=''>Any value</SelectItem>
+              <SelectItem value='any'>Any value</SelectItem>
               {column.Options?.map((option) => (
-                <SelectItem key={option.Value} value={option.Value}>
+                <SelectItem key={option.Value} value={option.Value || `option-${option.Label}`}>
                   {option.Label}
                 </SelectItem>
               ))}
