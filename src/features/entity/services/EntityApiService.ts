@@ -19,30 +19,15 @@ export class EntityApiService {
   }> {
     try {
       // Fetch schema information from world entity
-      const worldResponse = await daptinClient.jsonApi.findAll('world', {
-        query: JSON.stringify([
-          {
-            column: 'table_name',
-            operator: 'eq',
-            value: entityName,
-          },
-        ]),
-      })
+      const worldResponse = await daptinClient.worldManager.getWorldByName(entityName)
 
-      if (worldResponse.errors && worldResponse.errors.length) {
-        throw new Error(
-          worldResponse.errors[0].detail ||
-            `Failed to get schema for ${entityName}`
-        )
-      }
-
-      let schema = null
+      let schema: any = null
       let columns: ColumnDefinition[] = []
       let relations: any[] = []
       let actions: any[] = []
 
-      if (worldResponse.data && worldResponse.data.length > 0) {
-        schema = worldResponse.data[0]
+      if (worldResponse) {
+        schema = worldResponse;
 
         // Parse column information from schema
         if (schema.world_schema_json) {

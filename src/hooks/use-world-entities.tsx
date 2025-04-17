@@ -78,13 +78,7 @@ export function useWorldEntities() {
         const response = await daptinClient.jsonApi.findAll('world', {
           'page[size]': '500',
           sort: 'table_name',
-          query: JSON.stringify([
-            {
-              column: 'is_hidden',
-              operator: 'eq',
-              value: false,
-            },
-          ]),
+          query: JSON.stringify([]),
         })
 
         if (response.errors && response.errors.length) {

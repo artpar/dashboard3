@@ -107,11 +107,6 @@ export const sidebarData: SidebarData = {
           icon: 'fa-users',
         },
         {
-          title: 'Workgroups',
-          url: '/workgroup',
-          icon: 'fa-building',
-        },
-        {
           title: 'Customer',
           url: '/customer',
           icon: 'fa-user',
@@ -130,6 +125,12 @@ export const sidebarData: SidebarData = {
           title: 'Tasks',
           url: '/rpatask',
           icon: '',
+        },
+
+        {
+          title: 'Workgroups',
+          url: '/workgroup',
+          icon: 'fa-building',
         },
       ],
     },
