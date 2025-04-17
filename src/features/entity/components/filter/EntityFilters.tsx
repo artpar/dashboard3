@@ -82,9 +82,9 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
     .slice(0, 5) // Limit to 5 quick filters
 
   return (
-    <div className="space-y-4 flex ">
+    <div className="space-y-4 flex flex-col lg:flex-row">
       {/* Search bar */}
-      <div className="flex flex-col sm:flex-row gap-3 w-150 pt-4">
+      <div className="flex flex-row sm:flex-col gap-3 w-150 pt-4">
         <form onSubmit={handleSearch} className="relative flex-1">
           <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
           <Input
@@ -96,7 +96,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
           />
         </form>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3 px-2">
+      <div className="flex flex-row lg:flex-row space-x-4 gap-3 px-2">
         <div className="flex items-center gap-2">
           {/* Quick filters button */}
           {quickFilterColumns.length > 0 && (
