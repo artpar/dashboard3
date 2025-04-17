@@ -1,6 +1,5 @@
 import { VisualPermissionEditor } from '@/features/entity/components/permission/VisualPermissionEditor.tsx'
 import { usePermissionValue } from '@/features/entity/hooks/usePermissionValue.ts'
-import { PermissionPresetSelector } from '../../components/permission/PermissionPresetSelector'
 
 interface PermissionColumnEditorProps {
   value: number
@@ -42,16 +41,6 @@ export default function PermissionColumnEditor({
 
   return (
     <div className={`flex flex-col space-y-4 ${className}`}>
-      {/* Preset selector and view toggle */}
-      <div className='flex w-full items-center space-x-2'>
-        <PermissionPresetSelector
-          value={permissionValue}
-          onValueChange={handlePresetChange}
-          disabled={disabled}
-          error={error}
-        />
-      </div>
-
       {/* Visual editor */}
       <VisualPermissionEditor
         permissionValue={permissionValue}

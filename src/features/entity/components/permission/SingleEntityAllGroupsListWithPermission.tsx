@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -27,7 +26,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -38,11 +36,11 @@ import {
 } from '@/components/ui/table'
 import {
   getPermissionFlag,
-  hasPermission,
   PermissionAction,
   PermissionScope,
 } from '@/features/entity/columns/PermissionTypes'
 import { useEntityGroupRelations } from '@/features/entity/hooks/useEntityGroupRelations'
+import { PermissionScopeRow } from '@/features/entity/components/permission/components/PermissionScopeRow'
 
 interface SingleEntityAllGroupsListWithPermissionProps {
   entityName: string
@@ -192,74 +190,52 @@ export function SingleEntityAllGroupsListWithPermission({
               <TableHeader>
                 <TableRow>
                   <TableHead>Group</TableHead>
-                  <TableHead>Permissions</TableHead>
+                  <TableHead className='w-[60%]'>Permissions</TableHead>
                   <TableHead className='w-[100px]'>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {entityGroups.map((relatedUserGroup: any) => (
-                  <TableRow key={relatedUserGroup.reference_id}>
-                    <TableCell>
-                      <div className='font-medium'>{relatedUserGroup.name}</div>
-                      <div className='text-muted-foreground text-xs'>
-                        {relatedUserGroup.usergroup_id}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className='flex flex-wrap gap-2'>
-                        {Object.values(PermissionAction).map((action) => {
-                          const flag = getPermissionFlag(
-                            PermissionScope.Group,
-                            action
-                          )
-                          const hasPermissionValue = hasPermission(
-                            relatedUserGroup.permission || 0,
-                            flag
-                          )
-
-                          return (
-                            <div
-                              key={action}
-                              className='flex items-center space-x-2'
-                            >
-                              <Switch
-                                id={`${relatedUserGroup.reference_id}-${action}`}
-                                checked={hasPermissionValue}
-                                onCheckedChange={() =>
-                                  toggleGroupPermission(
-                                    relatedUserGroup.reference_id,
-                                    flag,
-                                    relatedUserGroup.permission || 0
-                                  )
-                                }
-                                disabled={disabled || isUpdating}
-                              />
-                              <Label
-                                htmlFor={`${relatedUserGroup.reference_id}-${action}`}
-                                className='text-xs'
-                              >
-                                {action}
-                              </Label>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        className='text-destructive hover:text-destructive/90 hover:bg-destructive/10'
-                        onClick={() =>
-                          handleRemoveFromGroup(relatedUserGroup.reference_id)
-                        }
+                {entityGroups.map((relatedUserGroup: any) => {
+                  // Create a custom toggle function for this specific group
+                  const handleTogglePermission = (scope: PermissionScope, action: PermissionAction) => {
+                    const flag = getPermissionFlag(scope, action)
+                    toggleGroupPermission(
+                      relatedUserGroup.reference_id,
+                      flag,
+                      relatedUserGroup.permission || 0
+                    )
+                  }
+                  
+                  return (
+                    <React.Fragment key={relatedUserGroup.reference_id}>
+                      <PermissionScopeRow
+                        scope={PermissionScope.Group}
+                        permissionValue={relatedUserGroup.permission || 0}
+                        togglePermission={handleTogglePermission}
                         disabled={disabled || isUpdating}
-                      >
-                        Remove
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        hideActions={true}
+                        title={relatedUserGroup.name}
+                        description={relatedUserGroup.usergroup_id}
+                      />
+                      <TableRow>
+                        <TableCell colSpan={2}></TableCell>
+                        <TableCell>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-destructive hover:text-destructive/90 hover:bg-destructive/10'
+                            onClick={() =>
+                              handleRemoveFromGroup(relatedUserGroup.reference_id)
+                            }
+                            disabled={disabled || isUpdating}
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
+                  )
+                })}
               </TableBody>
             </Table>
           </ScrollArea>
