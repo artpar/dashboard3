@@ -6,6 +6,7 @@ export const SYSTEM_COLUMNS = [
   'reference_id',
   'created_at',
   'updated_at',
+  'user_account_id',
   'version',
   'type',
   '__type',

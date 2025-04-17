@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowDownToLine,
+  ChevronDown,
   Columns,
   Download,
   Filter,
@@ -16,11 +17,12 @@ import {
   Table,
   Upload,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useWorldEntities } from '@/hooks/use-world-entities'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -32,15 +34,16 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Separator } from '@/components/ui/separator'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
-import { useWorldEntities } from '@/hooks/use-world-entities'
+import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
 
 interface EntityHeaderProps {
   title: string
@@ -73,26 +76,35 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     executeAction,
     currentPage,
     totalPages,
+    visibleColumns,
+    toggleColumnVisibility,
+    resetColumnVisibility,
+    showAllColumns,
+
   } = useEntityCollectionData()
 
   // Get world entities for related navigation
   const { entities } = useWorldEntities()
 
   // Find current entity in world entities
-  const currentEntity = entities.find(e => e.table_name === entityName)
+  const currentEntity = entities.find((e) => e.table_name === entityName)
 
   // Handle search
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
+    // Create a new filters object to avoid reference issues
+    const newFilters = { ...filters }
+
     if (searchTerm.trim()) {
-      setFilters({
-        ...filters,
-        _search: searchTerm.trim(),
-      })
-    } else {
-      const { _search, ...restFilters } = filters
-      setFilters(restFilters)
+      // Add the search term to filters
+      newFilters._search = searchTerm.trim()
+    } else if ('_search' in newFilters) {
+      // Remove search term if empty and it exists in filters
+      delete newFilters._search
     }
+
+    // Set the new filters object
+    setFilters(newFilters)
   }
 
   // Handle export
@@ -105,44 +117,48 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   const activeFilterCount = Object.keys(filters).length
 
   return (
-    <div className="space-y-4 mb-6">
+    <div className='mb-6 space-y-4'>
       {/* Header with title and description */}
-      <div className="flex items-start justify-between">
+      <div className='flex items-start justify-between'>
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <div className='flex items-center gap-2'>
+            <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
             {currentEntity?.is_top_level && (
-              <Badge variant="outline" className="ml-2">Top Level</Badge>
+              <Badge variant='outline' className='ml-2'>
+                Top Level
+              </Badge>
             )}
           </div>
           {description && (
-            <p className="text-muted-foreground mt-1">{description}</p>
+            <p className='text-muted-foreground mt-1'>{description}</p>
           )}
         </div>
 
         {/* Quick stats */}
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total Records</p>
-            <p className="text-lg font-medium">{data?.length || 0}</p>
+        <div className='flex items-center gap-4'>
+          <div className='text-right'>
+            <p className='text-muted-foreground text-sm'>Total Records</p>
+            <p className='text-lg font-medium'>{data?.length || 0}</p>
           </div>
 
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Page</p>
-            <p className="text-lg font-medium">{currentPage} / {totalPages || 1}</p>
+          <div className='text-right'>
+            <p className='text-muted-foreground text-sm'>Page</p>
+            <p className='text-lg font-medium'>
+              {currentPage} / {totalPages || 1}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className='flex flex-col justify-between gap-4 sm:flex-row'>
         {/* Search bar */}
-        <div className="flex-1 max-w-md">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className='max-w-md flex-1'>
+          <form onSubmit={handleSearch} className='relative'>
+            <Search className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4' />
             <Input
-              type="search"
+              type='search'
               placeholder={`Search ${entityName}...`}
-              className="pl-8 w-full"
+              className='w-full pl-8'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -150,20 +166,20 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className='flex flex-wrap items-center gap-2'>
           {/* View mode toggle */}
           <TooltipProvider>
-            <div className="hidden md:flex bg-muted rounded-md p-1">
+            <div className='bg-muted hidden rounded-md p-1 md:flex'>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    size='sm'
+                    className='h-8 w-8 p-0'
                     onClick={() => setViewMode('table')}
                   >
-                    <Table className="h-4 w-4" />
-                    <span className="sr-only">Table view</span>
+                    <Table className='h-4 w-4' />
+                    <span className='sr-only'>Table view</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Table view</TooltipContent>
@@ -173,12 +189,12 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <TooltipTrigger asChild>
                   <Button
                     variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    size='sm'
+                    className='h-8 w-8 p-0'
                     onClick={() => setViewMode('grid')}
                   >
-                    <LayoutGrid className="h-4 w-4" />
-                    <span className="sr-only">Grid view</span>
+                    <LayoutGrid className='h-4 w-4' />
+                    <span className='sr-only'>Grid view</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Grid view</TooltipContent>
@@ -188,12 +204,12 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <TooltipTrigger asChild>
                   <Button
                     variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    size='sm'
+                    className='h-8 w-8 p-0'
                     onClick={() => setViewMode('list')}
                   >
-                    <List className="h-4 w-4" />
-                    <span className="sr-only">List view</span>
+                    <List className='h-4 w-4' />
+                    <span className='sr-only'>List view</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>List view</TooltipContent>
@@ -203,17 +219,17 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
           {/* Filter button */}
           <Button
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={() => setShowFilterDialog(true)}
-            className="relative"
+            className='relative'
           >
-            <Filter className="mr-2 h-4 w-4" />
+            <Filter className='mr-2 h-4 w-4' />
             Filters
             {activeFilterCount > 0 && (
               <Badge
-                variant="secondary"
-                className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center rounded-full"
+                variant='secondary'
+                className='ml-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs'
               >
                 {activeFilterCount}
               </Badge>
@@ -223,46 +239,65 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           {/* Column settings */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Columns className="mr-2 h-4 w-4" />
+              <Button variant='outline' size='sm'>
+                <Columns className='mr-2 h-4 w-4' />
                 Columns
+                <ChevronDown className='ml-2 h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align='end' className='w-56'>
               <DropdownMenuLabel>Column Visibility</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {columns.map((column) => (
-                <DropdownMenuItem key={column.ColumnName}>
-                  {column.ColumnDescription || column.Name}
-                </DropdownMenuItem>
+                <DropdownMenuCheckboxItem
+                  key={column.ColumnName}
+                  checked={visibleColumns.includes(column.ColumnName)}
+                  onCheckedChange={() =>
+                    toggleColumnVisibility(column.ColumnName)
+                  }
+                >
+                  {column.Name}
+                  {AUDIT_COLUMNS.includes(column.ColumnName) && (
+                    <span className='text-muted-foreground ml-2 text-xs'>
+                      (Audit)
+                    </span>
+                  )}
+                </DropdownMenuCheckboxItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={resetColumnVisibility}>
+                Reset to default
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={showAllColumns}>
+                Show all columns
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Export options */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
+              <Button variant='outline' size='sm'>
+                <Download className='mr-2 h-4 w-4' />
                 Export
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={() => handleExport('csv')}>
-                <ArrowDownToLine className="mr-2 h-4 w-4" />
+                <ArrowDownToLine className='mr-2 h-4 w-4' />
                 Export as CSV
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('json')}>
-                <ArrowDownToLine className="mr-2 h-4 w-4" />
+                <ArrowDownToLine className='mr-2 h-4 w-4' />
                 Export as JSON
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('excel')}>
-                <ArrowDownToLine className="mr-2 h-4 w-4" />
+                <ArrowDownToLine className='mr-2 h-4 w-4' />
                 Export as Excel
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Upload className="mr-2 h-4 w-4" />
+                <Upload className='mr-2 h-4 w-4' />
                 Import Data
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -270,20 +305,20 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
           {/* Create new button */}
           <Button onClick={() => navigate({ to: `/create/${entityName}` })}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className='mr-2 h-4 w-4' />
             Add {entityName}
           </Button>
 
           {/* More actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-9 w-9">
-                <MoreHorizontal className="h-4 w-4" />
+              <Button variant='outline' size='icon' className='h-9 w-9'>
+                <MoreHorizontal className='h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={refresh}>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className='mr-2 h-4 w-4' />
                 Refresh Data
               </DropdownMenuItem>
 
@@ -293,15 +328,23 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
               {relations.length > 0 && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <Share2 className="mr-2 h-4 w-4" />
+                    <Share2 className='mr-2 h-4 w-4' />
                     Related Entities
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent>
                       {relations.map((relation) => (
                         <DropdownMenuItem
-                          key={relation.Subject + relation.SubjectName + relation.RelationName + relation.Object + relation.ObjectName}
-                          onClick={() => navigate({ to: `/entity/${relation.target}` })}
+                          key={
+                            relation.Subject +
+                            relation.SubjectName +
+                            relation.RelationName +
+                            relation.Object +
+                            relation.ObjectName
+                          }
+                          onClick={() =>
+                            navigate({ to: `/entity/${relation.target}` })
+                          }
                         >
                           {relation.label || relation.name}
                         </DropdownMenuItem>
@@ -332,8 +375,12 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
               <DropdownMenuSeparator />
 
               {/* Entity settings */}
-              <DropdownMenuItem onClick={() => navigate({ to: `/entity-settings/${entityName}` })}>
-                <Settings className="mr-2 h-4 w-4" />
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate({ to: `/entity-settings/${entityName}` })
+                }
+              >
+                <Settings className='mr-2 h-4 w-4' />
                 Entity Settings
               </DropdownMenuItem>
             </DropdownMenuContent>

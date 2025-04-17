@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { EntityApiService } from '../services/EntityApiService'
+import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 
 // Define the base entity context type
 export interface BaseEntityContextType {
@@ -15,6 +16,10 @@ export interface BaseEntityContextType {
   error: Error | null
   refresh: () => void
   executeAction: (actionName: string, payload: any) => Promise<any>
+  visibleColumns: string[]
+  toggleColumnVisibility: (columnKey: string) => void
+  resetColumnVisibility: () => void
+  showAllColumns: () => void
 }
 
 // Create a base provider component for entity data
@@ -31,6 +36,9 @@ export const BaseEntityDataProvider: React.FC<{
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [schemaError, setSchemaError] = useState<Error | null>(null)
 
+  // Column visibility state
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([])
+
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -42,6 +50,7 @@ export const BaseEntityDataProvider: React.FC<{
     setRelations([])
     setSchemaLoading(true)
     setSchemaError(null)
+    setVisibleColumns([])
   }, [entityName])
 
   // Fetch schema information
@@ -59,6 +68,14 @@ export const BaseEntityDataProvider: React.FC<{
         setRelations(relations)
         setAvailableActions(actions)
         setSchemaError(null)
+
+        // Initialize visible columns (excluding audit columns)
+        const AUDIT_COLUMNS = SYSTEM_COLUMNS;
+        setVisibleColumns(
+          columns
+            .filter(col => !AUDIT_COLUMNS.includes(col.ColumnName))
+            .map(col => col.ColumnName)
+        )
       } catch (err) {
         console.error(`Error fetching schema for ${entityName}:`, err)
         setSchemaError(err instanceof Error ? err : new Error(String(err)))
@@ -119,6 +136,30 @@ export const BaseEntityDataProvider: React.FC<{
     queryClient.invalidateQueries({ queryKey: [`entity-${entityName}`] })
   }, [entityName, queryClient])
 
+  // Toggle column visibility
+  const toggleColumnVisibility = useCallback((columnKey: string) => {
+    setVisibleColumns(prev =>
+      prev.includes(columnKey)
+        ? prev.filter(key => key !== columnKey)
+        : [...prev, columnKey]
+    )
+  }, [])
+
+  // Reset column visibility to default
+  const resetColumnVisibility = useCallback(() => {
+    const AUDIT_COLUMNS = ['created_at', 'updated_at', 'reference_id']
+    setVisibleColumns(
+      columns
+        .filter(col => !AUDIT_COLUMNS.includes(col.ColumnName))
+        .map(col => col.ColumnName)
+    )
+  }, [columns])
+
+  // Show all columns
+  const showAllColumns = useCallback(() => {
+    setVisibleColumns(columns.map(col => col.ColumnName))
+  }, [columns])
+
   // Create the base context value
   const baseContextValue: BaseEntityContextType = {
     entityName,
@@ -130,6 +171,10 @@ export const BaseEntityDataProvider: React.FC<{
     error: schemaError,
     refresh,
     executeAction,
+    visibleColumns,
+    toggleColumnVisibility,
+    resetColumnVisibility,
+    showAllColumns,
   }
 
   // Merge the base context with the specific context

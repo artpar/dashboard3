@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { FerrisWheel } from 'lucide-react'
 import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { useEntityColumns } from '../../hooks/useEntityColumns'
 import EntityTableBody from './EntityTableBody'
-import EntityTableHeader from './EntityTableHeader'
 
 /**
  * Main data table component that displays entity records
@@ -15,28 +13,31 @@ export const EntityDataTable: React.FC = () => {
     data,
     columns,
     isLoading,
-    columnsLoading,
     setSelectedItem,
     setShowEditDialog,
     setShowDeleteDialog,
     relations,
     entityName,
   } = useEntityCollectionData()
-  const [localColumns, setLocalColumns] = React.useState(columns || [])
   const navigate = useNavigate()
-  // Update local columns when columns from context change and are not empty
-  useEffect(() => {
-    if (columns && columns.length > 0) {
-      setLocalColumns(columns)
-    }
-  }, [columns, entityName])
-
+  // Get column visibility state from context
   const {
-    visibleColumns,
-    filteredColumns,
-    auditColumnsToShow,
-    toggleColumnVisibility,
-  } = useEntityColumns(localColumns)
+    visibleColumns
+  } = useEntityCollectionData()
+  
+  // Filter columns based on visibility settings
+  const filteredColumns = React.useMemo(() => {
+    return columns.filter(col => visibleColumns.includes(col.ColumnName))
+  }, [columns, visibleColumns])
+  
+  // Get audit columns to show
+  const auditColumnsToShow = React.useMemo(() => {
+    const AUDIT_COLUMNS = ['created_at', 'updated_at', 'reference_id']
+    return columns.filter(
+      col => AUDIT_COLUMNS.includes(col.ColumnName) && 
+             ['created_at', 'reference_id'].includes(col.ColumnName)
+    )
+  }, [columns])
 
   // Handle row actions
   const handleEdit = (item: any) => {
@@ -53,19 +54,17 @@ export const EntityDataTable: React.FC = () => {
     setSelectedItem(item)
     // This would typically open a view dialog
     console.log('View details for:', item)
-    navigate('/' + entityName + '/$entityId')
+    navigate({ to: `/${entityName}/$entityId` })
   }
 
   // If columns are not yet loaded or we're loading data, show a loading state
-  if (isLoading || columnsLoading || localColumns.length === 0) {
+  if (isLoading || columns.length === 0) {
     return (
       <div className='rounded-md border p-2 text-center'>
         <p className='text-muted-foreground'>
           {isLoading
             ? 'Loading data...'
-            : columnsLoading
-              ? 'Loading table structure...'
-              : 'Waiting for columns...'}
+            : 'Waiting for columns...'}
         </p>
       </div>
     )
@@ -73,14 +72,8 @@ export const EntityDataTable: React.FC = () => {
 
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
-      <EntityTableHeader
-        columns={localColumns}
-        visibleColumns={visibleColumns}
-        toggleColumnVisibility={toggleColumnVisibility}
-      />
-
       <div className='relative flex overflow-y-auto'>
-        <Table>
+        <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>
               <TableHead className='sticky top-0 min-w-12 bg-background'>
