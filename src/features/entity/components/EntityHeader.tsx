@@ -121,55 +121,82 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
       {/* Action buttons */}
       <div className='flex flex-wrap items-center justify-start gap-2'>
         {/* View mode toggle */}
+        {/*<TooltipProvider>*/}
+        {/*  <div className='bg-muted hidden rounded-md p-1 md:flex'>*/}
+        {/*    <Tooltip>*/}
+        {/*      <TooltipTrigger asChild>*/}
+        {/*        <Button*/}
+        {/*          variant={viewMode === 'table' ? 'secondary' : 'ghost'}*/}
+        {/*          size='sm'*/}
+        {/*          className='h-8 w-8 p-0'*/}
+        {/*          onClick={() => setViewMode('table')}*/}
+        {/*        >*/}
+        {/*          <Table className='h-4 w-4' />*/}
+        {/*          <span className='sr-only'>Table view</span>*/}
+        {/*        </Button>*/}
+        {/*      </TooltipTrigger>*/}
+        {/*      <TooltipContent>Table view</TooltipContent>*/}
+        {/*    </Tooltip>*/}
+
+        {/*    <Tooltip>*/}
+        {/*      <TooltipTrigger asChild>*/}
+        {/*        <Button*/}
+        {/*          variant={viewMode === 'grid' ? 'secondary' : 'ghost'}*/}
+        {/*          size='sm'*/}
+        {/*          className='h-8 w-8 p-0'*/}
+        {/*          onClick={() => setViewMode('grid')}*/}
+        {/*        >*/}
+        {/*          <LayoutGrid className='h-4 w-4' />*/}
+        {/*          <span className='sr-only'>Grid view</span>*/}
+        {/*        </Button>*/}
+        {/*      </TooltipTrigger>*/}
+        {/*      <TooltipContent>Grid view</TooltipContent>*/}
+        {/*    </Tooltip>*/}
+
+        {/*    <Tooltip>*/}
+        {/*      <TooltipTrigger asChild>*/}
+        {/*        <Button*/}
+        {/*          variant={viewMode === 'list' ? 'secondary' : 'ghost'}*/}
+        {/*          size='sm'*/}
+        {/*          className='h-8 w-8 p-0'*/}
+        {/*          onClick={() => setViewMode('list')}*/}
+        {/*        >*/}
+        {/*          <List className='h-4 w-4' />*/}
+        {/*          <span className='sr-only'>List view</span>*/}
+        {/*        </Button>*/}
+        {/*      </TooltipTrigger>*/}
+        {/*      <TooltipContent>List view</TooltipContent>*/}
+        {/*    </Tooltip>*/}
+        {/*  </div>*/}
+        {/*</TooltipProvider>*/}
+
         <TooltipProvider>
-          <div className='bg-muted hidden rounded-md p-1 md:flex'>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                  size='sm'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setViewMode('table')}
-                >
-                  <Table className='h-4 w-4' />
-                  <span className='sr-only'>Table view</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Table view</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                  size='sm'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setViewMode('grid')}
-                >
-                  <LayoutGrid className='h-4 w-4' />
-                  <span className='sr-only'>Grid view</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Grid view</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size='sm'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className='h-4 w-4' />
-                  <span className='sr-only'>List view</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>List view</TooltipContent>
-            </Tooltip>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='outline'
+                size='icon'
+                className='h-8 w-8 p-0'
+                onClick={refresh}
+              >
+                <RefreshCw className='h-4 w-4' />
+                <span className='sr-only'>Refresh</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Refresh Data</TooltipContent>
+          </Tooltip>
         </TooltipProvider>
 
+
+
+
+        {/* Create new item button */}
+        <Button size='sm' className='h-8 gap-1'>
+          <Plus className='h-4 w-4' />
+          New {entityName.replace(/_/g, ' ')}
+        </Button>
+
+        {/* Refresh button with tooltip */}
         {/* Column visibility dropdown */}
         <DropdownMenu open={showColumnMenu} onOpenChange={setShowColumnMenu}>
           <DropdownMenuTrigger asChild>
@@ -264,31 +291,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Create new item button */}
-        <Button size='sm' className='h-8 gap-1'>
-          <Plus className='h-4 w-4' />
-          New {entityName.replace(/_/g, ' ')}
-        </Button>
-
-        {/* Refresh button with tooltip */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant='outline'
-                size='icon'
-                className='h-8 w-8 p-0'
-                onClick={refresh}
-              >
-                <RefreshCw className='h-4 w-4' />
-                <span className='sr-only'>Refresh</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh Data</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
         {/* More actions dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
