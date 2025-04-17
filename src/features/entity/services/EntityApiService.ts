@@ -174,10 +174,22 @@ export class EntityApiService {
   ): Promise<{ data: any[]; totalPages: number }> {
     try {
       const { page, pageSize, filters, sort = '-created_at' } = params
+      let requestObject = {
+        'page[size]': pageSize.toString(),
+        'page[number]': page.toString(),
+        included_relations: '*',
+        sort,
+      }
+      console.log('fetchEntityCollection:', JSON.stringify(filters))
+      if (filters && filters["_search"] && typeof filters["_search"] === 'string') {
+        requestObject["filter"] = [filters["_search"]];
+        delete filters["_search"];
+      }
 
       // Parse filter query format for daptin
       const parseFilters = () => {
         if (!filters || Object.keys(filters).length === 0) return undefined
+
 
         const filterQuery = Object.entries(filters)
           .filter(([_, value]) => value !== undefined && value !== '')
@@ -193,13 +205,8 @@ export class EntityApiService {
       }
 
       // Main data query
-      const response = await daptinClient.jsonApi.findAll(entityName, {
-        'page[size]': pageSize.toString(),
-        'page[number]': page.toString(),
-        included_relations: '*',
-        sort,
-        query: parseFilters(),
-      })
+      requestObject["query"] = parseFilters();
+      const response = await daptinClient.jsonApi.findAll(entityName, requestObject)
 
       if (response.errors && response.errors.length) {
         throw new Error(

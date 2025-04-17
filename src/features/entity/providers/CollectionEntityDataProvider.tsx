@@ -81,6 +81,7 @@ export const CollectionEntityDataProvider: React.FC<{
     },
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    staleTime: 0,
     enabled: !!entityName,
   })
 
@@ -172,6 +173,7 @@ export const CollectionEntityDataProvider: React.FC<{
   }
 
   const fetchData = useCallback(() => {
+    console.log("CEDP.fetchData")
     refetch()
   }, [refetch])
 

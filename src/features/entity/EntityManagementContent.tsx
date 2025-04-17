@@ -74,14 +74,8 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
       <Main className='flex h-full w-full flex-col overflow-hidden'>
         <div className='flex-shrink-0'>
           <EntityHeader
-            title={title || ''}
-            description={description || ''}
-            availableActions={availableActions}
-            onRefresh={refresh}
-            onCreateNew={() => {
-              navigate({ to: '/create/' + entityName })
-            }}
-            onShowFilters={() => setShowFilterDialog(true)}
+            title={title || `${entityName.charAt(0).toUpperCase() + entityName.slice(1)} Management`}
+            description={description || `Manage your ${entityName} records`}
             entityName={entityName}
           />
         </div>
