@@ -280,7 +280,10 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       toast,
       hasValueChanged,
     ]
-  )
+  );
+  const [newEntity, setNewEntity] = useState<>({
+    "__type": entityName,
+  })
 
   // Render form fields for a group of columns
   const renderColumnFields = useCallback(
@@ -297,6 +300,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
                 <ColumnEditor
                   column={column}
                   value={field.value}
+                  entity={newEntity}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   error={form.formState.errors[column.ColumnName]?.message}

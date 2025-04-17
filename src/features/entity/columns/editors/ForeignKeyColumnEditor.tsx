@@ -244,8 +244,8 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   })
 
   // Find the selected option based on the current value (for non-file references)
-  const selectedOption =
-    options?.find((option) => option.reference_id === value.reference_id) || null
+  const selectedOption = options && value ?
+    options?.find((option) => option.reference_id === value.reference_id) || null  : null
 
   // Render file reference editor
   if (isFileReference) {
@@ -459,7 +459,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
                       <Check
                         className={cn(
                           'mr-2 h-4 w-4',
-                          value.reference_id === option.reference_id
+                          value && value.reference_id === option.reference_id
                             ? 'opacity-100'
                             : 'opacity-0'
                         )}
