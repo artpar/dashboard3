@@ -1,19 +1,19 @@
 // components/permission/components/PermissionScopeRow.tsx
-import { Button } from '@/components/ui/button';
-import { TableCell, TableRow } from '@/components/ui/table';
-import { 
-  PermissionAction, 
-  PermissionScope, 
-  PERMISSION_COLORS
-} from '@/features/entity/columns/PermissionTypes.ts';
-import { PermissionActionToggle } from './PermissionActionToggle';
+import { Button } from '@/components/ui/button'
+import { TableCell, TableRow } from '@/components/ui/table'
+import {
+  PERMISSION_COLORS,
+  PermissionAction,
+  PermissionScope,
+} from '@/features/entity/columns/PermissionTypes.ts'
+import { PermissionActionToggle } from './PermissionActionToggle'
 
 interface PermissionScopeRowProps {
-  scope: PermissionScope;
-  permissionValue: number;
-  togglePermission: (scope: PermissionScope, action: PermissionAction) => void;
-  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void;
-  disabled?: boolean;
+  scope: PermissionScope
+  permissionValue: number
+  togglePermission: (scope: PermissionScope, action: PermissionAction) => void
+  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void
+  disabled?: boolean
 }
 
 /**
@@ -27,21 +27,20 @@ export function PermissionScopeRow({
   toggleAllForScope,
   disabled,
 }: PermissionScopeRowProps) {
-  const colors = PERMISSION_COLORS[scope];
-  const scopeDescription = scope === PermissionScope.Guest 
-    ? 'Unauthenticated users' 
-    : 'Authenticated users';
+  const colors = PERMISSION_COLORS[scope]
+  const scopeDescription =
+    scope === PermissionScope.Guest
+      ? 'Unauthenticated users'
+      : 'Authenticated users'
 
   return (
     <TableRow>
       <TableCell>
         <div className={`font-medium ${colors.text}`}>{scope}</div>
-        <div className="text-muted-foreground text-xs">
-          {scopeDescription}
-        </div>
+        <div className='text-muted-foreground text-xs'>{scopeDescription}</div>
       </TableCell>
       <TableCell>
-        <div className="flex flex-wrap gap-2">
+        <div className='grid grid-cols-2 gap-y-2 grid-rows-3 gap-2'>
           {Object.values(PermissionAction).map((action) => (
             <PermissionActionToggle
               key={action}
@@ -55,11 +54,11 @@ export function PermissionScopeRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center space-x-2">
+        <div className='flex items-center space-x-2'>
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
+            type='button'
+            variant='outline'
+            size='sm'
             onClick={() => toggleAllForScope(scope, true)}
             disabled={disabled}
             className={`h-8 text-xs ${colors.border}`}
@@ -67,17 +66,17 @@ export function PermissionScopeRow({
             Select All
           </Button>
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
+            type='button'
+            variant='outline'
+            size='sm'
             onClick={() => toggleAllForScope(scope, false)}
             disabled={disabled}
-            className="h-8 text-xs"
+            className='h-8 text-xs'
           >
             Clear All
           </Button>
         </div>
       </TableCell>
     </TableRow>
-  );
+  )
 }
