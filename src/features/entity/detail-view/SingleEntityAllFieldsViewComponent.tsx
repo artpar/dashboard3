@@ -171,7 +171,10 @@ export function SingleEntityAllFieldsViewComponent({
             placeholder='Search fields...'
             className='bg-background pl-9'
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              console.log("Set search query", e.target.value)
+              setSearchQuery(e.target.value)
+            }}
           />
         </div>
       )}

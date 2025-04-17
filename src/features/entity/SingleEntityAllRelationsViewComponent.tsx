@@ -1,14 +1,10 @@
-// src/features/entity/components/relations/EntityRelations.tsx
+// src/features/entity/SingleEntityAllRelationsViewComponent.tsx
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card'
-import { EntityRelationsProvider } from './providers/EntityRelationsProvider'
-import { RelationsEmpty } from './relations/RelationsEmpty'
-import { RelationsList } from './relations/RelationsList'
+import { RelationsContainer } from './components/relations/RelationsContainer'
+import { RelationsHeader } from './components/relations/RelationsHeader'
 
 export interface EntityRelationsProps {
   entityName: string
@@ -28,6 +24,7 @@ export interface TableRelation {
 
 /**
  * Main component for displaying and interacting with entity relations
+ * Refactored to use smaller, more focused components
  */
 export function SingleEntityAllRelationsViewComponent({
   entityName,
@@ -37,21 +34,20 @@ export function SingleEntityAllRelationsViewComponent({
   description,
 }: EntityRelationsProps) {
   const defaultDescription = `Records connected to this ${entityName}`
+  const finalDescription = description || defaultDescription
 
   return (
     <Card className='animate-in fade-in-50 duration-300'>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description || defaultDescription}</CardDescription>
-      </CardHeader>
+      <RelationsHeader 
+        title={title} 
+        description={finalDescription} 
+      />
       <CardContent>
-        {relations.length === 0 ? (
-          <RelationsEmpty entityName={entityName} />
-        ) : (
-          <EntityRelationsProvider entityName={entityName}>
-            <RelationsList entityName={entityName} entityId={entityId} />
-          </EntityRelationsProvider>
-        )}
+        <RelationsContainer 
+          entityName={entityName} 
+          entityId={entityId} 
+          relations={relations} 
+        />
       </CardContent>
     </Card>
   )

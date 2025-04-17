@@ -27,7 +27,7 @@ export const BooleanColumnViewer: React.FC<ColumnViewerProps> = ({
     value === 'yes'
 
   return (
-    <span className={cn('flex justify-center', className)}>
+    <span className={cn('flex justify-left', className)}>
       {boolValue ? (
         <Badge variant='outline' className='bg-green-100 text-green-800'>
           Yes

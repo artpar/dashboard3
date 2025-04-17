@@ -1,15 +1,11 @@
 // src/components/entity/columns/viewers/DateColumnViewer.tsx
-import React from 'react'
-import { cn } from '@/lib/utils'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { formatDate, formatDateTime, formatTime } from '../formatters'
-import { ColumnType, ColumnViewerProps } from '../types'
-import { getColumnType } from '../utils'
+import React, { useState } from 'react'
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatDate, formatDateTime, formatTime } from '../formatters';
+import { ColumnType, ColumnViewerProps } from '../types';
+import { getColumnType } from '../utils';
+import ReactTimeAgo from 'react-time-ago'
 
 
 /**
@@ -24,7 +20,9 @@ export const DateColumnViewer: React.FC<ColumnViewerProps> = ({
 
   // Select the appropriate formatter based on column type
   let formattedValue: React.ReactNode = null
-  let fullFormattedValue: string = ''
+  let fullFormattedValue: string = '';
+  const [currentDate, setCurrentDate] = useState(new Date(value))
+  console.log("DateColumnViewer", value, currentDate)
 
   if (columnType === ColumnType.DateTime) {
     formattedValue = formatDateTime(value)
@@ -63,7 +61,7 @@ export const DateColumnViewer: React.FC<ColumnViewerProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className={cn('whitespace-nowrap', className)}>
-              {formattedValue}
+              <ReactTimeAgo date={currentDate} />
             </span>
           </TooltipTrigger>
           <TooltipContent>

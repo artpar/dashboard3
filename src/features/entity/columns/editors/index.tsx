@@ -8,6 +8,7 @@ import FileColumnEditor from './FileColumnEditor'
 import ForeignKeyColumnEditor from './ForeignKeyColumnEditor'
 import JsonColumnEditor from './JsonColumnEditor'
 import NumberColumnEditor from './NumberColumnEditor'
+import PasswordColumnEditor from './PasswordColumnEditor'
 import TextColumnEditor from './TextColumnEditor'
 
 
@@ -31,8 +32,10 @@ export const DefaultColumnEditor: React.FC<ColumnEditorProps> = (props) => {
     case ColumnType.State:
     case ColumnType.Pincode:
     case ColumnType.Continent:
-    case ColumnType.Password:
       return <TextColumnEditor {...props} />
+
+    case ColumnType.Password:
+      return <PasswordColumnEditor {...props} />
 
     case ColumnType.DateTime:
     case ColumnType.Date:
@@ -89,8 +92,10 @@ export function getColumnEditor(columnType: ColumnType) {
     case ColumnType.State:
     case ColumnType.Pincode:
     case ColumnType.Continent:
-    case ColumnType.Password:
       return TextColumnEditor
+
+    case ColumnType.Password:
+      return PasswordColumnEditor
 
     case ColumnType.DateTime:
     case ColumnType.Date:
@@ -145,4 +150,5 @@ export {
   JsonColumnEditor,
   FileColumnEditor,
   ForeignKeyColumnEditor,
+  PasswordColumnEditor,
 }

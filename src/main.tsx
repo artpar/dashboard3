@@ -8,6 +8,8 @@ import {
 } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { DaptinInitializer } from '@/daptinInitializer.tsx'
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
 import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
@@ -17,6 +19,8 @@ import { ThemeProvider } from './context/theme-context'
 import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
+
+TimeAgo.addDefaultLocale(en)
 
 // Create a component to initialize auth state
 function AuthInitializer() {
@@ -41,7 +45,6 @@ const isTokenExpired = (user: any) => {
 
 const queryClient = new QueryClient({
   defaultOptions: {
-
     queries: {
       retry: (failureCount, error) => {
         // eslint-disable-next-line no-console

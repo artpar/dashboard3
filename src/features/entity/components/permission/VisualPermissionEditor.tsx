@@ -1,111 +1,61 @@
 // components/VisualPermissionEditor.tsx
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PermissionAction, PermissionScope, PERMISSION_COLORS, hasPermission, getPermissionFlag, PERMISSION_EXPLANATIONS } from '@/features/entity/columns/PermissionTypes.ts';
-import { PermissionActionToggle } from './PermissionActionToggle'
-
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { PermissionAction, PermissionScope } from '@/features/entity/columns/PermissionTypes.ts';
+import { PermissionScopeRow } from './components/PermissionScopeRow';
 
 interface VisualPermissionEditorProps {
-  permissionValue: number
-  togglePermission: (scope: PermissionScope, action: PermissionAction) => void
-  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void
-  disabled?: boolean
+  permissionValue: number;
+  togglePermission: (scope: PermissionScope, action: PermissionAction) => void;
+  toggleAllForScope: (scope: PermissionScope, enabled: boolean) => void;
+  disabled?: boolean;
 }
 
+/**
+ * Main visual editor for permission management
+ * Displays a table with permission scopes and actions
+ */
 export function VisualPermissionEditor({
   permissionValue,
   togglePermission,
   toggleAllForScope,
   disabled,
 }: VisualPermissionEditorProps) {
-  const [activeTab, setActiveTab] = useState<PermissionScope>(
-    PermissionScope.Guest
-  )
+  const scopes = [PermissionScope.Guest, PermissionScope.User];
 
   return (
-    <div className='rounded-md border p-4'>
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as PermissionScope)}
-      >
-        <TabsList className='mb-4 grid grid-cols-2'>
-          {Object.values([PermissionScope.Guest, PermissionScope.User]).map((scope) => {
-            return (
-              <TabsTrigger
-                key={scope}
-                value={scope}
-                className={`data-[state=active]:bg-gray-400 
-                hover:bg-gray-200
-                cursor-pointer data-[state=active]:text-white`}
-              >
-                {scope}
-              </TabsTrigger>
-            )
-          })}
-        </TabsList>
-
-        {Object.values([PermissionScope.Guest, PermissionScope.User]).map((scope) => {
-          const colors = PERMISSION_COLORS[scope]
-
-          return (
-            <TabsContent key={scope} value={scope} className='space-y-4'>
-              <div className='mb-2 flex items-center justify-between'>
-                <h3 className={`text-sm font-medium ${colors.text}`}>
-                  {scope} Permissions
-                </h3>
-
-                <div className='flex items-center space-x-2'>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    onClick={() => toggleAllForScope(scope, true)}
-                    disabled={disabled}
-                    className={`h-8 text-xs ${colors.border}`}
-                  >
-                    Select All
-                  </Button>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    onClick={() => toggleAllForScope(scope, false)}
-                    disabled={disabled}
-                    className='h-8 text-xs'
-                  >
-                    Clear All
-                  </Button>
-                </div>
-              </div>
-
-              <div className='grid grid-cols-1 gap-2'>
-                {Object.values(PermissionAction).map((action) => {
-                  const flag = getPermissionFlag(scope, action)
-                  const isChecked = hasPermission(permissionValue, flag)
-                  const permissionKey = `${scope}${action}`
-                  const explanation =
-                    PERMISSION_EXPLANATIONS[permissionKey] ||
-                    `Allows ${scope.toLowerCase()}s to ${action.toLowerCase()} this resource`
-
-                  return (
-                    <PermissionActionToggle
-                      key={action}
-                      scope={scope}
-                      action={action}
-                      isChecked={isChecked}
-                      onToggle={() => togglePermission(scope, action)}
-                      disabled={disabled}
-                      colors={colors}
-                      explanation={explanation}
-                    />
-                  )
-                })}
-              </div>
-            </TabsContent>
-          )
-        })}
-      </Tabs>
+    <div className="flex flex-col">
+      <Card className="rounded-md border">
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Scope</TableHead>
+                <TableHead className="w-[60%]">Permissions</TableHead>
+                <TableHead className="w-[20%]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scopes.map((scope) => (
+                <PermissionScopeRow
+                  key={scope}
+                  scope={scope}
+                  permissionValue={permissionValue}
+                  togglePermission={togglePermission}
+                  toggleAllForScope={toggleAllForScope}
+                  disabled={disabled}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

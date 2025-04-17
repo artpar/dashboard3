@@ -8,6 +8,7 @@ import FileColumnViewer from './FileColumnViewer'
 import ForeignKeyColumnViewer from './ForeignKeyColumnViewer'
 import JsonColumnViewer from './JsonColumnViewer'
 import NumberColumnViewer from './NumberColumnViewer'
+import PasswordColumnViewer from './PasswordColumnViewer'
 import TextColumnViewer from './TextColumnViewer'
 
 
@@ -35,6 +36,8 @@ export const DefaultColumnViewer: React.FC<ColumnViewerProps> = (props) => {
     case ColumnType.Continent:
     case ColumnType.Id:
       return <TextColumnViewer {...props} />
+    case ColumnType.Password:
+      return <PasswordColumnViewer {...props} />
     case ColumnType.Permission:
       return <PermissionColumnViewer {...props} />
 
@@ -94,6 +97,9 @@ export function getColumnViewer(columnType: ColumnType) {
     case ColumnType.Id:
       return TextColumnViewer
 
+    case ColumnType.Password:
+      return PasswordColumnViewer
+
     case ColumnType.DateTime:
     case ColumnType.Date:
     case ColumnType.Time:
@@ -146,4 +152,5 @@ export {
   BooleanColumnViewer,
   JsonColumnViewer,
   FileColumnViewer,
+  PasswordColumnViewer,
 }
