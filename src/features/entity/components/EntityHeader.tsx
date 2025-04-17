@@ -2,16 +2,15 @@ import React, { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowDownToLine,
-  ChevronDown,
   Columns,
   Download,
-  Filter,
+  Eye,
+  EyeOff,
   LayoutGrid,
   List,
   MoreHorizontal,
   Plus,
   RefreshCw,
-  Search,
   Settings,
   Share2,
   Table,
@@ -34,7 +33,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import {
   Tooltip,
@@ -44,6 +42,7 @@ import {
 } from '@/components/ui/tooltip'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
 import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
+import EntityFilters from './filter/EntityFilters'
 
 interface EntityHeaderProps {
   title: string
@@ -60,8 +59,8 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   entityName,
 }) => {
   const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'table' | 'grid' | 'list'>('table')
+  const [showColumnMenu, setShowColumnMenu] = useState(false)
 
   // Get entity data from context
   const {
@@ -69,14 +68,11 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     availableActions,
     relations,
     refresh,
-    filters,
-    setFilters,
-    setShowFilterDialog,
-    executeAction,
     visibleColumns,
     toggleColumnVisibility,
     resetColumnVisibility,
     showAllColumns,
+    executeAction,
   } = useEntityCollectionData()
 
   // Get world entities for related navigation
@@ -85,32 +81,25 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   // Find current entity in world entities
   const currentEntity = entities.find((e: any) => e.table_name === entityName)
 
-  // Handle search
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault()
-    // Create a new filters object to avoid reference issues
-    const newFilters = { ...filters }
-
-    if (searchTerm.trim()) {
-      // Add the search term to filters
-      newFilters._search = searchTerm.trim()
-    } else if ('_search' in newFilters) {
-      // Remove search term if empty and it exists in filters
-      delete newFilters._search
-    }
-
-    // Set the new filters object
-    setFilters(newFilters)
-  }
-
   // Handle export
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
     // This would be implemented with the actual export functionality
     console.log(`Exporting ${entityName} as ${format}`)
   }
 
-  // Count active filters
-  const activeFilterCount = Object.keys(filters).length
+  // Get column groups for the dropdown menu
+  const columnGroups = {
+    standard: columns.filter(col =>
+      !AUDIT_COLUMNS.includes(col.ColumnName) &&
+      !col.ColumnName.startsWith('__')
+    ),
+    audit: columns.filter(col =>
+      AUDIT_COLUMNS.includes(col.ColumnName)
+    ),
+    system: columns.filter(col =>
+      col.ColumnName.startsWith('__')
+    )
+  }
 
   return (
     <div className='mb-6 space-y-4 flex flex-col'>
@@ -119,254 +108,271 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
         <div>
           <div className='flex items-center gap-2'>
             <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
-            {currentEntity?.is_top_level && (
-              <Badge variant='outline' className='ml-2'>
-                Top Level
-              </Badge>
+            {description && (
+              <p className='text-muted-foreground mt-1'>{description}</p>
             )}
           </div>
-          {description && (
-            <p className='text-muted-foreground mt-1'>{description}</p>
-          )}
         </div>
       </div>
 
-      <div className='flex flex-col justify-between gap-4 sm:flex-row'>
-        {/* Search bar */}
-        <div className='max-w-md flex-1'>
-          <form onSubmit={handleSearch} className='relative'>
-            <Search className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4' />
-            <Input
-              type='search'
-              placeholder={`Search ${entityName}...`}
-              className='w-full pl-8'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </form>
-        </div>
+      {/* Enhanced filtering component */}
+      <EntityFilters entityName={entityName} />
 
-        {/* Action buttons */}
-        <div className='flex flex-wrap items-center gap-2'>
-          {/* View mode toggle */}
-          <TooltipProvider>
-            <div className='bg-muted hidden rounded-md p-1 md:flex'>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                    size='sm'
-                    className='h-8 w-8 p-0'
-                    onClick={() => setViewMode('table')}
-                  >
-                    <Table className='h-4 w-4' />
-                    <span className='sr-only'>Table view</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Table view</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                    size='sm'
-                    className='h-8 w-8 p-0'
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <LayoutGrid className='h-4 w-4' />
-                    <span className='sr-only'>Grid view</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Grid view</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                    size='sm'
-                    className='h-8 w-8 p-0'
-                    onClick={() => setViewMode('list')}
-                  >
-                    <List className='h-4 w-4' />
-                    <span className='sr-only'>List view</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>List view</TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
-
-          {/* Filter button */}
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setShowFilterDialog(true)}
-            className='relative'
-          >
-            <Filter className='mr-2 h-4 w-4' />
-            Filters
-            {activeFilterCount > 0 && (
-              <Badge
-                variant='secondary'
-                className='ml-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs'
-              >
-                {activeFilterCount}
-              </Badge>
-            )}
-          </Button>
-
-          {/* Column settings */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm'>
-                <Columns className='mr-2 h-4 w-4' />
-                Columns
-                <ChevronDown className='ml-2 h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-56'>
-              <DropdownMenuLabel>Column Visibility</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {columns.map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.ColumnName}
-                  checked={visibleColumns.includes(column.ColumnName)}
-                  onCheckedChange={() =>
-                    toggleColumnVisibility(column.ColumnName)
-                  }
+      {/* Action buttons */}
+      <div className='flex flex-wrap items-center justify-start gap-2'>
+        {/* View mode toggle */}
+        <TooltipProvider>
+          <div className='bg-muted hidden rounded-md p-1 md:flex'>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                  size='sm'
+                  className='h-8 w-8 p-0'
+                  onClick={() => setViewMode('table')}
                 >
-                  {column.Name}
-                  {AUDIT_COLUMNS.includes(column.ColumnName) && (
-                    <span className='text-muted-foreground ml-2 text-xs'>
-                      (Audit)
-                    </span>
-                  )}
-                </DropdownMenuCheckboxItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={resetColumnVisibility}>
-                Reset to default
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={showAllColumns}>
-                Show all columns
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <Table className='h-4 w-4' />
+                  <span className='sr-only'>Table view</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Table view</TooltipContent>
+            </Tooltip>
 
-          {/* Export options */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm'>
-                <Download className='mr-2 h-4 w-4' />
-                Export
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={() => handleExport('csv')}>
-                <ArrowDownToLine className='mr-2 h-4 w-4' />
-                Export as CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('json')}>
-                <ArrowDownToLine className='mr-2 h-4 w-4' />
-                Export as JSON
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('excel')}>
-                <ArrowDownToLine className='mr-2 h-4 w-4' />
-                Export as Excel
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Upload className='mr-2 h-4 w-4' />
-                Import Data
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                  size='sm'
+                  className='h-8 w-8 p-0'
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className='h-4 w-4' />
+                  <span className='sr-only'>Grid view</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Grid view</TooltipContent>
+            </Tooltip>
 
-          {/* Create new button */}
-          <Button onClick={() => navigate({ to: `/create/${entityName}` })}>
-            <Plus className='mr-2 h-4 w-4' />
-            Add {entityName}
-          </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                  size='sm'
+                  className='h-8 w-8 p-0'
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className='h-4 w-4' />
+                  <span className='sr-only'>List view</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>List view</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
-          {/* More actions */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='icon' className='h-9 w-9'>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={refresh}>
-                <RefreshCw className='mr-2 h-4 w-4' />
-                Refresh Data
-              </DropdownMenuItem>
+        {/* Column visibility dropdown */}
+        <DropdownMenu open={showColumnMenu} onOpenChange={setShowColumnMenu}>
+          <DropdownMenuTrigger asChild>
+            <Button variant='outline' size='sm' className='h-8 gap-1'>
+              <Columns className='h-4 w-4' />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end' className='w-[250px]'>
+            <DropdownMenuLabel className='flex items-center justify-between'>
+              <span>Column Visibility</span>
+              <div className='flex gap-1'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-5 w-5'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    showAllColumns()
+                  }}
+                >
+                  <Eye className='h-3 w-3' />
+                  <span className='sr-only'>Show all</span>
+                </Button>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-5 w-5'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    resetColumnVisibility()
+                  }}
+                >
+                  <EyeOff className='h-3 w-3' />
+                  <span className='sr-only'>Reset to default</span>
+                </Button>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
 
-              <DropdownMenuSeparator />
-
-              {/* Related entities navigation */}
-              {relations.length > 0 && (
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <Share2 className='mr-2 h-4 w-4' />
-                    Related Entities
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {relations.map((relation) => (
-                        <DropdownMenuItem
-                          key={
-                            relation.Subject +
-                            relation.SubjectName +
-                            relation.RelationName +
-                            relation.Object +
-                            relation.ObjectName
-                          }
-                          onClick={() =>
-                            navigate({ to: `/entity/${relation.target}` })
-                          }
-                        >
-                          {relation.label || relation.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
+            {/* Column groups */}
+            <div className='max-h-[300px] overflow-y-auto'>
+              {/* Standard columns */}
+              {columnGroups.standard.length > 0 && (
+                <div className='p-1'>
+                  <div className='text-xs font-medium text-muted-foreground px-2 py-1'>Standard</div>
+                  {columnGroups.standard.map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.ColumnName}
+                      checked={visibleColumns.includes(column.ColumnName)}
+                      onCheckedChange={() => toggleColumnVisibility(column.ColumnName)}
+                      className='capitalize'
+                    >
+                      {column.Name || column.ColumnName.replace(/_/g, ' ')}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </div>
               )}
 
-              {/* Entity actions */}
-              {availableActions.length > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    {availableActions.map((action) => (
-                      <DropdownMenuItem
-                        key={action.id}
-                        onClick={() => executeAction(action.action_name, {})}
-                      >
-                        {action.label || action.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuGroup>
-                </>
+              {/* Audit columns */}
+              {columnGroups.audit.length > 0 && (
+                <div className='p-1 border-t'>
+                  <div className='text-xs font-medium text-muted-foreground px-2 py-1'>Audit</div>
+                  {columnGroups.audit.map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.ColumnName}
+                      checked={visibleColumns.includes(column.ColumnName)}
+                      onCheckedChange={() => toggleColumnVisibility(column.ColumnName)}
+                      className='capitalize'
+                    >
+                      {column.Name || column.ColumnName.replace(/_/g, ' ')}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </div>
               )}
 
-              <DropdownMenuSeparator />
+              {/* System columns */}
+              {columnGroups.system.length > 0 && (
+                <div className='p-1 border-t'>
+                  <div className='text-xs font-medium text-muted-foreground px-2 py-1'>System</div>
+                  {columnGroups.system.map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.ColumnName}
+                      checked={visibleColumns.includes(column.ColumnName)}
+                      onCheckedChange={() => toggleColumnVisibility(column.ColumnName)}
+                    >
+                      {column.Name || column.ColumnName}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </div>
+              )}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-              {/* Entity settings */}
-              <DropdownMenuItem
-                onClick={() =>
-                  navigate({ to: `/entity-settings/${entityName}` })
-                }
+        {/* Create new item button */}
+        <Button size='sm' className='h-8 gap-1'>
+          <Plus className='h-4 w-4' />
+          New {entityName.replace(/_/g, ' ')}
+        </Button>
+
+        {/* Refresh button with tooltip */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='outline'
+                size='icon'
+                className='h-8 w-8 p-0'
+                onClick={refresh}
               >
-                <Settings className='mr-2 h-4 w-4' />
-                Entity Settings
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                <RefreshCw className='h-4 w-4' />
+                <span className='sr-only'>Refresh</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Refresh Data</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* More actions dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 w-8 p-0'
+            >
+              <MoreHorizontal className='h-4 w-4' />
+              <span className='sr-only'>More</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+
+            {/* Export submenu */}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Download className='mr-2 h-4 w-4' />
+                <span>Export</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem
+                    onClick={() => handleExport('csv')}
+                  >
+                    <ArrowDownToLine className='mr-2 h-4 w-4' />
+                    <span>Export as CSV</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleExport('json')}
+                  >
+                    <ArrowDownToLine className='mr-2 h-4 w-4' />
+                    <span>Export as JSON</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleExport('excel')}
+                  >
+                    <ArrowDownToLine className='mr-2 h-4 w-4' />
+                    <span>Export as Excel</span>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+
+            {/* Import */}
+            <DropdownMenuItem>
+              <Upload className='mr-2 h-4 w-4' />
+              <span>Import Data</span>
+            </DropdownMenuItem>
+
+            {/* Settings */}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Settings className='mr-2 h-4 w-4' />
+              <span>Settings</span>
+            </DropdownMenuItem>
+
+            {/* Share */}
+            <DropdownMenuItem>
+              <Share2 className='mr-2 h-4 w-4' />
+              <span>Share</span>
+            </DropdownMenuItem>
+
+            {/* Custom actions */}
+            {availableActions && availableActions.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Custom Actions</DropdownMenuLabel>
+                  {availableActions.map((action: any) => (
+                    <DropdownMenuItem
+                      key={action.action_name}
+                      onClick={() => executeAction(action.action_name)}
+                    >
+                      <span>{action.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )
