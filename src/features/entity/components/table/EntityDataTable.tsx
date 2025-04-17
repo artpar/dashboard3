@@ -24,17 +24,17 @@ export const EntityDataTable: React.FC = () => {
   const {
     visibleColumns
   } = useEntityCollectionData()
-  
+
   // Filter columns based on visibility settings
   const filteredColumns = React.useMemo(() => {
     return columns.filter(col => visibleColumns.includes(col.ColumnName))
   }, [columns, visibleColumns])
-  
+
   // Get audit columns to show
   const auditColumnsToShow = React.useMemo(() => {
     const AUDIT_COLUMNS = ['created_at', 'updated_at', 'reference_id']
     return columns.filter(
-      col => AUDIT_COLUMNS.includes(col.ColumnName) && 
+      col => AUDIT_COLUMNS.includes(col.ColumnName) &&
              ['created_at', 'reference_id'].includes(col.ColumnName)
     )
   }, [columns])
@@ -52,9 +52,11 @@ export const EntityDataTable: React.FC = () => {
 
   const handleViewDetails = (item: any) => {
     setSelectedItem(item)
+    const itemId = item.id || item.reference_id
+
     // This would typically open a view dialog
     console.log('View details for:', item)
-    navigate({ to: `/${entityName}/$entityId` })
+    navigate({ to: `/${entityName}/${itemId}` })
   }
 
   // If columns are not yet loaded or we're loading data, show a loading state
