@@ -187,10 +187,10 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
               {/*) : (*/}
               {/*  <FileIcon className='mr-1 h-3 w-3' />*/}
               {/*)}*/}
-              <span className='max-w-[150px]'>
+              <span className='max-w-[200px]'>
                 {isImage && (
                   <img
-                    className='h-38 w-40'
+                    className='h-38'
                     alt={column.ColumnName + ' ' + column.ColumnDescription}
                     src={assetUrl}
                   />
