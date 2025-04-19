@@ -38,7 +38,7 @@ export const JsonColumnViewer: React.FC<ColumnViewerProps> = ({
     return <span className={className}>{String(value)}</span>
   }
   return (
-    <div className={cn('w-full overflow-hidden', className)}>
+    <div className={cn('w-full max-w-[600px] overflow-hidden text-wrap', className)}>
       {/* Expanded view with tabs and controls */}
       {
         <div className='rounded-md border'>
@@ -52,9 +52,11 @@ export const JsonColumnViewer: React.FC<ColumnViewerProps> = ({
             <SyntaxHighlighter
               language='json'
               style={isDarkTheme ? vscDarkPlus : vs}
+              wrapLines={true}
               customStyle={{
                 margin: 0,
                 height: '100%',
+                textWrap: 'normal',
                 fontSize: '0.85rem',
                 backgroundColor: 'transparent',
               }}
