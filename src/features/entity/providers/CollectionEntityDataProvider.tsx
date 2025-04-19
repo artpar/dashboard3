@@ -98,7 +98,6 @@ export const CollectionEntityDataProvider: React.FC<{
     },
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-    staleTime: 0,
     enabled: !!entityName,
   })
 

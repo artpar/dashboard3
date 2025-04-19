@@ -48,7 +48,6 @@ export const useRelationRecords = (
       )
     },
     enabled: !!relation && !!entityName && !!entityId && enabled,
-    staleTime: 30000,
   })
 
   // Calculate total pages when data changes

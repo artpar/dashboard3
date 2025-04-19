@@ -54,7 +54,7 @@ export const JsonColumnEditor: React.FC<ColumnEditorProps> = ({
       const parsed = JSON.parse(jsonString)
       const formatted = JSON.stringify(parsed, null, 2)
       setJsonString(formatted)
-      onChange(parsed)
+      onChange(jsonString)
       setJsonError(null)
     } catch (error) {
       console.error('Error formatting JSON:', error)
@@ -67,13 +67,13 @@ export const JsonColumnEditor: React.FC<ColumnEditorProps> = ({
     setJsonString(newValue)
     try {
       if (!newValue) {
-        onChange(null)
+        onChange()
         setJsonError(null)
         return
       }
 
-      const parsed = JSON.parse(newValue)
-      onChange(parsed)
+      // const parsed = JSON.parse(newValue)
+      onChange(newValue)
       setJsonError(null)
     } catch (error) {
       setJsonError('Invalid JSON format')

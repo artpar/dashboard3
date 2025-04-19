@@ -62,7 +62,6 @@ export const SingleEntityDataProvider: React.FC<{
       }
       return EntityApiService.fetchSingleEntity(entityName, entityId)
     },
-    staleTime: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     enabled: !!entityName && !!entityId,
