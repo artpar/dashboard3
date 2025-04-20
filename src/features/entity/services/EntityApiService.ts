@@ -51,14 +51,18 @@ export class EntityApiService {
             // Fetch actions for this entity
             try {
               const actionsResponse = await daptinClient.jsonApi.findAll(
-                'action',
-                {
+                'action', {
                   world_id: schema['reference_id'],
                 }
               )
 
               if (actionsResponse.data && actionsResponse.data.length > 0) {
-                actions = actionsResponse.data
+                actions = actionsResponse.data.map(row => {
+                  return {
+                    ActionName: row.action_name,
+                    InstanceOptional: row.instance_optional,
+                  }
+                })
               }
             } catch (actionError) {
               console.warn('Error fetching actions:', actionError)

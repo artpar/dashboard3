@@ -362,12 +362,12 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Custom Actions</DropdownMenuLabel>
-                  {availableActions.map((action: any) => (
+                  {availableActions.filter(e => e.InstanceOptional).map((action: any) => (
                     <DropdownMenuItem
                       key={action.action_name}
                       onClick={() => executeAction(action.action_name)}
                     >
-                      <span>{action.label}</span>
+                      <span>{action.ActionName}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuGroup>

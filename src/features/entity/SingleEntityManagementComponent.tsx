@@ -43,6 +43,7 @@ import { SingleEntityAllGroupsListWithPermission } from '@/features/entity/compo
 import { SingleEntityAllFieldsViewComponent } from '@/features/entity/detail-view'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
 import { EntityApiService } from '@/features/entity/services/EntityApiService'
+import { EntityActionsPanel } from '@/features/entity/components/actions/EntityActionsPanel'
 import {
   formatDate,
   formatDateTime,
@@ -302,27 +303,14 @@ export const SingleEntityManagementComponent: React.FC<
           className='flex h-full w-full flex-col overflow-hidden'
         >
           <TabsList className='flex w-full justify-start'>
-            <TabsTrigger value='details'>
-              <List className='mr-2 h-4 w-4' />
-              All Fields
-            </TabsTrigger>
-
-            <TabsTrigger value='permissions'>
-              <Key className='mr-2 h-4 w-4' />
-              Permissions
-            </TabsTrigger>
-
-            <TabsTrigger value='groups'>
-              <Key className='mr-2 h-4 w-4' />
-              Groups
-            </TabsTrigger>
-
+            <TabsTrigger value='details'>Details</TabsTrigger>
+            <TabsTrigger value='actions'>Actions</TabsTrigger>
+            <TabsTrigger value='permissions'>Permissions</TabsTrigger>
+            <TabsTrigger value='groups'>Groups</TabsTrigger>
             {relations.length > 0 && (
-              <TabsTrigger value='relations'>
-                <Layers className='mr-2 h-4 w-4' />
-                Relations
-              </TabsTrigger>
+              <TabsTrigger value='relations'>Relations</TabsTrigger>
             )}
+            <TabsTrigger value='history'>History</TabsTrigger>
           </TabsList>
 
           {/* Details Tab (All Fields) */}
@@ -371,6 +359,17 @@ export const SingleEntityManagementComponent: React.FC<
               entityName={entityName}
               entityId={entityId}
               disabled={false}
+            />
+          </TabsContent>
+
+          <TabsContent
+            value='actions'
+            className='flex flex-col space-y-6 overflow-y-auto pb-6'
+          >
+            <EntityActionsPanel
+              entityName={entityName}
+              entityId={entityId}
+              onActionComplete={refreshEntityData}
             />
           </TabsContent>
 
