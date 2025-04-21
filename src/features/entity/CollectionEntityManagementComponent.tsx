@@ -14,9 +14,9 @@ export const CollectionEntityManagementComponent: React.FC<
         entityName={entityName}
         title={
           title ||
-          `${entityName.charAt(0).toUpperCase() + entityName.slice(1)} Management`
+          `${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`
         }
-        description={description || `Manage your ${entityName} records`}
+        description={description || `Manage ${entityName} records`}
       />
     </CollectionEntityDataProvider>
   )

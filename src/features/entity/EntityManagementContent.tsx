@@ -62,7 +62,6 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
     )
   }
 
-  const navigate = useNavigate()
   return (
     <>
       <Main className='flex h-full w-full flex-col overflow-hidden'>

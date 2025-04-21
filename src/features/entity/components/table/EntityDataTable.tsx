@@ -1,7 +1,8 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { FerrisWheel } from 'lucide-react'
+import { ArrowDown, ArrowUp, FerrisWheel } from 'lucide-react'
 import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 import EntityTableBody from './EntityTableBody'
 
@@ -18,6 +19,8 @@ export const EntityDataTable: React.FC = () => {
     setShowDeleteDialog,
     relations,
     entityName,
+    sortColumns,
+    setSortColumn,
   } = useEntityCollectionData()
   const navigate = useNavigate()
   // Get column visibility state from context
@@ -81,14 +84,50 @@ export const EntityDataTable: React.FC = () => {
               <TableHead className='sticky top-0 min-w-12 bg-background'>
                 <FerrisWheel />
               </TableHead>
-              {filteredColumns.map((column) => (
-                <TableHead
-                  className='sticky top-0 min-w-16 bg-background'
-                  key={column.ColumnName}
-                >
-                  {column.ColumnName}
-                </TableHead>
-              ))}
+              {filteredColumns.map((column) => {
+                const isSorted = column.ColumnName in sortColumns;
+                const sortDirection = sortColumns[column.ColumnName];
+                
+                return (
+                  <TableHead
+                    className='sticky top-0 min-w-16 bg-background'
+                    key={column.ColumnName}
+                  >
+                    <Button 
+                      variant="ghost" 
+                      className="h-8 px-2 py-0 hover:bg-muted flex items-center justify-between w-full text-left font-medium"
+                      onClick={() => {
+                        // Toggle sort direction or set to asc if not sorted
+                        if (!isSorted) {
+                          setSortColumn(column.ColumnName, 'asc');
+                        } else if (sortDirection === 'asc') {
+                          setSortColumn(column.ColumnName, 'desc');
+                        } else {
+                          // Remove this column from sorting
+                          const newSortColumns = { ...sortColumns };
+                          delete newSortColumns[column.ColumnName];
+                          // We can't directly call clearSorting for a single column,
+                          // so we update all remaining sort columns
+                          Object.entries(newSortColumns).forEach(([col, dir]) => {
+                            setSortColumn(col, dir);
+                          });
+                        }
+                      }}
+                    >
+                      <span>{column.ColumnName}</span>
+                      {isSorted && (
+                        <span className="ml-2">
+                          {sortDirection === 'asc' ? (
+                            <ArrowUp className="h-4 w-4" />
+                          ) : (
+                            <ArrowDown className="h-4 w-4" />
+                          )}
+                        </span>
+                      )}
+                    </Button>
+                  </TableHead>
+                );
+              })}
               <TableHead className='text-muted-foreground sticky top-0 bg-background text-xs'>
                 Audit Info
               </TableHead>

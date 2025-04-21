@@ -106,7 +106,7 @@ export function SingleEntityAllGroupsListWithPermission({
   const availableGroups = getAvailableGroups()
 
   return (
-    <Card className={className}>
+    <Card className={className + " h-full"}>
       <CardHeader className='pb-3'>
         <div className='flex items-center justify-between'>
           <div>
@@ -185,7 +185,7 @@ export function SingleEntityAllGroupsListWithPermission({
             <Skeleton className='h-10 w-full' />
           </div>
         ) : entityGroups && entityGroups.length > 0 ? (
-          <ScrollArea className='h-[300px]'>
+          <ScrollArea className='h-full'>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -205,7 +205,7 @@ export function SingleEntityAllGroupsListWithPermission({
                       relatedUserGroup.permission || 0
                     )
                   }
-                  
+
                   return (
                     <React.Fragment key={relatedUserGroup.reference_id}>
                       <PermissionScopeRow

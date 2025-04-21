@@ -25,6 +25,9 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   } | null
   filters: Record<string, any>
   setFilters: (filters: Record<string, any>) => void
+  sortColumns: Record<string, 'asc' | 'desc'>
+  setSortColumn: (column: string, direction: 'asc' | 'desc') => void
+  clearSorting: () => void
   showCreateDialog: boolean
   setShowCreateDialog: (show: boolean) => void
   showEditDialog: boolean
@@ -63,6 +66,7 @@ export const CollectionEntityDataProvider: React.FC<{
     total: number
   } | null>(null)
   const [filters, setFilters] = useState<Record<string, any>>({})
+  const [sortColumns, setSortColumns] = useState<Record<string, 'asc' | 'desc'>>({})
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -79,7 +83,15 @@ export const CollectionEntityDataProvider: React.FC<{
     setTotalPages(1)
     setPagination(null)
     setFilters({})
+    setSortColumns({})
   }, [entityName])
+
+  // Convert sortColumns object to sort string for API
+  const getSortString = useCallback(() => {
+    return Object.entries(sortColumns)
+      .map(([column, direction]) => `${direction === 'desc' ? '-' : '+'}${column}`)
+      .join(',');
+  }, [sortColumns]);
 
   // Fetch entity collection data
   const {
@@ -88,12 +100,14 @@ export const CollectionEntityDataProvider: React.FC<{
     error: queryError,
     refetch,
   } = useQuery({
-    queryKey: [`entity-${entityName}-collection`, currentPage, pageSize, filters],
+    queryKey: [`entity-${entityName}-collection`, currentPage, pageSize, filters, sortColumns],
     queryFn: async () => {
+      const sortString = getSortString();
       return EntityApiService.fetchEntityCollection(entityName, {
         page: currentPage,
         pageSize,
         filters,
+        sort: sortString || '-created_at',
       })
     },
     refetchOnMount: true,
@@ -193,6 +207,25 @@ export const CollectionEntityDataProvider: React.FC<{
     return deleteMutation.mutateAsync(id)
   }
 
+  // Set sort column
+  const setSortColumn = useCallback((column: string, direction: 'asc' | 'desc') => {
+    setSortColumns(prev => {
+      // Create a new object with the updated sort column
+      const newSortColumns = { ...prev };
+      
+      // If the column is already in the sort columns, update its direction
+      // If it's not, add it to the sort columns
+      newSortColumns[column] = direction;
+      
+      return newSortColumns;
+    });
+  }, []);
+
+  // Clear all sorting
+  const clearSorting = useCallback(() => {
+    setSortColumns({});
+  }, []);
+
   const fetchData = useCallback(() => {
     console.log("CEDP.fetchData")
     refetch()
@@ -211,6 +244,9 @@ export const CollectionEntityDataProvider: React.FC<{
     pagination,
     filters,
     setFilters,
+    sortColumns,
+    setSortColumn,
+    clearSorting,
     showCreateDialog,
     setShowCreateDialog,
     showEditDialog,

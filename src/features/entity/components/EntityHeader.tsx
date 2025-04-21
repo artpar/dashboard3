@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowDownToLine,
+  ArrowDown,
+  ArrowUp,
   Columns,
   Download,
   Eye,
@@ -15,6 +17,7 @@ import {
   Share2,
   Table,
   Upload,
+  X,
 } from 'lucide-react'
 import { useWorldEntities } from '@/hooks/use-world-entities'
 import { Badge } from '@/components/ui/badge'
@@ -73,6 +76,9 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     resetColumnVisibility,
     showAllColumns,
     executeAction,
+    sortColumns,
+    setSortColumn,
+    clearSorting,
   } = useEntityCollectionData()
 
   // Get world entities for related navigation
@@ -289,6 +295,97 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 </div>
               )}
             </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Sorting dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 gap-1'
+            >
+              {Object.keys(sortColumns).length > 0 ? (
+                <ArrowDown className='h-4 w-4 text-primary' />
+              ) : (
+                <ArrowDown className='h-4 w-4' />
+              )}
+              Sort
+              {Object.keys(sortColumns).length > 0 && (
+                <Badge variant="secondary" className="ml-1 px-1">
+                  {Object.keys(sortColumns).length}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end' className='w-[250px]'>
+            <DropdownMenuLabel className="flex justify-between items-center">
+              <span>Sort Columns</span>
+              {Object.keys(sortColumns).length > 0 && (
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={clearSorting}>
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+
+            {/* Current sorting */}
+            {Object.keys(sortColumns).length > 0 && (
+              <>
+                <DropdownMenuLabel>Current Sorting</DropdownMenuLabel>
+                {Object.entries(sortColumns).map(([column, direction]) => (
+                  <DropdownMenuItem key={column} className="flex justify-between">
+                    <span>{column}</span>
+                    <div className="flex items-center">
+                      {direction === 'asc' ? (
+                        <ArrowUp className="h-4 w-4 ml-2" />
+                      ) : (
+                        <ArrowDown className="h-4 w-4 ml-2" />
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </>
+            )}
+
+            {/* Available columns for sorting */}
+            <DropdownMenuLabel>Available Columns</DropdownMenuLabel>
+            {columns.sort((a, b) => a.ColumnName.localeCompare(b.ColumnName)).map((column) => {
+              const columnName = column.ColumnName;
+              const isCurrentlySorted = columnName in sortColumns;
+              const currentDirection = sortColumns[columnName];
+
+              return (
+                <DropdownMenuSub key={columnName}>
+                  <DropdownMenuSubTrigger className="flex justify-between">
+                    <span>{columnName}</span>
+                    {isCurrentlySorted && (
+                      <div className="flex items-center">
+                        {currentDirection === 'asc' ? (
+                          <ArrowUp className="h-4 w-4 ml-2" />
+                        ) : (
+                          <ArrowDown className="h-4 w-4 ml-2" />
+                        )}
+                      </div>
+                    )}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={() => setSortColumn(columnName, 'asc')}>
+                        <ArrowUp className="mr-2 h-4 w-4" />
+                        <span>Sort Ascending</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortColumn(columnName, 'desc')}>
+                        <ArrowDown className="mr-2 h-4 w-4" />
+                        <span>Sort Descending</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
         {/* More actions dropdown */}
