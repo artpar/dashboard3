@@ -45,20 +45,11 @@ jobs:
           cd ..
 
 
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.6.2
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           name: Release v${{ steps.package-version.outputs.version }}
           body: |
-            ## Changelog
-            ${{ steps.changelog.outputs.changelog }}
-            
             ## Installation
             Download the zip file and extract it to your web server.
           files: |
