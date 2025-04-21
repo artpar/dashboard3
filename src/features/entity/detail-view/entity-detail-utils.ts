@@ -120,7 +120,7 @@ export function groupColumnsByCategory(
   const groups: FieldGroup[] = [
     {
       id: 'main',
-      title: 'Basic Information',
+      title: 'Basic',
       fields: []
     },
     {

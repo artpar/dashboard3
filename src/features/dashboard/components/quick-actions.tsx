@@ -73,15 +73,15 @@ export function QuickActions() {
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Quick Create</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleNavigate('/resources/new')}>
+          <DropdownMenuItem onClick={() => handleNavigate('/resources')}>
             <Database className='mr-2 h-4 w-4' />
             New Resource
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigate('/actions/new')}>
+          <DropdownMenuItem onClick={() => handleNavigate('/actions')}>
             <PlusCircle className='mr-2 h-4 w-4' />
             New Action
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigate('/users/new')}>
+          <DropdownMenuItem onClick={() => handleNavigate('/users')}>
             <PlusCircle className='mr-2 h-4 w-4' />
             New User
           </DropdownMenuItem>

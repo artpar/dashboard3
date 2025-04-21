@@ -197,7 +197,11 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
 
         {/* Create new item button */}
-        <Button size='sm' className='h-8 gap-1'>
+        <Button onClick={() => {
+          navigate({
+            to: '/create/' + entityName
+          })
+        }} size='sm' className='h-8 gap-1'>
           <Plus className='h-4 w-4' />
           New {entityName.replace(/_/g, ' ')}
         </Button>

@@ -25,7 +25,7 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
 
   // Skip special filter keys like _search
   const filterKeys = Object.keys(filters).filter(key => key !== '_search')
-  
+
   if (filterKeys.length === 0) {
     return null
   }
@@ -38,7 +38,7 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
   // Format filter value for display
   const formatFilterValue = (key: string, value: any): string => {
     const column = getColumnDef(key)
-    
+
     if (!column) {
       return String(value)
     }
@@ -63,18 +63,18 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
 
   return (
     <div className="flex flex-col gap-2 mb-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between space-x-2">
         <h3 className="text-sm font-medium">Active Filters</h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onClearAllFilters}
           className="h-6 px-2 text-xs"
         >
           Clear All
         </Button>
       </div>
-      
+
       <ScrollArea className="max-w-full">
         <div className="flex flex-wrap gap-2 pb-1">
           <TooltipProvider>

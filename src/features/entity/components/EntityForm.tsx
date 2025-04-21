@@ -281,7 +281,7 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
       hasValueChanged,
     ]
   );
-  const [newEntity, setNewEntity] = useState<>({
+  const [newEntity, setNewEntity] = useState<any>({
     "__type": entityName,
   })
 
@@ -319,58 +319,70 @@ export const EntityForm: React.FC<EntityFormProps> = ({ mode, onClose }) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='flex w-full flex-col space-y-6 overflow-y-auto p-4 pb-6'
+        className='flex w-full flex-col h-full'
       >
-        <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-          <TabsList className='mb-4 grid grid-cols-6'>
-            <TabsTrigger value='basic'>Basic Information</TabsTrigger>
-            {relationshipColumns.length > 0 && (
-              <TabsTrigger value='relationships'>Relationships</TabsTrigger>
-            )}
-            {advancedColumns.length > 0 && (
-              <TabsTrigger value='advanced'>Advanced</TabsTrigger>
-            )}
-            <TabsTrigger value='permission'>Permission</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value='basic' className='space-y-4'>
-            <div className='grid grid-cols-1 gap-4 lg:grid-cols-1'>
-              {renderColumnFields(basicColumns)}
+        {/* Tabs container with fixed position for the tabs list */}
+        <div className='flex flex-col h-full'>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className='flex flex-col h-full'>
+            {/* Fixed tabs list that won't scroll away */}
+            <div className='sticky top-0 bg-background z-10 pb-2'>
+              <TabsList className='mb-2 grid grid-cols-6'>
+                <TabsTrigger value='basic'>Basic</TabsTrigger>
+                {relationshipColumns.length > 0 && (
+                  <TabsTrigger value='relationships'>Relationships</TabsTrigger>
+                )}
+                {advancedColumns.length > 0 && (
+                  <TabsTrigger value='advanced'>Advanced</TabsTrigger>
+                )}
+                <TabsTrigger value='permission'>Permission</TabsTrigger>
+              </TabsList>
             </div>
-          </TabsContent>
 
-          <TabsContent value='permission' className='space-y-4'>
-            <div className='grid grid-cols-1 gap-4 lg:grid-cols-1'>
-              {renderColumnFields(
-                columns.filter((col) => col.ColumnName === 'permission')
+            {/* Scrollable content area */}
+            <div className='flex-1 overflow-y-auto px-4'>
+              <TabsContent value='basic' className='space-y-4 pb-4'>
+                <div className='grid grid-cols-1 gap-4 lg:grid-cols-1'>
+                  {renderColumnFields(basicColumns)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value='permission' className='space-y-4 pb-4'>
+                <div className='grid grid-cols-1 gap-4 lg:grid-cols-1'>
+                  {renderColumnFields(
+                    columns.filter((col) => col.ColumnName === 'permission')
+                  )}
+                </div>
+              </TabsContent>
+
+              {relationshipColumns.length > 0 && (
+                <TabsContent value='relationships' className='space-y-4 pb-4'>
+                  <div className='grid grid-cols-1 gap-4'>
+                    {renderColumnFields(relationshipColumns)}
+                  </div>
+                </TabsContent>
+              )}
+
+              {advancedColumns.length > 0 && (
+                <TabsContent value='advanced' className='space-y-4 pb-4'>
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                    {renderColumnFields(advancedColumns)}
+                  </div>
+                </TabsContent>
               )}
             </div>
-          </TabsContent>
 
-          {relationshipColumns.length > 0 && (
-            <TabsContent value='relationships' className='space-y-4'>
-              <div className='grid grid-cols-1 gap-4'>
-                {renderColumnFields(relationshipColumns)}
-              </div>
-            </TabsContent>
-          )}
-
-          {advancedColumns.length > 0 && (
-            <TabsContent value='advanced' className='space-y-4'>
-              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                {renderColumnFields(advancedColumns)}
-              </div>
-            </TabsContent>
-          )}
-        </Tabs>
-
-        <DialogFooter className={cn('pt-4', isSubmitting && 'opacity-50')}>
-          <Link className="border border-black rounded pt-2 px-4 text-sm" to="..">Cancel</Link>
-          <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-            {mode === 'create' ? 'Create' : 'Update'} {entityName}
-          </Button>
-        </DialogFooter>
+            {/* Fixed footer */}
+            <div className='sticky bottom-0 bg-background pt-4 pb-4 border-t'>
+              <DialogFooter className={cn(isSubmitting && 'opacity-50')}>
+                <Link className="border border-black rounded pt-2 px-4 text-sm" to="..">Cancel</Link>
+                <Button type='submit' disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                  {mode === 'create' ? 'Create' : 'Update'} {entityName}
+                </Button>
+              </DialogFooter>
+            </div>
+          </Tabs>
+        </div>
       </form>
     </Form>
   )

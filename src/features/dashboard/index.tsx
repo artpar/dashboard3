@@ -434,7 +434,7 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       className="flex h-24 flex-col space-y-2"
-                      onClick={() => navigate({ to: '/create/memory/new' })}
+                      onClick={() => navigate({ to: '/create/memory' })}
                     >
                       <Lightbulb className="h-6 w-6" />
                       <span>New Memory</span>
@@ -442,7 +442,7 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       className="flex h-24 flex-col space-y-2"
-                      onClick={() => navigate({ to: '/create/article/new' })}
+                      onClick={() => navigate({ to: '/create/article' })}
                     >
                       <FileText className="h-6 w-6" />
                       <span>New Article</span>
@@ -450,7 +450,7 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       className="flex h-24 flex-col space-y-2"
-                      onClick={() => navigate({ to: '/create/rpa_task/new' })}
+                      onClick={() => navigate({ to: '/create/rpa_task' })}
                     >
                       <ClipboardList className="h-6 w-6" />
                       <span>New Task</span>

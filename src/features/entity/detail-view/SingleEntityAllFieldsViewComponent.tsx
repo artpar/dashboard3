@@ -76,7 +76,7 @@ export function SingleEntityAllFieldsViewComponent({
       const groups: FieldGroup[] = [
         {
           id: 'basic',
-          title: 'Basic Information',
+          title: 'Basic',
           icon: <Info className='h-4 w-4' />,
           fields: basicFields,
         },
