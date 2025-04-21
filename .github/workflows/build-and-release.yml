@@ -44,9 +44,10 @@ jobs:
           zip -r ../dist-archive/shadcn-admin-${{ steps.package-version.outputs.version }}.zip .
           cd ..
 
+
       - name: Generate changelog
         id: changelog
-        uses: metcalfc/changelog-generator@v4.1.0
+        uses: metcalfc/changelog-generator@v4.6.2
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
