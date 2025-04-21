@@ -3,11 +3,11 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - main
-      
+      - main3
+
   pull_request:
     branches:
-      - main
+      - main3
 
 jobs:
   install-lint-build:
@@ -23,7 +23,7 @@ jobs:
           node-version: 18
 
       - name: Install pnpm
-        run: npm install -g pnpm  
+        run: npm install -g pnpm
 
       - name: Install dependencies
         run: pnpm install
