@@ -95,7 +95,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
     .slice(0, 5) // Limit to 5 quick filters
 
   return (
-    <div className='flex flex-col space-y-4 lg:flex-row'>
+    <div className='flex flex-col'>
       <div className='flex flex-row space-x-2'>
         {/* Search bar */}
         <div className='flex flex-col'>
@@ -133,7 +133,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
           </form>
         </div>
       </div>
-      <div className='flex flex-row gap-3 space-x-4 px-2 lg:flex-row'>
+      <div className='flex flex-row gap-3 space-x-4 px-2 lg:flex-row pt-2'>
         {/* Quick filters button */}
         {quickFilterColumns.length > 0 && (
           <Popover open={showQuickFilters} onOpenChange={setShowQuickFilters}>

@@ -108,7 +108,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   }
 
   return (
-    <div className='mb-6 space-y-4 flex flex-col'>
+    <div className='space-y-4 flex flex-col'>
       {/* Header with title and description */}
       <div className='flex items-start justify-between'>
         <div>

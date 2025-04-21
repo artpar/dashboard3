@@ -1,5 +1,5 @@
 // src/features/entity/components/detail-view/EntityDetailField.tsx
-import { ChevronRightIcon, CopyIcon } from 'lucide-react'
+import { ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import {
 import { ColumnDefinition } from '@/features/entity/columns'
 import { EditableEntityField } from './EditableEntityField'
 import { getFieldLabel } from './entity-detail-utils'
+
 
 interface EntityDetailFieldProps {
   fieldName: string
@@ -93,7 +94,7 @@ export function EntityDetailField({
     <div className={rowClasses}>
       <div
         className={cn(
-          'flex w-full flex-col sm:flex-row',
+          'flex w-full flex-col overflow-hidden sm:flex-row',
           isExpanded && 'border-border/50 border-b'
         )}
       >
@@ -124,11 +125,7 @@ export function EntityDetailField({
         </div>
 
         {/* Field Value with Editable Capability */}
-        <div
-          className={cn(
-            'group relative flex w-full px-4 py-3',
-          )}
-        >
+        <div className={cn('group relative flex w-full px-4 py-3')}>
           <EditableEntityField
             fieldName={fieldName}
             column={column}
