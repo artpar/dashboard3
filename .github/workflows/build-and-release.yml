@@ -11,54 +11,51 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all history for tags and branches
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
-      
+
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-      
+        run: npm install -g pnpm
+
+
       - name: Get version from package.json
         id: package-version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Lint the code
         run: pnpm lint
-      
+
       - name: Run Prettier check
         run: pnpm format:check
-      
+
       - name: Build the project
         run: pnpm build
-      
+
       - name: Create build artifact
         run: |
           mkdir -p dist-archive
           cd dist
           zip -r ../dist-archive/shadcn-admin-${{ steps.package-version.outputs.version }}.zip .
           cd ..
-      
+
       - name: Generate changelog
         id: changelog
         uses: metcalfc/changelog-generator@v4.1.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
