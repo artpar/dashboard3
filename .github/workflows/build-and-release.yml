@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir -p dist-archive
           cd dist
-          zip -r ../dist-archive/shadcn-admin-${{ steps.package-version.outputs.version }}.zip .
+          zip -r ../dist-archive/shadcn-admin.zip .
           cd ..
 
 
@@ -53,7 +53,7 @@ jobs:
             ## Installation
             Download the zip file and extract it to your web server.
           files: |
-            dist-archive/shadcn-admin-${{ steps.package-version.outputs.version }}.zip
+            dist-archive/shadcn-admin.zip
           draft: false
           prerelease: false
         env:
