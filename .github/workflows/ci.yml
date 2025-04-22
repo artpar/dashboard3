@@ -28,5 +28,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build the project
+      - name: Build tphe project
         run: pnpm build

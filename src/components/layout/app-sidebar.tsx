@@ -212,7 +212,7 @@ const AppSidebar = () => {
       <div
         data-slot='sidebar-footer'
         data-sidebar='footer'
-        className='flex flex-col gap-2 p-2'
+        className='flex flex-col gap-2 p-2 absolute bottom-0 bg-white w-64'
       >
         <ul
           data-slot='sidebar-menu'
@@ -244,12 +244,11 @@ const AppSidebar = () => {
                   data-slot='avatar-fallback'
                   className='bg-muted flex size-full items-center justify-center rounded-lg'
                 >
-                  SN
+                  {user.email.substring(0, 2).toUpperCase()}
                 </span>
               </span>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>satnaing</span>
-                <span className='truncate text-xs'>satnaingdev@gmail.com</span>
+                <span className='truncate font-semibold'>{user.email}</span>
               </div>
               <svg
                 xmlns='http://www.w3.org/2000/svg'

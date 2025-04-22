@@ -203,6 +203,7 @@ const Sidebar = React.forwardRef<
           </VisuallyHidden>
           <SheetContent
             data-sidebar='sidebar'
+            data-slot='sidebar'
             data-mobile='true'
             className='bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden'
             style={
@@ -215,7 +216,7 @@ const Sidebar = React.forwardRef<
             <VisuallyHidden asChild>
               <SheetDescription />
             </VisuallyHidden>
-            <div className='flex h-full w-full flex-col'>{children}</div>
+            <div className='flex h-full w-full flex-col justify-between'>{children}</div>
           </SheetContent>
         </Sheet>
       )
@@ -229,9 +230,11 @@ const Sidebar = React.forwardRef<
         data-collapsible={state === 'collapsed' ? collapsible : ''}
         data-variant={variant}
         data-side={side}
+        data-slot='sidebar'
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
+          data-slot='sidebar-gap'
           className={cn(
             'relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
             'group-data-[collapsible=offcanvas]:w-0',
@@ -242,6 +245,7 @@ const Sidebar = React.forwardRef<
           )}
         />
         <div
+          data-slot='sidebar-container'
           className={cn(
             'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
             side === 'left'
@@ -257,7 +261,8 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar='sidebar'
-            className='bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm'
+            data-slot='sidebar-inner'
+            className='bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col justify-between group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm'
           >
             {children}
           </div>
@@ -382,7 +387,8 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar='footer'
-      className={cn('flex flex-col gap-2 p-2', className)}
+      data-slot='sidebar-footer'
+      className={cn('flex flex-col gap-2 p-2 mt-auto shrink-0', className)}
       {...props}
     />
   )
@@ -412,6 +418,7 @@ const SidebarContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar='content'
+      data-slot='sidebar-content'
       className={cn(
         'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
         className

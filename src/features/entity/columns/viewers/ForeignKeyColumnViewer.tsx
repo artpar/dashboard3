@@ -1,7 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, ExternalLink, FileIcon, ImageIcon } from 'lucide-react'
+import { AlertCircle, ExternalLink, FileIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
