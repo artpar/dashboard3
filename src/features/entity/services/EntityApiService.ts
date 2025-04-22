@@ -193,7 +193,6 @@ export class EntityApiService {
       let requestObject: Record<string, any> = {
         'page[size]': pageSize.toString(),
         'page[number]': page.toString(),
-        included_relations: '*',
         sort,
       }
       console.log('fetchEntityCollection:', JSON.stringify(filters))

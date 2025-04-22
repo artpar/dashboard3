@@ -27,7 +27,7 @@ const AppSidebar = () => {
 
   // Derive isExpanded from sidebar context
   const isExpanded = isMobile ? openMobile : open
-  const sidebarData = useSidebarData();
+  const sidebarData = useSidebarData()
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
   const navigate = useNavigate()
@@ -136,13 +136,12 @@ const AppSidebar = () => {
                 <TeamSwitcher teams={sidebarData.teams} />
               </div>
 
-              <div  className='px-4 py-2'>
+              <div className='px-4 py-2'>
                 <Search />
-
               </div>
 
               {/* Main navigation */}
-              <ScrollArea  className='flex-1 pb-16'>
+              <ScrollArea className='flex-1 pb-16'>
                 <nav className='mb-4 space-y-1 p-2'>
                   {sidebarData.navGroups.map((props) => (
                     <NavGroup key={props.table_name} {...props} />
@@ -211,34 +210,65 @@ const AppSidebar = () => {
 
       {/* User section */}
       <div
-        className={cn(
-          'bg-background flex items-center border-t p-3 transition-all duration-300',
-          isExpanded ? 'w-64' : 'w-14 justify-center'
-        )}
+        data-slot='sidebar-footer'
+        data-sidebar='footer'
+        className='flex flex-col gap-2 p-2'
       >
-        {isExpanded ? (
-          <>
-            <div className='min-w-0 flex-1'>
-              <p className='truncate font-medium'>{user?.name || 'Guest'}</p>
-            </div>
-            <Link
-              to='/settings/account'
-              onClick={(e) => handleNavigate(e, '/settings/account')}
-            >
-              <Button variant='ghost' size='icon'>
-                <Settings size={16} />
-              </Button>
-            </Link>
-          </>
-        ) : (
-          <Link
-            to='/settings/account'
-            onClick={(e) => handleNavigate(e, '/settings/account')}
-            className='flex w-full justify-center'
+        <ul
+          data-slot='sidebar-menu'
+          data-sidebar='menu'
+          className='flex w-full min-w-0 flex-col gap-1'
+        >
+          <li
+            data-slot='sidebar-menu-item'
+            data-sidebar='menu-item'
+            className='group/menu-item relative'
           >
-            <Settings size={18} />
-          </Link>
-        )}
+            <button
+              data-slot='dropdown-menu-trigger'
+              data-sidebar='menu-button'
+              data-size='lg'
+              data-active='false'
+              className='peer/menu-button ring-sidebar-ring active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground flex h-12 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium [&amp;>span:last-child]:truncate [&amp;>svg]:size-4 [&amp;>svg]:shrink-0'
+              type='button'
+              id='radix-«re»'
+              aria-haspopup='menu'
+              aria-expanded='false'
+              data-state='closed'
+            >
+              <span
+                data-slot='avatar'
+                className='relative flex size-8 h-8 w-8 shrink-0 overflow-hidden rounded-lg'
+              >
+                <span
+                  data-slot='avatar-fallback'
+                  className='bg-muted flex size-full items-center justify-center rounded-lg'
+                >
+                  SN
+                </span>
+              </span>
+              <div className='grid flex-1 text-left text-sm leading-tight'>
+                <span className='truncate font-semibold'>satnaing</span>
+                <span className='truncate text-xs'>satnaingdev@gmail.com</span>
+              </div>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                className='lucide lucide-chevrons-up-down ml-auto size-4'
+              >
+                <path d='m7 15 5 5 5-5'></path>
+                <path d='m7 9 5-5 5 5'></path>
+              </svg>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   )

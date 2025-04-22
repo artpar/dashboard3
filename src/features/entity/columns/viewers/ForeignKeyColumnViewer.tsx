@@ -154,7 +154,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     // If there's only one file, display it as before but with improved styling
     if (fileDataArray.length === 1) {
       const fileData = fileDataArray[0]
-      
+
       // Generate asset URL
       const assetUrl =
         DAPTIN_ENDPOINT +
@@ -165,7 +165,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         '/' +
         column.ColumnName +
         '.png'
-      
+
       // Get file name or use placeholder
       const fileName =
         typeof fileData === 'object' && fileData !== null && 'name' in fileData
@@ -199,17 +199,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                       className='h-24 w-24 object-contain'
                       alt={column.ColumnName + ' ' + (column.ColumnDescription || '')}
                       src={assetUrl}
-                      onError={(e) => {
-                        // If image fails to load, show placeholder
-                        (e.target as HTMLImageElement).src = ''
-                        ;(e.target as HTMLImageElement).style.display = 'none'
-                        e.currentTarget.parentElement?.appendChild(
-                          Object.assign(document.createElement('div'), {
-                            className: 'h-24 w-24 flex items-center justify-center bg-gray-100',
-                            innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'
-                          })
-                        )
-                      }}
                     />
                     <span className='mt-1 text-xs truncate max-w-24'>
                       {fileName}
@@ -243,95 +232,63 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
     // If there are multiple files, display them in a grid
     return (
-      <div className={cn('flex flex-wrap gap-2', className)}>
-        {fileDataArray.map((fileData, index) => {
+      <div className={cn('flex flex-wrap gap-2 w-full', className)}>
+        {fileDataArray.filter((val, index) => index < 3).map((fileData, index) => {
           // Generate a unique asset URL for each file if possible
-          const fileAssetUrl = entity && column.ColumnName && 
+          const fileAssetUrl = entity && column.ColumnName &&
             (typeof fileData === 'object' && fileData !== null && 'reference_id' in fileData
-              ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}/${fileData.reference_id}.${isImage ? 'png' : 'file'}`
-              : `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png`)
-          
+              ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.${isImage ? 'png' : 'file'}?index=${index}`
+              : `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`)
+
           // Get file name or use placeholder
           const fileName =
             typeof fileData === 'object' && fileData !== null && 'name' in fileData
               ? fileData.name
               : `File ${index + 1}`
-          
+
           // Get file size if available
           const fileSize =
             typeof fileData === 'object' && fileData !== null && 'size' in fileData
               ? formatFileSize(fileData.size as number)
               : ''
-          
+
           return (
-            <TooltipProvider key={index}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant='outline'
-                    className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
-                    onClick={() => {
-                      // Handle file preview or download
-                      if (
-                        typeof fileData === 'object' &&
-                        fileData !== null &&
-                        'url' in fileData
-                      ) {
-                        window.open(fileData.url, '_blank')
-                      } else {
-                        window.open(fileAssetUrl, '_blank')
-                      }
-                    }}
-                  >
-                    {isImage ? (
-                      <div className='flex flex-col items-center p-1'>
-                        {fileData.contents ? (
-                          <img
-                            src={`data:image/${fileData.type?.split('/')[1] || 'png'};base64,${fileData.contents}`}
-                            alt={fileName}
-                            className='h-16 w-16 object-contain'
-                          />
-                        ) : (
-                          <img
-                            src={fileAssetUrl}
-                            alt={fileName}
-                            className='h-16 w-16 object-contain'
-                            onError={(e) => {
-                              // If image fails to load, show placeholder
-                              (e.target as HTMLImageElement).src = ''
-                              ;(e.target as HTMLImageElement).style.display = 'none'
-                              e.currentTarget.parentElement?.appendChild(
-                                Object.assign(document.createElement('div'), {
-                                  className: 'h-16 w-16 flex items-center justify-center bg-gray-100',
-                                  innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'
-                                })
-                              )
-                            }}
-                          />
-                        )}
-                        <span className='mt-1 text-xs truncate max-w-16'>
+            <Badge
+              variant='outline'
+              className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
+              onClick={() => {
+                // Handle file preview or download
+                if (
+                  typeof fileData === 'object' &&
+                  fileData !== null &&
+                  'url' in fileData
+                ) {
+                  window.open(fileData.url, '_blank')
+                } else {
+                  window.open(fileAssetUrl, '_blank')
+                }
+              }}
+            >
+              {isImage ? (
+                <div className='flex flex-col items-center p-1'>
+                  <img
+                    src={fileAssetUrl}
+                    alt={fileName}
+                    className='h-16 w-16 object-contain'
+                  />
+                  <span className='mt-1 text-xs truncate max-w-16'>
                           {fileName.length > 10 ? fileName.substring(0, 8) + '...' : fileName}
                         </span>
-                      </div>
-                    ) : (
-                      <div className='flex items-center gap-1 p-1'>
-                        <FileIcon className='h-3 w-3' />
-                        <span className='truncate max-w-24 text-xs'>
+                </div>
+              ) : (
+                <div className='flex items-center gap-1 p-1'>
+                  <FileIcon className='h-3 w-3' />
+                  <span className='truncate max-w-24 text-xs'>
                           {fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName}
                         </span>
-                      </div>
-                    )}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className='text-xs'>
-                    <p className='font-bold'>{isImage ? 'Image' : 'File'} {index + 1} of {fileDataArray.length}</p>
-                    <p>{fileName}</p>
-                    {fileSize && <p>Size: {fileSize}</p>}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                </div>
+              )}
+            </Badge>
           )
         })}
       </div>
