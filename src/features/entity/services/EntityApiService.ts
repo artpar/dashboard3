@@ -88,9 +88,7 @@ export class EntityApiService {
     entityId: string
   ): Promise<any> {
     try {
-      const response = await daptinClient.jsonApi.find(entityName, entityId, {
-        included_relations: '*',
-      })
+      const response = await daptinClient.jsonApi.find(entityName, entityId, {})
 
       if (response.errors && response.errors.length) {
         throw new Error(

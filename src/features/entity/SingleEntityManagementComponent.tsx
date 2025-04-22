@@ -75,9 +75,7 @@ export const SingleEntityManagementComponent: React.FC<
     queryKey: [`entity-${entityName}-details`, entityId],
     queryFn: async () => {
       try {
-        const response = await daptinClient.jsonApi.find(entityName, entityId, {
-          included_relations: '*', // Try to fetch related data
-        })
+        const response = await daptinClient.jsonApi.find(entityName, entityId, {})
 
         if (response.errors && response.errors.length) {
           throw new Error(
