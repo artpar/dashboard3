@@ -50,7 +50,8 @@ export function useSidebarData(): SidebarData {
         url: '/',
         icon: "",
       },
-    ]
+    ];
+    console.log("sidebar.groupedEntities", groupedEntities)
 
     // Create nav items from top-level entities
     const entityItems = isLoading

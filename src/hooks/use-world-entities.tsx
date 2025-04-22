@@ -86,11 +86,12 @@ export function useWorldEntities() {
             response.errors[0].detail || 'Failed to fetch world entities'
           )
         }
+        console.log("useWorldEntities: ", response.data)
 
         return response.data.map((entity: any) => ({
           ...entity,
           icon: entity.icon,
-        }))
+        }));
       } catch (err) {
         console.error('Error fetching world entities:', err)
         throw err

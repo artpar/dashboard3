@@ -1,5 +1,5 @@
 // src/components/entity/columns/editors/ForeignKeyColumnEditor.tsx
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import {
@@ -9,6 +9,8 @@ import {
   Loader2,
   Upload,
   X,
+  Trash2,
+  ImageIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -72,6 +74,8 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropZoneRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState<boolean>(false)
 
   // Get the referenced entity from the column's ForeignKeyData
   const referencedEntity = column.ForeignKeyData?.Namespace || ''
@@ -94,28 +98,15 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   // If we receive a non-array value, we'll normalize it
   const normalizedValue = Array.isArray(value) ? value : (value ? [value] : [])
 
-  // Extract file data for display (first item in the array)
-  const fileData = normalizedValue.length > 0 ? normalizedValue[0] : null
-
   // Get asset URL for displaying current image
   const assetUrl =
     entity && column.ColumnName
       ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png`
       : ''
 
-  // Handle file upload
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
-
-    const file = files[0]
-    setIsUploading(true)
-    setUploadError(null)
-    setUploadProgress(0)
-
-    try {
+  // Process a single file and return a promise with the file object
+  const processFile = (file: File): Promise<any> => {
+    return new Promise((resolve, reject) => {
       // Create file metadata object
       const fileObject = {
         __type: columnType,
@@ -127,7 +118,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
       // Convert file to base64 for the 'contents' field
       const reader = new FileReader()
-      reader.onload = async (e) => {
+      reader.onload = (e) => {
         try {
           const base64Content =
             (e.target?.result as string)?.split(',')[1] || ''
@@ -138,36 +129,34 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
             contents: base64Content,
           }
 
-          // Always use array for file/image type columns
-          const newValue = [fileWithContents]
-
-          // Update the value
-          onChange(newValue)
-          setUploadProgress(100)
-
-          // Reset the file input
-          if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-          }
-
-          // Close the popover after successful upload
-          setTimeout(() => {
-            setIsUploading(false)
-            setOpen(false)
-            if (onBlur) onBlur()
-          }, 500)
+          resolve(fileWithContents)
         } catch (error) {
           console.error('Error processing file:', error)
-          setUploadError('Failed to process file')
-          setIsUploading(false)
+          reject(error)
         }
       }
 
       reader.onerror = () => {
-        setUploadError('Failed to read file')
-        setIsUploading(false)
+        reject(new Error('Failed to read file'))
       }
 
+      // Read file as data URL
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // Handle file upload from input element
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    setIsUploading(true)
+    setUploadError(null)
+    setUploadProgress(0)
+
+    try {
       // Simulate progress
       const interval = setInterval(() => {
         setUploadProgress((prev) => {
@@ -176,24 +165,126 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
         })
       }, 200)
 
-      // Read file as data URL
-      reader.readAsDataURL(file)
+      // Process all selected files
+      const filePromises = Array.from(files).map(processFile)
+      const processedFiles = await Promise.all(filePromises)
+
+      // Combine with existing files
+      const newValue = [...normalizedValue, ...processedFiles]
+
+      // Update the value
+      onChange(newValue)
+      setUploadProgress(100)
+
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+
+      // Close the popover after successful upload
+      setTimeout(() => {
+        setIsUploading(false)
+        setOpen(false)
+        if (onBlur) onBlur()
+      }, 500)
 
       // Clean up interval
-      return () => clearInterval(interval)
+      clearInterval(interval)
     } catch (error) {
-      console.error('Error uploading file:', error)
-      setUploadError('Failed to upload file')
+      console.error('Error uploading files:', error)
+      setUploadError('Failed to upload files')
       setIsUploading(false)
     }
   }
 
-  // Handle file removal
-  const handleRemoveFile = () => {
-    // Always use array for file/image type columns
+  // Handle files from drag and drop
+  const handleDroppedFiles = async (files: FileList) => {
+    if (!files || files.length === 0) return
+
+    setIsUploading(true)
+    setUploadError(null)
+    setUploadProgress(0)
+
+    try {
+      // Simulate progress
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const newProgress = prev + Math.random() * 10
+          return newProgress < 90 ? newProgress : 90
+        })
+      }, 200)
+
+      // Process all dropped files
+      const filePromises = Array.from(files).map(processFile)
+      const processedFiles = await Promise.all(filePromises)
+
+      // Combine with existing files
+      const newValue = [...normalizedValue, ...processedFiles]
+
+      // Update the value
+      onChange(newValue)
+      setUploadProgress(100)
+
+      // Close the popover after successful upload
+      setTimeout(() => {
+        setIsUploading(false)
+        setOpen(false)
+        if (onBlur) onBlur()
+      }, 500)
+
+      // Clean up interval
+      clearInterval(interval)
+    } catch (error) {
+      console.error('Error uploading dropped files:', error)
+      setUploadError('Failed to upload files')
+      setIsUploading(false)
+    }
+  }
+
+  // Handle removal of a single file
+  const handleRemoveFile = (index: number) => {
+    const newValue = [...normalizedValue]
+    newValue.splice(index, 1)
+    onChange(newValue)
+    if (onBlur) onBlur()
+  }
+
+  // Handle removal of all files
+  const handleRemoveAllFiles = () => {
     onChange([])
     if (onBlur) onBlur()
   }
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDragging(false)
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleDroppedFiles(e.dataTransfer.files)
+      }
+    },
+    [handleDroppedFiles]
+  )
 
   // Query to fetch options from the referenced entity (for non-file references)
   const { data: options, isLoading } = useQuery({
@@ -249,157 +340,219 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
   // Render file reference editor
   if (isFileReference) {
-    // Display current file if exists
-    if (fileData) {
-      const fileName =
-        typeof fileData === 'object' && fileData !== null && 'name' in fileData
-          ? fileData.name
-          : 'File'
-
-      const fileSize =
-        typeof fileData === 'object' && fileData !== null && 'size' in fileData
-          ? formatFileSize(fileData.size as number)
-          : ''
-
+    // Display files if they exist
+    if (normalizedValue.length > 0) {
       return (
-        <div className={cn('space-y-2', className)}>
-          <div className='flex items-center gap-2 w-full'>
-            <Badge
-              variant='outline'
-              className={cn(
-                'flex h-auto items-center bg-gray-50 hover:bg-gray-100 w-full',
-                error && 'border-red-500'
-              )}
-            >
-              {isImage ? (
-                <div className='flex flex-col items-center'>
-                  <img
-                    src={assetUrl}
-                    alt={fileName}
-                    className='h-38 w-40 object-contain'
-                  />
-                  <span className='mt-1 text-xs'>
-                    {fileName} {fileSize && `(${fileSize})`}
-                  </span>
-                </div>
-              ) : (
-                <div className='flex items-center gap-2'>
-                  <FileIcon className='h-4 w-4' />
-                  <span>
-                    {fileName} {fileSize && `(${fileSize})`}
-                  </span>
-                </div>
-              )}
-            </Badge>
+        <div className={cn('space-y-4', className)}>
+          <div className='flex flex-wrap gap-2'>
+            {normalizedValue.map((fileData, index) => {
+              const fileName =
+                typeof fileData === 'object' && fileData !== null && 'name' in fileData
+                  ? fileData.name
+                  : 'File'
 
-            {!disabled && (
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={handleRemoveFile}
-                className='h-8 w-8 p-0'
-              >
-                <X className='h-4 w-4' />
-              </Button>
-            )}
+              const fileSize =
+                typeof fileData === 'object' && fileData !== null && 'size' in fileData
+                  ? formatFileSize(fileData.size as number)
+                  : ''
+
+              // Generate a unique asset URL for each file if possible
+              const fileAssetUrl = entity && column.ColumnName && fileData.reference_id
+                ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}/${fileData.reference_id}.${isImage ? 'png' : 'file'}`
+                : assetUrl
+
+              return (
+                <div key={index} className='relative group'>
+                  <Badge
+                    variant='outline'
+                    className={cn(
+                      'flex h-auto items-center bg-gray-50 hover:bg-gray-100',
+                      error && 'border-red-500'
+                    )}
+                  >
+                    {isImage ? (
+                      <div className='flex flex-col items-center p-1'>
+                        {fileData.contents ? (
+                          <img
+                            src={`data:image/${fileData.type.split('/')[1]};base64,${fileData.contents}`}
+                            alt={fileName}
+                            className='h-24 w-24 object-contain'
+                          />
+                        ) : (
+                          <img
+                            src={fileAssetUrl}
+                            alt={fileName}
+                            className='h-24 w-24 object-contain'
+                            onError={(e) => {
+                              // If image fails to load, show placeholder
+                              (e.target as HTMLImageElement).src = ''
+                              ;(e.target as HTMLImageElement).style.display = 'none'
+                              e.currentTarget.parentElement?.appendChild(
+                                Object.assign(document.createElement('div'), {
+                                  className: 'h-24 w-24 flex items-center justify-center bg-gray-100',
+                                  innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'
+                                })
+                              )
+                            }}
+                          />
+                        )}
+                        <span className='mt-1 text-xs truncate max-w-24'>
+                          {fileName} {fileSize && `(${fileSize})`}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className='flex items-center gap-2 p-2'>
+                        <FileIcon className='h-4 w-4' />
+                        <span className='truncate max-w-40'>
+                          {fileName} {fileSize && `(${fileSize})`}
+                        </span>
+                      </div>
+                    )}
+                  </Badge>
+
+                  {!disabled && (
+                    <Button
+                      variant='destructive'
+                      size='icon'
+                      onClick={() => handleRemoveFile(index)}
+                      className='absolute -top-2 -right-2 h-5 w-5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                    >
+                      <X className='h-3 w-3' />
+                    </Button>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           {!disabled && (
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button variant='outline' size='sm' className='text-xs'>
-                  Change {isImage ? 'Image' : 'File'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-80'>
-                <div className='space-y-4'>
-                  <h4 className='font-medium'>
-                    Upload {isImage ? 'Image' : 'File'}
-                  </h4>
-
-                  <Input
-                    ref={fileInputRef}
-                    type='file'
-                    accept={isImage ? 'image/*' : undefined}
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                  />
-
-                  {isUploading && (
-                    <div className='space-y-2'>
-                      <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
-                        <div
-                          className='bg-primary h-full transition-all duration-300 ease-in-out'
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                      <p className='text-muted-foreground text-center text-xs'>
-                        {uploadProgress < 100
-                          ? 'Uploading...'
-                          : 'Upload complete!'}
-                      </p>
+            <div className='flex items-center gap-2'>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant='outline' size='sm'>
+                    <Upload className='mr-2 h-4 w-4' />
+                    Add More {isImage ? 'Images' : 'Files'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-80'>
+                  <div 
+                    ref={dropZoneRef}
+                    className={cn(
+                      'space-y-4 p-4 border-2 border-dashed rounded-md transition-colors',
+                      isDragging ? 'border-primary bg-primary/5' : 'border-gray-200'
+                    )}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <h4 className='font-medium text-center'>
+                      Upload {isImage ? 'Images' : 'Files'}
+                    </h4>
+                    
+                    <div className='flex flex-col items-center justify-center gap-2 py-4'>
+                      {isImage ? <ImageIcon className='h-10 w-10 text-gray-400' /> : <FileIcon className='h-10 w-10 text-gray-400' />}
+                      <p className='text-sm text-gray-500'>Drag & drop {isImage ? 'images' : 'files'} here or click to browse</p>
                     </div>
-                  )}
 
-                  {uploadError && (
-                    <p className='text-destructive text-xs'>{uploadError}</p>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
+                    <Input
+                      ref={fileInputRef}
+                      type='file'
+                      multiple
+                      accept={isImage ? 'image/*' : undefined}
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                      className='cursor-pointer'
+                    />
+
+                    {isUploading && (
+                      <div className='space-y-2'>
+                        <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
+                          <div
+                            className='bg-primary h-full transition-all duration-300 ease-in-out'
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <p className='text-muted-foreground text-center text-xs'>
+                          {uploadProgress < 100
+                            ? 'Uploading...'
+                            : 'Upload complete!'}
+                        </p>
+                      </div>
+                    )}
+
+                    {uploadError && (
+                      <p className='text-destructive text-xs'>{uploadError}</p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleRemoveAllFiles}
+                className='text-destructive hover:bg-destructive hover:text-destructive-foreground'
+              >
+                <Trash2 className='mr-2 h-4 w-4' />
+                Clear All
+              </Button>
+            </div>
           )}
         </div>
       )
     }
 
-    // Display upload button if no file exists
+    // Display upload button if no files exist
     return (
       <div className={cn('space-y-2', className)}>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant='outline'
-              className={cn('w-full justify-center', error && 'border-red-500')}
-              disabled={disabled}
-            >
-              <Upload className='mr-2 h-4 w-4' />
-              Upload {isImage ? 'Image' : 'File'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-80'>
-            <div className='space-y-4'>
-              <h4 className='font-medium'>
-                Upload {isImage ? 'Image' : 'File'}
-              </h4>
+        <div 
+          ref={dropZoneRef}
+          className={cn(
+            'p-8 border-2 border-dashed rounded-md transition-colors cursor-pointer',
+            isDragging ? 'border-primary bg-primary/5' : 'border-gray-200',
+            error && 'border-red-500'
+          )}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className='flex flex-col items-center justify-center gap-3'>
+            {isImage ? <ImageIcon className='h-12 w-12 text-gray-400' /> : <FileIcon className='h-12 w-12 text-gray-400' />}
+            <p className='text-sm font-medium'>Drag & drop {isImage ? 'images' : 'files'} here or click to browse</p>
+            <p className='text-xs text-gray-500'>Upload multiple {isImage ? 'images' : 'files'} at once</p>
+            
+            <Input
+              ref={fileInputRef}
+              type='file'
+              multiple
+              accept={isImage ? 'image/*' : undefined}
+              onChange={handleFileUpload}
+              disabled={isUploading || disabled}
+              className='hidden'
+            />
+          </div>
 
-              <Input
-                ref={fileInputRef}
-                type='file'
-                accept={isImage ? 'image/*' : undefined}
-                onChange={handleFileUpload}
-                disabled={isUploading}
-              />
-
-              {isUploading && (
-                <div className='space-y-2'>
-                  <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
-                    <div
-                      className='bg-primary h-full transition-all duration-300 ease-in-out'
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <p className='text-muted-foreground text-center text-xs'>
-                    {uploadProgress < 100 ? 'Uploading...' : 'Upload complete!'}
-                  </p>
-                </div>
-              )}
-
-              {uploadError && (
-                <p className='text-destructive text-xs'>{uploadError}</p>
-              )}
+          {isUploading && (
+            <div className='mt-4 space-y-2'>
+              <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
+                <div
+                  className='bg-primary h-full transition-all duration-300 ease-in-out'
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className='text-muted-foreground text-center text-xs'>
+                {uploadProgress < 100 ? 'Uploading...' : 'Upload complete!'}
+              </p>
             </div>
-          </PopoverContent>
-        </Popover>
+          )}
+
+          {uploadError && (
+            <p className='text-destructive text-center text-xs mt-2'>{uploadError}</p>
+          )}
+        </div>
       </div>
     )
   }
