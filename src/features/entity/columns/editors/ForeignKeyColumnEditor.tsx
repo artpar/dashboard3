@@ -1,28 +1,13 @@
 // src/components/entity/columns/editors/ForeignKeyColumnEditor.tsx
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
-import {
-  Check,
-  ChevronsUpDown,
-  FileIcon,
-  Loader2,
-  Upload,
-  X,
-  Trash2,
-  ImageIcon,
-} from 'lucide-react'
+import { FileIcon, ImageIcon, Trash2, Upload, X } from 'lucide-react'
+import Select from 'react-select'
 import { cn } from '@/lib/utils'
+import { useWorldEntities } from '@/hooks/use-world-entities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import {
   Popover,
@@ -58,16 +43,16 @@ interface ForeignKeyColumnEditorProps extends ColumnEditorProps {
  * Component for editing foreign key values
  */
 export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
-                                                                                value,
-                                                                                column,
-                                                                                onChange,
-                                                                                onBlur,
-                                                                                className,
-                                                                                error,
-                                                                                entity,
-                                                                                disabled,
-                                                                                placeholder,
-                                                                              }) => {
+  value,
+  column,
+  onChange,
+  onBlur,
+  className,
+  error,
+  entity,
+  disabled,
+  placeholder,
+}) => {
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [uploadProgress, setUploadProgress] = useState<number>(0)
@@ -76,6 +61,8 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState<boolean>(false)
+  const [labelColumn, setLabelColumn] = useState<string | null>(null)
+  const { entities } = useWorldEntities()
 
   // Get the referenced entity from the column's ForeignKeyData
   const referencedEntity = column.ForeignKeyData?.Namespace || ''
@@ -85,6 +72,43 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   // Determine if this is a file reference column
   const isFileReference =
     dataSource === 'cloud_store' || columnType.startsWith('file.')
+
+  // Find label column for the referenced entity
+  useEffect(() => {
+    if (!referencedEntity) return
+
+    // Find the entity in world entities
+    const entityMetadata = entities.find(
+      (e) => e.table_name === referencedEntity
+    )
+    if (!entityMetadata || !entityMetadata.world_schema_json) return
+
+    try {
+      // Parse the schema to find a label column
+      const schema = JSON.parse(entityMetadata.world_schema_json)
+      if (!schema || !schema.Columns) return
+
+      // First look for a column with ColumnType 'label'
+      let labelCol = schema.Columns.find((col) => col.ColumnType === 'label')
+      // Found a label column with ColumnType 'label'
+
+      // If no label column found, look for name, title, or other common label fields
+      if (!labelCol) {
+        const commonLabelFields = ['name', 'title', 'label', 'display_name']
+        for (const fieldName of commonLabelFields) {
+          labelCol = schema.Columns.find(
+            (col) => col.ColumnName.toLowerCase() === fieldName.toLowerCase()
+          )
+          if (labelCol) break
+        }
+      }
+
+      // Set the label column name if found
+      setLabelColumn(labelCol ? labelCol.ColumnName : null)
+    } catch (err) {
+      console.error('Error parsing schema for label column:', err)
+    }
+  }, [referencedEntity, entities])
 
   // Determine if it's an image based on column type
   const isImage =
@@ -96,7 +120,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
   // File references should always be arrays
   // If we receive a non-array value, we'll normalize it
-  const normalizedValue = Array.isArray(value) ? value : (value ? [value] : [])
+  const normalizedValue = Array.isArray(value) ? value : value ? [value] : []
 
   // Get asset URL for displaying current image
   const assetUrl =
@@ -286,8 +310,10 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
     [handleDroppedFiles]
   )
 
+  const [options, setOptions] = useState<any[]>([])
+
   // Query to fetch options from the referenced entity (for non-file references)
-  const { data: options, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['foreignKeyOptions', referencedEntity, searchTerm],
     queryFn: async () => {
       if (!referencedEntity || isFileReference) return []
@@ -301,13 +327,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
 
         // Add search term if provided
         if (searchTerm) {
-          queryParams.query = JSON.stringify([
-            {
-              column: 'reference_id',
-              operator: 'like',
-              value: `%${searchTerm}%`,
-            },
-          ])
+          queryParams.filter = searchTerm
         }
 
         // Fetch data from the referenced entity
@@ -316,16 +336,16 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
           queryParams
         )
 
+        // Process the response data
+        console.log(`Received ${response.data?.length || 0} results from API`)
+
         // Map the response to options
         if (response.data && Array.isArray(response.data)) {
-          return response.data.map((item) => ({
-            id: item.id,
-            reference_id: item.reference_id,
-            label: item.name || item.title || item.label || item.reference_id,
-          }))
+          return response.data
+        } else {
+          console.warn('Response data is not an array:', response.data)
+          return []
         }
-
-        return []
       } catch (error) {
         console.error(`Error fetching ${referencedEntity} options:`, error)
         return []
@@ -334,9 +354,76 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
     enabled: !!referencedEntity && !isFileReference,
   })
 
-  // Find the selected option based on the current value (for non-file references)
-  const selectedOption = options && value ?
-    options?.find((option) => option.reference_id === value.reference_id) || null  : null
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      // Preserve the original data structure but add a computed label property
+      const processedOptions = data.map((row) => ({
+        ...row, // Keep all original properties
+        _computedLabel:
+          labelColumn && row[labelColumn]
+            ? row[labelColumn]
+            : row.name || row.title || row.label || row.reference_id,
+      }))
+      setOptions(processedOptions)
+
+      // Debug output to help diagnose issues
+      console.log(
+        `Processed ${processedOptions.length} options from ${data.length} data items`
+      )
+    } else {
+      // Reset options if no data
+      setOptions([])
+    }
+  }, [data, labelColumn])
+
+  const getItemLabel = useCallback(
+    (item: any) => {
+      // First check if we have a pre-computed label
+      if (item._computedLabel) {
+        return item._computedLabel
+      }
+      // Otherwise compute it on the fly
+      if (labelColumn && item[labelColumn]) {
+        return item[labelColumn]
+      } else {
+        return item.name || item.title || item.label || item.reference_id
+      }
+    },
+    [labelColumn]
+  )
+
+  // Convert options for react-select
+  const selectOptions = options.map((option) => ({
+    value: option.reference_id,
+    label: getItemLabel(option),
+    data: option,
+  }))
+
+  // Find the currently selected option
+  const selectedOption = value
+    ? {
+        value: value.reference_id,
+        label: getItemLabel(value),
+        data: value,
+      }
+    : null
+
+  // Handle select change
+  const handleSelectChange = (selected: any) => {
+    if (selected) {
+      onChange({
+        type: referencedEntity,
+        label: selected.label,
+        id: selected.value,
+        reference_id: selected.value,
+        ...selected.data, // Include all original data
+      })
+      if (onBlur) onBlur()
+    } else {
+      onChange(null)
+      if (onBlur) onBlur()
+    }
+  }
 
   // Render file reference editor
   if (isFileReference) {
@@ -347,22 +434,27 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
           <div className='flex flex-wrap gap-2'>
             {normalizedValue.map((fileData, index) => {
               const fileName =
-                typeof fileData === 'object' && fileData !== null && 'name' in fileData
+                typeof fileData === 'object' &&
+                fileData !== null &&
+                'name' in fileData
                   ? fileData.name
                   : 'File'
 
               const fileSize =
-                typeof fileData === 'object' && fileData !== null && 'size' in fileData
+                typeof fileData === 'object' &&
+                fileData !== null &&
+                'size' in fileData
                   ? formatFileSize(fileData.size as number)
                   : ''
 
               // Generate a unique asset URL for each file if possible
-              const fileAssetUrl = entity && column.ColumnName && fileData.reference_id
-                ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}/${fileData.reference_id}.${isImage ? 'png' : 'file'}`
-                : assetUrl
+              const fileAssetUrl =
+                entity && column.ColumnName && fileData.reference_id
+                  ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}/${fileData.reference_id}.${isImage ? 'png' : 'file'}`
+                  : assetUrl
 
               return (
-                <div key={index} className='relative group'>
+                <div key={index} className='group relative'>
                   <Badge
                     variant='outline'
                     className={cn(
@@ -385,25 +477,31 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
                             className='h-24 w-24 object-contain'
                             onError={(e) => {
                               // If image fails to load, show placeholder
-                              (e.target as HTMLImageElement).src = ''
-                              ;(e.target as HTMLImageElement).style.display = 'none'
+                              ;(e.target as HTMLImageElement).src = ''
+                              ;(e.target as HTMLImageElement).style.display =
+                                'none'
                               e.currentTarget.parentElement?.appendChild(
                                 Object.assign(document.createElement('div'), {
-                                  className: 'h-24 w-24 flex items-center justify-center bg-gray-100',
-                                  innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'
+                                  className:
+                                    'h-24 w-24 flex items-center justify-center bg-gray-100',
+                                  innerHTML:
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" ' +
+                                    'strokeLinecap="round" strokeLinejoin="round" class="lucide lucide-image">' +
+                                    '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>' +
+                                    '<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
                                 })
                               )
                             }}
                           />
                         )}
-                        <span className='mt-1 text-xs truncate max-w-24'>
+                        <span className='mt-1 max-w-24 truncate text-xs'>
                           {fileName} {fileSize && `(${fileSize})`}
                         </span>
                       </div>
                     ) : (
                       <div className='flex items-center gap-2 p-2'>
                         <FileIcon className='h-4 w-4' />
-                        <span className='truncate max-w-40'>
+                        <span className='max-w-40 truncate'>
                           {fileName} {fileSize && `(${fileSize})`}
                         </span>
                       </div>
@@ -415,7 +513,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
                       variant='destructive'
                       size='icon'
                       onClick={() => handleRemoveFile(index)}
-                      className='absolute -top-2 -right-2 h-5 w-5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                      className='absolute -top-2 -right-2 h-5 w-5 rounded-full opacity-0 transition-opacity group-hover:opacity-100'
                     >
                       <X className='h-3 w-3' />
                     </Button>
@@ -435,24 +533,33 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className='w-80'>
-                  <div 
+                  <div
                     ref={dropZoneRef}
                     className={cn(
-                      'space-y-4 p-4 border-2 border-dashed rounded-md transition-colors',
-                      isDragging ? 'border-primary bg-primary/5' : 'border-gray-200'
+                      'space-y-4 rounded-md border-2 border-dashed p-4 transition-colors',
+                      isDragging
+                        ? 'border-primary bg-primary/5'
+                        : 'border-gray-200'
                     )}
                     onDragEnter={handleDragEnter}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                   >
-                    <h4 className='font-medium text-center'>
+                    <h4 className='text-center font-medium'>
                       Upload {isImage ? 'Images' : 'Files'}
                     </h4>
-                    
+
                     <div className='flex flex-col items-center justify-center gap-2 py-4'>
-                      {isImage ? <ImageIcon className='h-10 w-10 text-gray-400' /> : <FileIcon className='h-10 w-10 text-gray-400' />}
-                      <p className='text-sm text-gray-500'>Drag & drop {isImage ? 'images' : 'files'} here or click to browse</p>
+                      {isImage ? (
+                        <ImageIcon className='h-10 w-10 text-gray-400' />
+                      ) : (
+                        <FileIcon className='h-10 w-10 text-gray-400' />
+                      )}
+                      <p className='text-sm text-gray-500'>
+                        Drag & drop {isImage ? 'images' : 'files'} here or click
+                        to browse
+                      </p>
                     </div>
 
                     <Input
@@ -506,10 +613,10 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
     // Display upload button if no files exist
     return (
       <div className={cn('space-y-2', className)}>
-        <div 
+        <div
           ref={dropZoneRef}
           className={cn(
-            'p-8 border-2 border-dashed rounded-md transition-colors cursor-pointer',
+            'cursor-pointer rounded-md border-2 border-dashed p-8 transition-colors',
             isDragging ? 'border-primary bg-primary/5' : 'border-gray-200',
             error && 'border-red-500'
           )}
@@ -520,10 +627,18 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
           onClick={() => fileInputRef.current?.click()}
         >
           <div className='flex flex-col items-center justify-center gap-3'>
-            {isImage ? <ImageIcon className='h-12 w-12 text-gray-400' /> : <FileIcon className='h-12 w-12 text-gray-400' />}
-            <p className='text-sm font-medium'>Drag & drop {isImage ? 'images' : 'files'} here or click to browse</p>
-            <p className='text-xs text-gray-500'>Upload multiple {isImage ? 'images' : 'files'} at once</p>
-            
+            {isImage ? (
+              <ImageIcon className='h-12 w-12 text-gray-400' />
+            ) : (
+              <FileIcon className='h-12 w-12 text-gray-400' />
+            )}
+            <p className='text-sm font-medium'>
+              Drag & drop {isImage ? 'images' : 'files'} here or click to browse
+            </p>
+            <p className='text-xs text-gray-500'>
+              Upload multiple {isImage ? 'images' : 'files'} at once
+            </p>
+
             <Input
               ref={fileInputRef}
               type='file'
@@ -550,83 +665,53 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
           )}
 
           {uploadError && (
-            <p className='text-destructive text-center text-xs mt-2'>{uploadError}</p>
+            <p className='text-destructive mt-2 text-center text-xs'>
+              {uploadError}
+            </p>
           )}
         </div>
       </div>
     )
   }
 
-  // Render standard foreign key selector (for non-file references)
+  // Render React Select component for foreign key selection
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant='outline'
-          role='combobox'
-          aria-expanded={open}
-          className={cn(
-            'w-full justify-between',
-            !value && 'text-muted-foreground',
-            error && 'border-red-500',
-            className
-          )}
-          disabled={disabled || !referencedEntity}
-        >
-          {value && selectedOption
-            ? selectedOption.label
-            : placeholder || `Select ${referencedEntity}`}
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className='w-full p-0'>
-        <Command>
-          <CommandInput
-            placeholder={`Search ${referencedEntity}...`}
-            onValueChange={setSearchTerm}
-          />
-          <CommandList>
-            {isLoading ? (
-              <div className='flex items-center justify-center p-4'>
-                <Loader2 className='h-4 w-4 animate-spin' />
-                <span className='ml-2'>Loading...</span>
-              </div>
-            ) : (
-              <>
-                <CommandEmpty>No {referencedEntity} found.</CommandEmpty>
-                <CommandGroup>
-                  {options?.map((option) => (
-                    <CommandItem
-                      key={option.reference_id}
-                      value={option.reference_id}
-                      onSelect={(currentValue) => {
-                        onChange({
-                          type: referencedEntity,
-                          id: currentValue,
-                          reference_id: currentValue
-                        })
-                        setOpen(false)
-                        if (onBlur) onBlur()
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          value && value.reference_id === option.reference_id
-                            ? 'opacity-100'
-                            : 'opacity-0'
-                        )}
-                      />
-                      <p className="font-mono">{option.label}</p>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="min-h-48">
+      <Select
+        isDisabled={disabled}
+        options={selectOptions}
+        value={selectedOption}
+        onChange={handleSelectChange}
+        placeholder={placeholder || `Select ${referencedEntity || 'item'}...`}
+        onInputChange={setSearchTerm}
+        isLoading={isLoading}
+        isClearable
+        className={cn('w-full z-50', error ? 'react-select-error' : '')}
+        classNamePrefix='react-select'
+        formatOptionLabel={(option: any) => (
+          <div className='flex flex-col'>
+            <span>{option.label}</span>
+            <span className='text-xs text-gray-400'>{option.value}</span>
+          </div>
+        )}
+        styles={{
+          control: (provided, state) => ({
+            ...provided,
+            borderColor: error ? 'red' : provided.borderColor,
+            boxShadow: error ? '0 0 0 1px red' : provided.boxShadow,
+            '&:hover': {
+              borderColor: error
+                ? 'red'
+                : state.isFocused
+                  ? 'var(--primary-color)'
+                  : 'var(--border-color)',
+            },
+          }),
+        }}
+        noOptionsMessage={() => `No ${referencedEntity || 'items'} found`}
+      />
+      {error && <div className='mt-1 text-xs text-red-500'>{error}</div>}
+    </div>
   )
 }
 

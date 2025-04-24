@@ -57,6 +57,7 @@
     "react-dom": "^19.0.0",
     "react-files-preview": "^3.0.0",
     "react-hook-form": "^7.54.0",
+    "react-select": "^5.10.1",
     "react-syntax-highlighter": "^15.6.1",
     "react-time-ago": "^7.3.3",
     "recharts": "^2.14.1",
