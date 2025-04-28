@@ -82,13 +82,25 @@ export class EntityApiService {
 
   /**
    * Fetch a single entity by ID
+   * @param entityName The name of the entity to fetch
+   * @param entityId The ID of the entity to fetch
+   * @param options Additional options for the fetch
+   * @param options.includedRelations Specify relations to include, use '*' for all relations
    */
   static async fetchSingleEntity(
     entityName: string,
-    entityId: string
+    entityId: string,
+    options: { includedRelations?: string } = {}
   ): Promise<any> {
     try {
-      const response = await daptinClient.jsonApi.find(entityName, entityId, {})
+      const params: Record<string, any> = {}
+      
+      // Add included relations if specified
+      if (options.includedRelations) {
+        params['included_relations'] = options.includedRelations
+      }
+      
+      const response = await daptinClient.jsonApi.find(entityName, entityId, params)
 
       if (response.errors && response.errors.length) {
         throw new Error(

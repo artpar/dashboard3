@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import { TrashIcon } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +22,6 @@ import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'
 import { ColumnDefinition, ColumnType } from '@/features/entity/columns/types'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
-import { TrashIcon } from 'lucide-react'
 
 interface EntityPasteDialogProps {
   open: boolean
@@ -33,9 +33,9 @@ interface EntityPasteDialogProps {
  * Allows editing of the data before pasting
  */
 export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
-                                                                      open,
-                                                                      onClose,
-                                                                    }) => {
+  open,
+  onClose,
+}) => {
   const {
     clipboardData,
     pasteItems: originalPasteItems,
@@ -89,24 +89,33 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
     columnKey: string,
     newValue: any
   ) => {
+    console.log(
+      'Handle cell change for ',
+      columnKey,
+      ' to ',
+      newValue,
+      ' at row ',
+      rowIndex
+    )
     setEditableData((prevData) => {
       const newData = [...prevData]
       newData[rowIndex] = {
         ...newData[rowIndex],
         [columnKey]: newValue,
       }
+      console.log('New data:', newData)
       return newData
     })
   }
 
   // Custom paste function that uses the edited data
-  const pasteItems = async () => {
+  const pasteItems = useCallback(async () => {
     await originalPasteItems(editableData)
-  }
+  }, [editableData]);
 
   return (
-    <AlertDialog className="max-h-full" open={open} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-[90vw] w-full max-h-[90vh]">
+    <AlertDialog className='max-h-full' open={open} onOpenChange={onClose}>
+      <AlertDialogContent className='max-h-[90vh] w-full max-w-[90vw]'>
         <AlertDialogHeader>
           <AlertDialogTitle>
             Paste {clipboardData.length} item
@@ -115,30 +124,30 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
           <AlertDialogDescription>
             {hasTypeMismatch
               ? 'Warning: Some items have a different type than the current entity (' +
-              entityName +
-              '). This may cause issues when pasting.'
+                entityName +
+                '). This may cause issues when pasting.'
               : 'Review the data below before pasting. New items will be created based on this data.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {/* Table container with fixed height and scrollable content */}
-        <div className="relative h-[60vh] w-full overflow-hidden border rounded-md">
+        <div className='relative h-[60vh] w-full overflow-hidden rounded-md border'>
           {/* Scrollable container that allows both horizontal and vertical scrolling */}
-          <div className="absolute inset-0 overflow-auto">
+          <div className='absolute inset-0 overflow-auto'>
             {/* Table wrapper with minimum width to ensure it can grow */}
-            <div className="min-w-full w-max">
+            <div className='w-max min-w-full'>
               <Table>
-                <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableHeader className='bg-background sticky top-0 z-10'>
                   <TableRow>
-                    <TableHead className="w-12 whitespace-nowrap">#</TableHead>
+                    <TableHead className='w-12 whitespace-nowrap'>#</TableHead>
                     {columnDefinitions
                       .filter(
-                        (column) =>
-                          !SYSTEM_COLUMNS.includes(column.ColumnName)
-                      ).map((column) => (
+                        (column) => !SYSTEM_COLUMNS.includes(column.ColumnName)
+                      )
+                      .map((column) => (
                         <TableHead
                           key={column.ColumnName}
-                          className="whitespace-nowrap"
+                          className='whitespace-nowrap'
                         >
                           {column.Name || column.ColumnName}
                         </TableHead>
@@ -148,15 +157,17 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
                 <TableBody>
                   {editableData.map((item, rowIndex) => (
                     <TableRow key={rowIndex}>
-                      <TableCell className="w-12 font-medium">
-                        <TrashIcon onClick={() => {
-                          console.log('Delete item', item)
-                          setEditableData((prevData) => {
-                            const newData = [...prevData]
-                            newData.splice(rowIndex, 1)
-                            return newData
-                          })
-                        }}></TrashIcon>
+                      <TableCell className='w-12 font-medium'>
+                        <TrashIcon
+                          onClick={() => {
+                            console.log('Delete item', item)
+                            setEditableData((prevData) => {
+                              const newData = [...prevData]
+                              newData.splice(rowIndex, 1)
+                              return newData
+                            })
+                          }}
+                        ></TrashIcon>
                       </TableCell>
                       {columnDefinitions
                         .filter(
@@ -166,8 +177,8 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
                         .map((column) => {
                           const key = column.ColumnName
                           return (
-                            <TableCell key={key} className="w-60 p-0">
-                              <div className="p-2">
+                            <TableCell key={key} className='w-60 p-0'>
+                              <div className='p-2'>
                                 <ColumnEditor
                                   column={column}
                                   value={item[key]}
@@ -175,7 +186,7 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
                                   onChange={(newValue) =>
                                     handleCellChange(rowIndex, key, newValue)
                                   }
-                                  className="w-full"
+                                  className='w-full'
                                 />
                               </div>
                             </TableCell>
@@ -195,7 +206,7 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
             onClick={() => {
               pasteItems()
             }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className='bg-primary text-primary-foreground hover:bg-primary/90'
           >
             Paste {editableData.length} item
             {editableData.length !== 1 ? 's' : ''}

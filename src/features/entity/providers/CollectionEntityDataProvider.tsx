@@ -369,7 +369,7 @@ export const CollectionEntityDataProvider: React.FC<{
   }, [refetch])
 
   // Copy selected items to clipboard in the required format
-  const copySelectedItems = useCallback(() => {
+  const copySelectedItems = useCallback(async () => {
     if (selectedItems.length === 0) {
       toast({
         variant: 'default',
@@ -379,18 +379,46 @@ export const CollectionEntityDataProvider: React.FC<{
       return
     }
 
-    // Format the selected items as an array of objects with columnName: value pairs
-    const formattedItems = selectedItems.map(item => {
-      const formattedItem: Record<string, any> = {}
-      // Add all properties from the item
-      Object.keys(item).forEach(key => {
-        // Skip internal properties that start with underscore
-        if (!key.startsWith('_')) {
-          formattedItem[key] = item[key]
-        }
-      })
-      return formattedItem
+    // Fetch each selected item with all relations included
+    const deepCopyPromises = selectedItems.map(item => {
+      // Get the ID of the item
+      const itemId = item.id || item.reference_id
+      if (!itemId) {
+        console.error('Item has no ID:', item)
+        return Promise.resolve(null)
+      }
+      // Fetch the item with all relations included
+      return EntityApiService.fetchSingleEntity(entityName, itemId, { includedRelations: '*' })
     })
+
+    // Wait for all fetches to complete
+    const deepCopiedItems = await Promise.all(deepCopyPromises)
+
+    console.log("CEDP.copySelectedItems", deepCopiedItems)
+    // Filter out any null items and format them
+    const formattedItems = deepCopiedItems
+      .filter(item => item !== null)
+      .map(item => {
+        const formattedItem: Record<string, any> = {}
+        // Add all properties from the item
+        Object.keys(item).forEach(key => {
+          // Skip internal properties that start with underscore
+          if (!key.startsWith('_')) {
+            formattedItem[key] = item[key]
+          }
+          if (formattedItem[key] instanceof Array) {
+            if (formattedItem[key].length === 0) {
+              delete formattedItem[key]
+            }
+          } else if  (formattedItem[key] instanceof Object) {
+            formattedItem[key] = {
+              "type": formattedItem[key]["type"],
+              "id": formattedItem[key]["reference_id"]
+            }
+          }
+        })
+        return formattedItem
+      })
 
     // Set the clipboard data in the state
     setClipboardData(formattedItems)
@@ -422,7 +450,7 @@ export const CollectionEntityDataProvider: React.FC<{
   }, [selectedItems, toast])
 
   // Paste items from clipboard
-  const pasteItems = useCallback(async () => {
+  const pasteItems = useCallback(async (clipboardData) => {
     console.log("CEDP.pasteItems", clipboardData)
     if (!clipboardData || clipboardData.length === 0) {
       toast({
