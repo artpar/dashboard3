@@ -107,7 +107,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
         )}
 
         {/* Fixed pagination at the bottom */}
-        <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-4'>
+        <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-2'>
           <EntityPagination
             currentPage={currentPage}
             totalPages={pagination?.lastPage || totalPages}
