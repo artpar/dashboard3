@@ -1,7 +1,8 @@
 import React from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Trash2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import EntityHeader from '@/features/entity/components/EntityHeader.tsx'
@@ -25,16 +26,21 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   description,
 }) => {
   const {
+    data,
     isLoading,
     error,
     currentPage,
     totalPages,
     pageSize,
+    selectedItems,
     setCurrentPage,
     setPageSize,
+    bulkDeleteItems,
+    selectAllItems,
     pagination,
     showFilterDialog,
     setShowFilterDialog,
+    clearSelectedItems,
     filters,
     setFilters,
   } = useEntityCollectionData()
@@ -62,6 +68,19 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
     )
   }
 
+  const handleDelete = (item: any) => {
+    setSelectedItem(item)
+    setShowDeleteDialog(true)
+  }
+
+  // Handle bulk delete action
+  const handleBulkDelete = async () => {
+    if (selectedItems.length > 0) {
+      const itemIds = selectedItems.map((item) => item.id || item.reference_id)
+      await bulkDeleteItems(itemIds)
+    }
+  }
+
   return (
     <>
       <Main className='flex h-full w-full flex-col overflow-hidden'>
@@ -83,7 +102,10 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
             <Skeleton className='h-64 w-full' />
           </div>
         ) : (
-          <EntityDataTable />
+          <EntityDataTable
+            handleBulkDelete={handleBulkDelete}
+            handleDelete={handleDelete}
+          />
         )}
 
         {/* Fixed pagination at the bottom */}

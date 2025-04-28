@@ -223,10 +223,10 @@ export const CollectionEntityDataProvider: React.FC<{
     },
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: [`entity-${entityName}-collection`] })
-      
+
       const successCount = results.filter(r => r.success).length;
       const failureCount = results.length - successCount;
-      
+
       if (failureCount === 0) {
         toast({
           title: 'Success',
@@ -245,7 +245,7 @@ export const CollectionEntityDataProvider: React.FC<{
           description: `${successCount} deleted, ${failureCount} failed`,
         })
       }
-      
+
       setShowBulkDeleteDialog(false)
       setSelectedItems([])
     },
@@ -312,11 +312,11 @@ export const CollectionEntityDataProvider: React.FC<{
     setSortColumns(prev => {
       // Create a new object with the updated sort column
       const newSortColumns = { ...prev };
-      
+
       // If the column is already in the sort columns, update its direction
       // If it's not, add it to the sort columns
       newSortColumns[column] = direction;
-      
+
       return newSortColumns;
     });
   }, []);

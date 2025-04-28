@@ -1,9 +1,8 @@
 import React from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
-import { TableCell, TableRow } from '@/components/ui/table'
-import { ColumnDefinition } from '@/features/entity/columns'
 import { EyeIcon } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { TableRow } from '@/components/ui/table'
+import { ColumnDefinition } from '@/features/entity/columns'
 import EntityAuditCell from './EntityAuditCell'
 import EntityTableCell from './EntityTableCell'
 
@@ -40,18 +39,20 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = ({
       key={item.id || item.reference_id || index}
       className={isSelected ? 'bg-muted/40' : undefined}
     >
-      <TableCell className='w-4 p-2 pt-4'>
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={onToggleSelect}
-          aria-label={`Select row ${index + 1}`}
-        />
-      </TableCell>
-      <TableCell onClick={() => {
-        onViewDetails(item)
-      }} className='w-12 pl-5 hover:bg-gray-200 hover:cursor-pointer'>
-        <EyeIcon  className='w-5 h-5 mt-1' />
-      </TableCell>
+      <td
+        onClick={onToggleSelect}
+        className='w-4 cursor-pointer p-2 pt-4 hover:bg-gray-200'
+      >
+        <Checkbox  checked={isSelected} aria-label={`Select row ${index + 1}`} />
+      </td>
+      <td
+        onClick={() => {
+          onViewDetails(item)
+        }}
+        className='w-12 pl-3 hover:cursor-pointer hover:bg-gray-200'
+      >
+        <EyeIcon className='mt-1 h-5 w-5' />
+      </td>
       {columns.map((column) => (
         <EntityTableCell key={column.ColumnName} item={item} column={column} />
       ))}

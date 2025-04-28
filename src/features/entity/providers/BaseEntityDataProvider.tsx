@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { ColumnDefinition } from '@/features/entity/columns'
-import { EntityApiService } from '../services/EntityApiService'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
+import { EntityApiService } from '../services/EntityApiService'
 
 // Define the base entity context type
 export interface BaseEntityContextType {
@@ -70,11 +70,11 @@ export const BaseEntityDataProvider: React.FC<{
         setSchemaError(null)
 
         // Initialize visible columns (excluding audit columns)
-        const AUDIT_COLUMNS = SYSTEM_COLUMNS;
+        const AUDIT_COLUMNS = SYSTEM_COLUMNS
         setVisibleColumns(
           columns
-            .filter(col => !AUDIT_COLUMNS.includes(col.ColumnName))
-            .map(col => col.ColumnName)
+            .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
+            .map((col) => col.ColumnName)
         )
       } catch (err) {
         console.error(`Error fetching schema for ${entityName}:`, err)
@@ -138,9 +138,9 @@ export const BaseEntityDataProvider: React.FC<{
 
   // Toggle column visibility
   const toggleColumnVisibility = useCallback((columnKey: string) => {
-    setVisibleColumns(prev =>
+    setVisibleColumns((prev) =>
       prev.includes(columnKey)
-        ? prev.filter(key => key !== columnKey)
+        ? prev.filter((key) => key !== columnKey)
         : [...prev, columnKey]
     )
   }, [])
@@ -150,14 +150,14 @@ export const BaseEntityDataProvider: React.FC<{
     const AUDIT_COLUMNS = ['created_at', 'updated_at', 'reference_id']
     setVisibleColumns(
       columns
-        .filter(col => !AUDIT_COLUMNS.includes(col.ColumnName))
-        .map(col => col.ColumnName)
+        .filter((col) => !AUDIT_COLUMNS.includes(col.ColumnName))
+        .map((col) => col.ColumnName)
     )
   }, [columns])
 
   // Show all columns
   const showAllColumns = useCallback(() => {
-    setVisibleColumns(columns.map(col => col.ColumnName))
+    setVisibleColumns(columns.map((col) => col.ColumnName))
   }, [columns])
 
   // Create the base context value
