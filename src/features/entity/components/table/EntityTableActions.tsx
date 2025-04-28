@@ -51,7 +51,6 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
   }
 
   return (
-    <TableCell className='w-12 text-left'>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='icon'>
@@ -96,7 +95,6 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-    </TableCell>
   )
 }
 

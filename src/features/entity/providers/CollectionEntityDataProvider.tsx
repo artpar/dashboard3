@@ -10,6 +10,12 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   data: any[]
   selectedItem: any
   setSelectedItem: (item: any) => void
+  selectedItems: any[]
+  setSelectedItems: (items: any[]) => void
+  toggleItemSelection: (item: any) => void
+  selectAllItems: () => void
+  clearSelectedItems: () => void
+  isItemSelected: (item: any) => boolean
   currentPage: number
   setCurrentPage: (page: number) => void
   pageSize: number
@@ -34,12 +40,15 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   setShowEditDialog: (show: boolean) => void
   showDeleteDialog: boolean
   setShowDeleteDialog: (show: boolean) => void
+  showBulkDeleteDialog: boolean
+  setShowBulkDeleteDialog: (show: boolean) => void
   showFilterDialog: boolean
   setShowFilterDialog: (show: boolean) => void
   fetchData: () => void
   createItem: (item: any) => Promise<any>
   updateItem: (id: string, item: any) => Promise<any>
   deleteItem: (id: string) => Promise<any>
+  bulkDeleteItems: (ids: string[]) => Promise<any>
 }
 
 // Create the collection entity context
@@ -54,6 +63,7 @@ export const CollectionEntityDataProvider: React.FC<{
 }> = ({ children, entityName }) => {
   const [data, setData] = useState<any[]>([])
   const [selectedItem, setSelectedItem] = useState<any>(null)
+  const [selectedItems, setSelectedItems] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
@@ -70,6 +80,7 @@ export const CollectionEntityDataProvider: React.FC<{
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
   const [showFilterDialog, setShowFilterDialog] = useState(false)
 
   const { toast } = useToast()
@@ -79,6 +90,7 @@ export const CollectionEntityDataProvider: React.FC<{
   useEffect(() => {
     setData([])
     setSelectedItem(null)
+    setSelectedItems([])
     setCurrentPage(1)
     setTotalPages(1)
     setPagination(null)
@@ -194,6 +206,58 @@ export const CollectionEntityDataProvider: React.FC<{
     },
   })
 
+  // Bulk Delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Process deletions sequentially to ensure all are handled
+      const results = [];
+      for (const id of ids) {
+        try {
+          const result = await EntityApiService.deleteEntity(entityName, id);
+          results.push({ id, success: true, result });
+        } catch (error) {
+          results.push({ id, success: false, error });
+        }
+      }
+      return results;
+    },
+    onSuccess: (results) => {
+      queryClient.invalidateQueries({ queryKey: [`entity-${entityName}-collection`] })
+      
+      const successCount = results.filter(r => r.success).length;
+      const failureCount = results.length - successCount;
+      
+      if (failureCount === 0) {
+        toast({
+          title: 'Success',
+          description: `${successCount} item${successCount !== 1 ? 's' : ''} deleted successfully`,
+        })
+      } else if (successCount === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to delete items',
+          description: 'All delete operations failed',
+        })
+      } else {
+        toast({
+          variant: 'default',
+          title: 'Partial Success',
+          description: `${successCount} deleted, ${failureCount} failed`,
+        })
+      }
+      
+      setShowBulkDeleteDialog(false)
+      setSelectedItems([])
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete items',
+        description: error.message || 'An error occurred',
+      })
+    },
+  })
+
   // Exposed functions
   const createItem = async (item: any) => {
     return createMutation.mutateAsync(item)
@@ -206,6 +270,42 @@ export const CollectionEntityDataProvider: React.FC<{
   const deleteItem = async (id: string) => {
     return deleteMutation.mutateAsync(id)
   }
+
+  const bulkDeleteItems = async (ids: string[]) => {
+    return bulkDeleteMutation.mutateAsync(ids)
+  }
+
+  // Item selection helpers
+  const toggleItemSelection = useCallback((item: any) => {
+    const itemId = item.id || item.reference_id;
+    setSelectedItems(prev => {
+      const isSelected = prev.some(i => (i.id || i.reference_id) === itemId);
+      if (isSelected) {
+        return prev.filter(i => (i.id || i.reference_id) !== itemId);
+      } else {
+        return [...prev, item];
+      }
+    });
+  }, []);
+
+  const selectAllItems = useCallback(() => {
+    if (selectedItems.length === data.length) {
+      // If all items are already selected, clear the selection
+      setSelectedItems([]);
+    } else {
+      // Otherwise, select all items
+      setSelectedItems([...data]);
+    }
+  }, [data, selectedItems.length]);
+
+  const clearSelectedItems = useCallback(() => {
+    setSelectedItems([]);
+  }, []);
+
+  const isItemSelected = useCallback((item: any) => {
+    const itemId = item.id || item.reference_id;
+    return selectedItems.some(i => (i.id || i.reference_id) === itemId);
+  }, [selectedItems])
 
   // Set sort column
   const setSortColumn = useCallback((column: string, direction: 'asc' | 'desc') => {
@@ -236,6 +336,12 @@ export const CollectionEntityDataProvider: React.FC<{
     data,
     selectedItem,
     setSelectedItem,
+    selectedItems,
+    setSelectedItems,
+    toggleItemSelection,
+    selectAllItems,
+    clearSelectedItems,
+    isItemSelected,
     currentPage,
     setCurrentPage,
     pageSize,
@@ -253,12 +359,15 @@ export const CollectionEntityDataProvider: React.FC<{
     setShowEditDialog,
     showDeleteDialog,
     setShowDeleteDialog,
+    showBulkDeleteDialog,
+    setShowBulkDeleteDialog,
     showFilterDialog,
     setShowFilterDialog,
     fetchData,
     createItem,
     updateItem,
     deleteItem,
+    bulkDeleteItems,
     isLoading: isLoadingData,
     error: queryError instanceof Error ? queryError : queryError ? new Error(String(queryError)) : null,
   }

@@ -12,6 +12,8 @@ interface EntityTableBodyProps {
   onEdit: (item: any) => void
   onDelete: (item: any) => void
   onViewDetails: (item: any) => void
+  isItemSelected: (item: any) => boolean
+  toggleItemSelection: (item: any) => void
 }
 
 /**
@@ -26,6 +28,8 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
   onEdit,
   onDelete,
   onViewDetails,
+  isItemSelected,
+  toggleItemSelection,
 }) => {
   // If no data, show empty state
   if (data.length === 0) {
@@ -33,7 +37,7 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
       <TableBody className={className}>
         <TableRow>
           <TableCell
-            colSpan={filteredColumns.length + 2}
+            colSpan={filteredColumns.length + 3} // +3 for checkbox, actions, and audit columns
             className='text-muted-foreground py-6 text-center'
           >
             No data found
@@ -57,6 +61,8 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = ({
           onEdit={onEdit}
           onDelete={onDelete}
           onViewDetails={onViewDetails}
+          isSelected={isItemSelected(item)}
+          onToggleSelect={() => toggleItemSelection(item)}
         />
       ))}
     </TableBody>
