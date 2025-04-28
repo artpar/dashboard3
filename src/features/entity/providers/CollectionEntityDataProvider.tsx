@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useEffect, useState, useMemo } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
@@ -44,6 +44,12 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   setShowBulkDeleteDialog: (show: boolean) => void
   showFilterDialog: boolean
   setShowFilterDialog: (show: boolean) => void
+  showPasteDialog: boolean
+  setShowPasteDialog: (show: boolean) => void
+  clipboardData: any[] | null
+  setClipboardData: (data: any[] | null) => void
+  copySelectedItems: () => void
+  pasteItems: () => Promise<void>
   fetchData: () => void
   createItem: (item: any) => Promise<any>
   updateItem: (id: string, item: any) => Promise<any>
@@ -64,6 +70,8 @@ export const CollectionEntityDataProvider: React.FC<{
   const [data, setData] = useState<any[]>([])
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [selectedItems, setSelectedItems] = useState<any[]>([])
+  // Use a Map for faster lookups of selected items
+  const [selectedItemsMap, setSelectedItemsMap] = useState<Map<string, any>>(new Map())
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
@@ -82,6 +90,8 @@ export const CollectionEntityDataProvider: React.FC<{
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
   const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showPasteDialog, setShowPasteDialog] = useState(false)
+  const [clipboardData, setClipboardData] = useState<any[] | null>(null)
 
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -275,16 +285,33 @@ export const CollectionEntityDataProvider: React.FC<{
     return bulkDeleteMutation.mutateAsync(ids)
   }
 
-  // Item selection helpers
+  // Keep selectedItems array and selectedItemsMap in sync
+  useEffect(() => {
+    const newMap = new Map();
+    selectedItems.forEach(item => {
+      const itemId = item.id || item.reference_id;
+      newMap.set(itemId, item);
+    });
+    setSelectedItemsMap(newMap);
+  }, [selectedItems]);
+
+  // Item selection helpers - optimized for performance
   const toggleItemSelection = useCallback((item: any) => {
     const itemId = item.id || item.reference_id;
-    setSelectedItems(prev => {
-      const isSelected = prev.some(i => (i.id || i.reference_id) === itemId);
-      if (isSelected) {
-        return prev.filter(i => (i.id || i.reference_id) !== itemId);
+    
+    setSelectedItemsMap(prevMap => {
+      const newMap = new Map(prevMap);
+      if (newMap.has(itemId)) {
+        newMap.delete(itemId);
       } else {
-        return [...prev, item];
+        newMap.set(itemId, item);
       }
+      
+      // Update the selectedItems array based on the map
+      const newSelectedItems = Array.from(newMap.values());
+      setSelectedItems(newSelectedItems);
+      
+      return newMap;
     });
   }, []);
 
@@ -292,20 +319,29 @@ export const CollectionEntityDataProvider: React.FC<{
     if (selectedItems.length === data.length) {
       // If all items are already selected, clear the selection
       setSelectedItems([]);
+      setSelectedItemsMap(new Map());
     } else {
-      // Otherwise, select all items
-      setSelectedItems([...data]);
+      // Otherwise, select all items - create a new map for faster lookups
+      const newMap = new Map();
+      data.forEach(item => {
+        const itemId = item.id || item.reference_id;
+        newMap.set(itemId, item);
+      });
+      setSelectedItemsMap(newMap);
+      setSelectedItems(data.slice()); // Use slice to create a new array
     }
   }, [data, selectedItems.length]);
 
   const clearSelectedItems = useCallback(() => {
     setSelectedItems([]);
+    setSelectedItemsMap(new Map());
   }, []);
 
+  // Memoized isItemSelected function for better performance
   const isItemSelected = useCallback((item: any) => {
     const itemId = item.id || item.reference_id;
-    return selectedItems.some(i => (i.id || i.reference_id) === itemId);
-  }, [selectedItems])
+    return selectedItemsMap.has(itemId);
+  }, [selectedItemsMap])
 
   // Set sort column
   const setSortColumn = useCallback((column: string, direction: 'asc' | 'desc') => {
@@ -330,6 +366,135 @@ export const CollectionEntityDataProvider: React.FC<{
     console.log("CEDP.fetchData")
     refetch()
   }, [refetch])
+
+  // Copy selected items to clipboard in the required format
+  const copySelectedItems = useCallback(() => {
+    if (selectedItems.length === 0) {
+      toast({
+        variant: 'default',
+        title: 'No items selected',
+        description: 'Please select at least one item to copy.',
+      })
+      return
+    }
+
+    // Format the selected items as an array of objects with columnName: value pairs
+    const formattedItems = selectedItems.map(item => {
+      const formattedItem: Record<string, any> = {}
+      // Add all properties from the item
+      Object.keys(item).forEach(key => {
+        // Skip internal properties that start with underscore
+        if (!key.startsWith('_')) {
+          formattedItem[key] = item[key]
+        }
+      })
+      return formattedItem
+    })
+
+    // Set the clipboard data in the state
+    setClipboardData(formattedItems)
+
+    // Copy to system clipboard as JSON string
+    try {
+      const jsonString = JSON.stringify(formattedItems, null, 2)
+      navigator.clipboard.writeText(jsonString).then(() => {
+        toast({
+          title: 'Copied to clipboard',
+          description: `${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''} copied`,
+        })
+      }).catch(err => {
+        console.error('Failed to copy to clipboard:', err)
+        toast({
+          variant: 'destructive',
+          title: 'Copy failed',
+          description: 'Could not copy to system clipboard. Data is still available for internal paste.',
+        })
+      })
+    } catch (err) {
+      console.error('Error stringifying data:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Copy failed',
+        description: 'Could not format data for clipboard.',
+      })
+    }
+  }, [selectedItems, toast])
+
+  // Paste items from clipboard
+  const pasteItems = useCallback(async () => {
+    if (!clipboardData || clipboardData.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'No data to paste',
+        description: 'Clipboard is empty. Copy some items first.',
+      })
+      return
+    }
+
+    // Check if the clipboard data has the correct type
+    const hasCorrectType = clipboardData.every(item => {
+      return item.__type === entityName || !item.__type
+    })
+
+    if (!hasCorrectType) {
+      toast({
+        variant: 'destructive',
+        title: 'Type mismatch',
+        description: `Cannot paste items of different type into ${entityName}.`,
+      })
+      return
+    }
+
+    // Create each item from the clipboard
+    const results = []
+    for (const item of clipboardData) {
+      try {
+        // Prepare item for creation by removing any IDs or reference IDs
+        // to ensure we create new items rather than trying to update existing ones
+        const newItem = { ...item }
+        delete newItem.id
+        delete newItem.reference_id
+        
+        // Set the correct type if not already set
+        if (!newItem.__type) {
+          newItem.__type = entityName
+        }
+        
+        // Create the item
+        const result = await createItem(newItem)
+        results.push({ success: true, result })
+      } catch (error) {
+        results.push({ success: false, error })
+      }
+    }
+
+    // Show toast with results
+    const successCount = results.filter(r => r.success).length
+    const failureCount = results.length - successCount
+
+    if (failureCount === 0) {
+      toast({
+        title: 'Success',
+        description: `${successCount} item${successCount !== 1 ? 's' : ''} pasted successfully`,
+      })
+    } else if (successCount === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Paste failed',
+        description: 'All paste operations failed',
+      })
+    } else {
+      toast({
+        variant: 'default',
+        title: 'Partial Success',
+        description: `${successCount} pasted, ${failureCount} failed`,
+      })
+    }
+
+    // Refresh data
+    fetchData()
+    setShowPasteDialog(false)
+  }, [clipboardData, entityName, createItem, fetchData, toast])
 
   // Collection entity specific context
   const collectionContextValue: Partial<CollectionEntityContextType> = {
@@ -363,6 +528,12 @@ export const CollectionEntityDataProvider: React.FC<{
     setShowBulkDeleteDialog,
     showFilterDialog,
     setShowFilterDialog,
+    showPasteDialog,
+    setShowPasteDialog,
+    clipboardData,
+    setClipboardData,
+    copySelectedItems,
+    pasteItems,
     fetchData,
     createItem,
     updateItem,

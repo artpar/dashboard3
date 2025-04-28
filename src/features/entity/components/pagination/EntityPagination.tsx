@@ -1,3 +1,5 @@
+import React from 'react'
+import { Checkbox } from '@/components/ui/checkbox.tsx'
 import {
   Pagination,
   PaginationContent,
@@ -14,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
 
 interface EntityPaginationProps {
   currentPage: number

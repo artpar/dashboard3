@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Copy, Clipboard } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import EntityPasteDialog from '@/features/entity/components/dialogs/EntityPasteDialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,6 +22,8 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
     setShowEditDialog,
     setShowBulkDeleteDialog,
     showBulkDeleteDialog,
+    showPasteDialog,
+    setShowPasteDialog,
     relations,
     entityName,
     sortColumns,
@@ -29,10 +32,32 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
     toggleItemSelection,
     selectAllItems,
     isItemSelected,
+    copySelectedItems,
+    setClipboardData,
   } = useEntityCollectionData()
   const navigate = useNavigate()
   // Get column visibility state from context
   const { visibleColumns } = useEntityCollectionData()
+
+  // Listen for custom paste event
+  React.useEffect(() => {
+    const handlePasteEvent = (event: CustomEvent) => {
+      const { data } = event.detail;
+      if (Array.isArray(data) && data.length > 0) {
+        // Set the clipboard data and show the paste dialog
+        setClipboardData(data);
+        setShowPasteDialog(true);
+      }
+    };
+
+    // Add event listener for the custom event
+    window.addEventListener('entity-paste-trigger', handlePasteEvent as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('entity-paste-trigger', handlePasteEvent as EventListener);
+    };
+  }, [setClipboardData, setShowPasteDialog]);
 
   // Filter columns based on visibility settings
   const filteredColumns = React.useMemo(() => {
@@ -185,6 +210,12 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Paste Dialog */}
+      <EntityPasteDialog
+        open={showPasteDialog}
+        onClose={() => setShowPasteDialog(false)}
+      />
     </div>
   )
 }

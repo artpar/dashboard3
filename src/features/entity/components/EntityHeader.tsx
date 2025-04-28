@@ -4,7 +4,9 @@ import {
   ArrowDown,
   ArrowDownToLine,
   ArrowUp,
+  Clipboard,
   Columns,
+  Copy,
   Download,
   Eye,
   EyeOff,
@@ -81,6 +83,9 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     clearSelectedItems,
     executeAction,
     sortColumns,
+    setShowPasteDialog,
+    copySelectedItems,
+    setClipboardData,
     setSortColumn,
     clearSorting,
   } = useEntityCollectionData()
@@ -136,8 +141,8 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                   size='icon'
                   className='h-8 w-8 p-0'
                   onClick={() => {
-                    console.log("refreshing data")
-                    fetchData();
+                    console.log('refreshing data')
+                    fetchData()
                   }}
                 >
                   <RefreshCw className='h-4 w-4' />
@@ -435,8 +440,8 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                       .filter((e) => e.InstanceOptional)
                       .map((action: any) => (
                         <DropdownMenuItem
-                          key={action.action_name}
-                          onClick={() => executeAction(action.action_name)}
+                          key={action.ActionName}
+                          onClick={() => executeAction(action.ActionName)}
                         >
                           <span>{action.ActionName}</span>
                         </DropdownMenuItem>
@@ -447,19 +452,30 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <div className='flex justify-end gap-2 p-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => copySelectedItems()}
+            disabled={selectedItems.length === 0}
+            className='flex items-center gap-1'
+          >
+            <Copy className='h-4 w-4' />
+            Copy {selectedItems.length > 0 ? `(${selectedItems.length})` : ''}
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => setShowPasteDialog(true)}
+            className='flex items-center gap-1'
+          >
+            <Clipboard className='h-4 w-4' />
+            Paste
+          </Button>
+        </div>
 
         {selectedItems.length > 0 && (
-          <div className='w-full max-w-1/3 flex items-center justify-between rounded'>
-            <div className='flex items-center space-x-2'>
-              <Checkbox
-                checked={selectedItems.length === data.length && data.length > 0}
-                onCheckedChange={selectAllItems}
-              />
-              <span className='text-sm font-medium'>
-              {selectedItems.length} item
-                {selectedItems.length !== 1 ? 's' : ''} selected
-            </span>
-            </div>
+          <div className='flex justify-end gap-2 p-2'>
             <div className='flex space-x-2'>
               <Button
                 variant='destructive'
@@ -470,20 +486,10 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <Trash2 className='h-4 w-4' />
                 Delete Selected
               </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='h-8'
-                onClick={clearSelectedItems}
-              >
-                Cancel
-              </Button>
             </div>
           </div>
         )}
-
       </div>
-
     </div>
   )
 }

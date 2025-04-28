@@ -254,6 +254,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
           return (
             <Badge
+              key={fileAssetUrl}
               variant='outline'
               className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
               onClick={() => {
