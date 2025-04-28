@@ -20,7 +20,7 @@ export const CollectionEntityManagementComponent: React.FC<
         // The copy button in the UI will handle this
         console.log('Copy shortcut detected')
       }
-      
+
       // Check if Ctrl+V or Command+V is pressed
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         // Try to get clipboard data
@@ -29,7 +29,7 @@ export const CollectionEntityManagementComponent: React.FC<
             try {
               // Try to parse the clipboard text as JSON
               const data = JSON.parse(text)
-              
+
               // Check if it's an array of objects (our expected format)
               if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
                 console.log('Valid clipboard data detected, opening paste dialog')
@@ -39,7 +39,7 @@ export const CollectionEntityManagementComponent: React.FC<
               }
             } catch (err) {
               // Not valid JSON, ignore
-              console.log('Invalid clipboard data format')
+              console.log('Invalid clipboard data format', text, err)
             }
           })
           .catch(err => {

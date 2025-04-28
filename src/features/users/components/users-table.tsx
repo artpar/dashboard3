@@ -2,9 +2,6 @@ import { useState } from 'react'
 import {
   ColumnDef,
   ColumnFiltersState,
-  RowData,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -12,7 +9,10 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowData,
+  SortingState,
   useReactTable,
+  VisibilityState,
 } from '@tanstack/react-table'
 import {
   Table,
@@ -67,7 +67,7 @@ export function UsersTable({ columns, data }: DataTableProps) {
   })
 
   return (
-    <div className='space-y-4 flex flex-col'>
+    <div className='flex flex-col space-y-4'>
       <DataTableToolbar table={table} />
       <div className='rounded-md border'>
         <Table>

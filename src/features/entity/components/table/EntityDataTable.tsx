@@ -42,6 +42,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
   // Listen for custom paste event
   React.useEffect(() => {
     const handlePasteEvent = (event: CustomEvent) => {
+      console.log('Paste event:', event)
       const { data } = event.detail;
       if (Array.isArray(data) && data.length > 0) {
         // Set the clipboard data and show the paste dialog
@@ -106,7 +107,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
         <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>
-              <TableHead className='bg-background sticky top-0'>
+              <TableHead className='bg-background'>
                 <Checkbox
                   checked={
                     selectedItems.length === data.length && data.length > 0

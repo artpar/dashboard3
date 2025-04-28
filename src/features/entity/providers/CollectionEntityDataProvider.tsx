@@ -298,7 +298,7 @@ export const CollectionEntityDataProvider: React.FC<{
   // Item selection helpers - optimized for performance
   const toggleItemSelection = useCallback((item: any) => {
     const itemId = item.id || item.reference_id;
-    
+
     setSelectedItemsMap(prevMap => {
       const newMap = new Map(prevMap);
       if (newMap.has(itemId)) {
@@ -306,11 +306,11 @@ export const CollectionEntityDataProvider: React.FC<{
       } else {
         newMap.set(itemId, item);
       }
-      
+
       // Update the selectedItems array based on the map
       const newSelectedItems = Array.from(newMap.values());
       setSelectedItems(newSelectedItems);
-      
+
       return newMap;
     });
   }, []);
@@ -422,6 +422,7 @@ export const CollectionEntityDataProvider: React.FC<{
 
   // Paste items from clipboard
   const pasteItems = useCallback(async () => {
+    console.log("CEDP.pasteItems", clipboardData)
     if (!clipboardData || clipboardData.length === 0) {
       toast({
         variant: 'destructive',
@@ -454,12 +455,12 @@ export const CollectionEntityDataProvider: React.FC<{
         const newItem = { ...item }
         delete newItem.id
         delete newItem.reference_id
-        
+
         // Set the correct type if not already set
         if (!newItem.__type) {
           newItem.__type = entityName
         }
-        
+
         // Create the item
         const result = await createItem(newItem)
         results.push({ success: true, result })
