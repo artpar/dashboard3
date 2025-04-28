@@ -33,7 +33,7 @@ export const EntitySelect: React.FC<EntitySelectProps> = ({
     : null
 
   return (
-    <div className="min-h-48">
+    <div className="min-h-20">
       <Select
         isDisabled={disabled}
         options={selectOptions}

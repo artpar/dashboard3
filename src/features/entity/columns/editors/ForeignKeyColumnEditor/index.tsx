@@ -29,6 +29,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
   const columnType = column.ColumnType || ''
 
   // Determine if this is a file reference column
+  console.log("FKColumnEditor: ", column, value)
   const isFileReference =
     dataSource === 'cloud_store' || columnType.startsWith('file.')
 

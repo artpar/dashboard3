@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { BaseEntityContextType, BaseEntityDataProvider } from './BaseEntityDataProvider'
 import { EntityApiService } from '../services/EntityApiService'
+import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 
 // Define the collection entity context type
 export interface CollectionEntityContextType extends BaseEntityContextType {
@@ -453,8 +454,7 @@ export const CollectionEntityDataProvider: React.FC<{
         // Prepare item for creation by removing any IDs or reference IDs
         // to ensure we create new items rather than trying to update existing ones
         const newItem = { ...item }
-        delete newItem.id
-        delete newItem.reference_id
+        SYSTEM_COLUMNS.map(name => delete newItem[name])
 
         // Set the correct type if not already set
         if (!newItem.__type) {
