@@ -53,6 +53,11 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
     }
   }, [clipboardData])
 
+  // Custom paste function that uses the edited data
+  const pasteItems = useCallback(async () => {
+    await originalPasteItems(editableData)
+  }, [editableData, originalPasteItems])
+
   // If no clipboard data, don't show the dialog
   if (!clipboardData || clipboardData.length === 0) {
     return null
@@ -108,10 +113,7 @@ export const EntityPasteDialog: React.FC<EntityPasteDialogProps> = ({
     })
   }
 
-  // Custom paste function that uses the edited data
-  const pasteItems = useCallback(async () => {
-    await originalPasteItems(editableData)
-  }, [editableData]);
+
 
   return (
     <AlertDialog className='max-h-full' open={open} onOpenChange={onClose}>
