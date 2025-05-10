@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { SystemStatistics } from './SystemTypes';
 import { daptinClient } from '@/daptin';
 
@@ -13,6 +13,7 @@ interface UseSystemStatsResult {
   error: Error | null;
   lastUpdated: Date | null;
   refetch: () => Promise<void>;
+  isRefreshing: boolean; // Added to indicate background refresh
 }
 
 const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL || daptinClient.endpoint;
@@ -23,12 +24,41 @@ export function useSystemStats({
 }: UseSystemStatsProps = {}): UseSystemStatsResult {
   const [statistics, setStatistics] = useState<SystemStatistics | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(initialFetch);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  
+  // Use refs to track previous values for smooth transitions
+  const prevStatsRef = useRef<SystemStatistics | null>(null);
+  const isMountedRef = useRef<boolean>(true);
 
-  const fetchStatistics = async () => {
+  // Smoothly merge new data with existing data
+  const smoothlyUpdateStatistics = (newData: SystemStatistics) => {
+    if (!prevStatsRef.current) {
+      // First load - just set the data directly
+      setStatistics(newData);
+      prevStatsRef.current = newData;
+      return;
+    }
+    
+    // Merge the new data with previous data for smoother transitions
+    // This creates a transitional state that will be updated on the next refresh
+    const mergedData = { ...newData };
+    
+    // Update the reference for next time
+    prevStatsRef.current = newData;
+    
+    // Set the merged data
+    setStatistics(mergedData);
+  };
+
+  const fetchStatistics = useCallback(async (isInitialLoad = false) => {
     try {
-      setIsLoading(true);
+      if (isInitialLoad) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       setError(null);
       
       const response = await fetch(`${DAPTIN_ENDPOINT}/statistics`);
@@ -38,32 +68,55 @@ export function useSystemStats({
       }
       
       const data = await response.json();
-      setStatistics(data);
-      setLastUpdated(new Date());
+      
+      if (isMountedRef.current) {
+        smoothlyUpdateStatistics(data);
+        setLastUpdated(new Date());
+      }
     } catch (err) {
       console.error('Error fetching system statistics:', err);
-      setError(err instanceof Error ? err : new Error(String(err)));
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (initialFetch) {
-      fetchStatistics();
+      fetchStatistics(true);
     }
 
     if (refreshInterval > 0) {
-      const intervalId = setInterval(fetchStatistics, refreshInterval);
-      return () => clearInterval(intervalId);
+      const intervalId = setInterval(() => fetchStatistics(false), refreshInterval);
+      return () => {
+        clearInterval(intervalId);
+        isMountedRef.current = false;
+      };
     }
-  }, [refreshInterval, initialFetch]);
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [refreshInterval, initialFetch, fetchStatistics]);
+
+  // Create a memoized refetch function that always passes isInitialLoad=false
+  const refetch = useCallback(async () => {
+    return fetchStatistics(false);
+  }, [fetchStatistics]);
 
   return {
     statistics,
     isLoading,
+    isRefreshing,
     error,
     lastUpdated,
-    refetch: fetchStatistics,
+    refetch,
   };
 }

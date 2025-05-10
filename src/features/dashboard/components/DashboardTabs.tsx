@@ -1,26 +1,21 @@
 import React from 'react'
-import { LayoutDashboard, Activity, Database, BarChart, Settings } from 'lucide-react'
+import { Activity, BarChart, Database, LayoutDashboard, Settings } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SystemStatus } from './SystemStatus'
 import { QuickActions } from './QuickActions'
 import { ActivityOverview } from './ActivityOverview'
 import { EntityStatCard } from './EntityStatCard'
 import { DatabaseStats } from './DatabaseStats'
-import { SystemHealth } from './SystemHealth'
-import { SystemUptime } from './SystemUptime'
 import { EntityActions } from './EntityActions'
+import { DashboardAreaChart, DashboardBarChart, DashboardPieChart } from './DataCharts'
 import {
-  DashboardAreaChart,
-  DashboardBarChart,
-  DashboardPieChart
-} from './DataCharts'
-import {
-  getEntityIcon,
-  getEntityColor,
-  EntityStats as EntityStatsType,
   ChartData,
-  EntityDistributionData
+  EntityDistributionData,
+  EntityStats as EntityStatsType,
+  getEntityColor,
+  getEntityIcon,
 } from '../utils/dashboardUtils.tsx'
+import { SystemDashboard } from '@/features/dashboard/components/system/SystemDashboard.tsx'
 
 interface DashboardTabsProps {
   activeTab: string
@@ -37,18 +32,18 @@ interface DashboardTabsProps {
 }
 
 export const DashboardTabs: React.FC<DashboardTabsProps> = ({
-  activeTab,
-  setActiveTab,
-  totalEntities,
-  totalUsers,
-  credits,
-  isLoadingEntities,
-  isLoadingUsers,
-  entityStats,
-  recentActivity,
-  userChartData,
-  isLoadingUserAggregates,
-}) => {
+                                                              activeTab,
+                                                              setActiveTab,
+                                                              totalEntities,
+                                                              totalUsers,
+                                                              credits,
+                                                              isLoadingEntities,
+                                                              isLoadingUsers,
+                                                              entityStats,
+                                                              recentActivity,
+                                                              userChartData,
+                                                              isLoadingUserAggregates,
+                                                            }) => {
   // Create entity distribution data for pie chart
   const entityDistributionData: EntityDistributionData[] = entityStats
     .filter(stat => !stat.isLoading && stat.count > 0)
@@ -207,17 +202,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
       {/* System Tab */}
       <TabsContent value="system" className="space-y-4">
-        {/* System Uptime & Status - Live */}
-        <SystemUptime refreshInterval={15000} />
-        
-        {/* System Health */}
-        <SystemHealth refreshInterval={15000} />
-
-        {/* Database Stats */}
-        <DatabaseStats />
-
-        {/* Entity Actions */}
-        <EntityActions />
+        <SystemDashboard refreshInterval={1000} />
       </TabsContent>
     </Tabs>
   )

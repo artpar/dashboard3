@@ -205,7 +205,9 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <div className='flex items-center gap-2 p-2'>
+                  <div onClick={() => {
+                    // TODO: fetch content from assetUrl and serve as file download to user
+                  }} className='flex items-center gap-2 p-2 cursor-pointer'>
                     <FileIcon className='h-4 w-4' />
                     <span className='truncate max-w-40'>
                       {fileName}
