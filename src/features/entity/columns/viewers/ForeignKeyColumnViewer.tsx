@@ -1,7 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, ExternalLink, FileIcon, Download } from 'lucide-react'
+import { AlertCircle, Download, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,12 +18,18 @@ import { ColumnViewerProps } from '../types'
 export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
 
 // Helper function to download a file from a URL
-const downloadFile = async (url: string, fileName: string, onError: (message: string) => void) => {
+const downloadFile = async (
+  url: string,
+  fileName: string,
+  onError: (message: string) => void
+) => {
   try {
     const response = await fetch(url)
 
     if (!response.ok) {
-      throw new Error(`Failed to download file: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `Failed to download file: ${response.status} ${response.statusText}`
+      )
     }
 
     const blob = await response.blob()
@@ -178,8 +184,11 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
     // If there are no files, return a placeholder
     if (fileDataArray.length === 0) {
-      return <span className={className}>No {isImage ? 'images' : 'files'}</span>
+      return (
+        <span className={className}>No {isImage ? 'images' : 'files'}</span>
+      )
     }
+    const tokenString = '?token=' + localStorage.getItem('token')
 
     // If there's only one file, display it as before but with improved styling
     if (fileDataArray.length === 1) {
@@ -193,11 +202,11 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         '/' +
         entity.reference_id +
         '/' +
-        column.ColumnName;
+        column.ColumnName
       if (isImage) {
         assetUrl += '.png'
       } else {
-        assetUrl += ("?token=" + localStorage.getItem("token"))
+        assetUrl += tokenString
       }
 
       // Get file name or use placeholder
@@ -231,10 +240,14 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   <div className='flex flex-col items-center p-1'>
                     <img
                       className='h-24 w-24 object-contain'
-                      alt={column.ColumnName + ' ' + (column.ColumnDescription || '')}
+                      alt={
+                        column.ColumnName +
+                        ' ' +
+                        (column.ColumnDescription || '')
+                      }
                       src={assetUrl}
                     />
-                    <span className='mt-1 text-xs truncate max-w-24'>
+                    <span className='mt-1 max-w-24 truncate text-xs'>
                       {fileName}
                     </span>
                   </div>
@@ -246,30 +259,25 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                       if (isDownloading) return
 
                       setIsDownloading(true)
-                      downloadFile(
-                        assetUrl,
-                        fileName,
-                        (errorMessage) => {
-                          toast({
-                            variant: 'destructive',
-                            title: 'Download failed',
-                            description: errorMessage,
-                          })
-                          setIsDownloading(false)
-                        }
-                      ).finally(() => {
+                      downloadFile(assetUrl, fileName, (errorMessage) => {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Download failed',
+                          description: errorMessage,
+                        })
+                        setIsDownloading(false)
+                      }).finally(() => {
                         setIsDownloading(false)
                       })
                     }}
-                    className='flex items-center gap-2 p-2 cursor-pointer'>
+                    className='flex cursor-pointer items-center gap-2 p-2'
+                  >
                     {isDownloading ? (
-                      <span className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-1"></span>
+                      <span className='mr-1 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
                     ) : (
                       <Download className='h-4 w-4' />
                     )}
-                    <span className='truncate max-w-40'>
-                      {fileName}
-                    </span>
+                    <span className='max-w-40 truncate'>{fileName}</span>
                   </div>
                 )}
               </Badge>
@@ -292,93 +300,103 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
     // If there are multiple files, display them in a grid
     return (
-      <div className={cn('flex flex-wrap gap-2 w-full', className)}>
-        {fileDataArray.filter((val, index) => index < 3).map((fileData, index) => {
-          // Generate a unique asset URL for each file if possible
-          const fileAssetUrl = entity && column.ColumnName &&
-            (typeof fileData === 'object' && fileData !== null && 'reference_id' in fileData
-              ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.${isImage ? 'png' : 'file'}?index=${index}`
-              : `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`)
+      <div className={cn('flex w-full flex-wrap gap-2', className)}>
+        {fileDataArray
+          .filter((val, index) => index < 3)
+          .map((fileData, index) => {
+            // Generate a unique asset URL for each file if possible
+            const fileAssetUrl =
+              entity &&
+              column.ColumnName &&
+              (typeof fileData === 'object' &&
+              fileData !== null &&
+              'reference_id' in fileData
+                ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.${isImage ? 'png' : 'file'}?index=${index}`
+                : `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`)
 
-          // Get file name or use placeholder
-          const fileName =
-            typeof fileData === 'object' && fileData !== null && 'name' in fileData
-              ? fileData.name
-              : `File ${index + 1}`
+            // Get file name or use placeholder
+            const fileName =
+              typeof fileData === 'object' &&
+              fileData !== null &&
+              'name' in fileData
+                ? fileData.name
+                : `File ${index + 1}`
 
-          // Get file size if available
-          const fileSize =
-            typeof fileData === 'object' && fileData !== null && 'size' in fileData
-              ? formatFileSize(fileData.size as number)
-              : ''
+            // Get file size if available
+            const fileSize =
+              typeof fileData === 'object' &&
+              fileData !== null &&
+              'size' in fileData
+                ? formatFileSize(fileData.size as number)
+                : ''
 
-          return (
-            <Badge
-              key={fileAssetUrl}
-              variant='outline'
-              className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
-              onClick={() => {
-                // Handle file preview or download
-                if (
-                  typeof fileData === 'object' &&
-                  fileData !== null &&
-                  'url' in fileData
-                ) {
-                  window.open(fileData.url, '_blank')
-                } else {
-                  window.open(fileAssetUrl, '_blank')
-                }
-              }}
-            >
-              {isImage ? (
-                <div className='flex flex-col items-center p-1'>
-                  <img
-                    src={fileAssetUrl}
-                    alt={fileName}
-                    className='h-16 w-16 object-contain'
-                  />
-                  <span className='mt-1 text-xs truncate max-w-16'>
-                          {fileName.length > 10 ? fileName.substring(0, 8) + '...' : fileName}
-                        </span>
-                </div>
-              ) : (
-                <div
-                  className='flex items-center gap-1 p-1 cursor-pointer'
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    if (isDownloading) return
+            return (
+              <Badge
+                key={fileAssetUrl}
+                variant='outline'
+                className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
+                onClick={() => {
+                  // Handle file preview or download
+                  if (
+                    typeof fileData === 'object' &&
+                    fileData !== null &&
+                    'url' in fileData
+                  ) {
+                    window.open(fileData.url, '_blank')
+                  } else {
+                    window.open(fileAssetUrl, '_blank')
+                  }
+                }}
+              >
+                {isImage ? (
+                  <div className='flex flex-col items-center p-1'>
+                    <img
+                      src={fileAssetUrl}
+                      alt={fileName}
+                      className='h-16 w-16 object-contain'
+                    />
+                    <span className='mt-1 max-w-16 truncate text-xs'>
+                      {fileName.length > 10
+                        ? fileName.substring(0, 8) + '...'
+                        : fileName}
+                    </span>
+                  </div>
+                ) : (
+                  <div
+                    className='flex cursor-pointer items-center gap-1 p-1'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      if (isDownloading) return
 
-                    setIsDownloading(true)
-                    downloadFile(
-                      fileAssetUrl,
-                      fileName,
-                      (errorMessage) => {
+                      setIsDownloading(true)
+                      downloadFile(fileAssetUrl, fileName, (errorMessage) => {
                         toast({
                           variant: 'destructive',
                           title: 'Download failed',
                           description: errorMessage,
                         })
                         setIsDownloading(false)
-                      }
-                    ).finally(() => {
-                      setIsDownloading(false)
-                    })
-                  }}
-                >
-                  {isDownloading ? (
-                    <span className="animate-spin h-3 w-3 border-2 border-gray-500 border-t-transparent rounded-full mr-1"></span>
-                  ) : (
-                    <Download className='h-3 w-3' />
-                  )}
-                  <span className='truncate max-w-24 text-xs'>
-                    {fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName}
-                  </span>
-                </div>
-              )}
-            </Badge>
-          )
-        })}
+                      }).finally(() => {
+                        setIsDownloading(false)
+                      })
+                    }}
+                  >
+                    {isDownloading ? (
+                      <span className='mr-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
+                    ) : (
+                      <Download className='h-3 w-3' />
+                    )}
+                    <span className='max-w-24 truncate text-xs'>
+                      {fileName.length > 15
+                        ? fileName.substring(0, 12) + '...'
+                        : fileName}
+                    </span>
+                  </div>
+                )}
+              </Badge>
+            )
+          })}
       </div>
     )
   }

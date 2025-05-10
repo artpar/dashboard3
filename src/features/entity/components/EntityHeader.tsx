@@ -100,16 +100,81 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   const [actionSchema, setActionSchema] = useState<any>()
   const [showActionExecute, setShowActionExecute] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importActionSchema, setImportActionSchema] = useState<any>({
+    "Name": "import_data",
+    "Label": "Import data from dump",
+    "OnType": "world",
+    "InstanceOptional": false,
+    "InFields": [
+      {
+        "Name": "JSON Dump file",
+        "ColumnName": "dump_file",
+        "ColumnType": "file.json|yaml|toml|hcl|csv|docx|xlsx|pdf|html",
+        "IsNullable": false
+      },
+      {
+        "Name": "truncate_before_insert",
+        "ColumnName": "truncate_before_insert",
+        "ColumnType": "truefalse"
+      },
+      {
+        "Name": "batch_size",
+        "ColumnName": "batch_size",
+        "ColumnType": "measurement"
+      }
+    ],
+    "OutFields": [
+      {
+        "Type": "__data_import",
+        "Method": "EXECUTE",
+        "Attributes": {
+          "world_reference_id": "$.reference_id",
+          "truncate_before_insert": "~truncate_before_insert",
+          "dump_file": "~dump_file",
+          "table_name": "$.table_name",
+          "batch_size": "~batch_size",
+          "user": "~user"
+        }
+      }
+    ]
+  })
   const handleExecuteAction = async (actionId: string) => {
     const actionSchema = await getActionSchema(actionId)
     setActionSchema(actionSchema)
     setShowActionExecute(true)
   }
 
+  // Handle import data
+  const handleImport = async () => {
+    try {
+      // Get the import_data action schema
+      console.log("Importing data for entity:", entityName)
+      setShowImportDialog(true)
+    } catch (error) {
+      console.error('Failed to get import schema:', error)
+    }
+  }
+
   // Handle export
-  const handleExport = (format: 'csv' | 'json' | 'excel') => {
-    // This would be implemented with the actual export functionality
-    console.log(`Exporting ${entityName} as ${format}`)
+  const handleExport = async (format: 'csv' | 'json' | 'xlsx' | 'pdf' | 'html') => {
+    try {
+      // Get visible columns as a comma-separated string
+      const columnsToExport = visibleColumns.join(',');
+
+      // Execute the export_data action
+      await executeAction('world', 'export_data', {
+        table_name: entityName,
+        format: format,
+        columns: columnsToExport,
+        include_headers: true
+      })
+
+      // Note: No need to handle the download manually as the executeAction
+      // function in useEntityActions already handles the file download response
+    } catch (error) {
+      console.error('Export failed:', error)
+    }
   }
 
   // Get column groups for the dropdown menu
@@ -134,6 +199,26 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
         onExecute={async (payload) => {
           const actionResponse = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
           console.log("actionResponse", actionResponse)
+        }}
+      />
+
+      {/* Import Data Dialog */}
+      <ActionExecuteComponent
+        actionSchema={importActionSchema}
+        viewType="dialog"
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onCancel={() => setShowImportDialog(false)}
+        onExecute={async (payload) => {
+          // Add the current entity name to the payload
+          const importPayload = {
+            ...payload,
+            table_name: entityName
+          }
+          const actionResponse = await executeAction('world', 'import_data', importPayload)
+          console.log("Import response:", actionResponse)
+          // Refresh the data after import
+          refresh()
         }}
       />
       {/* Header with title and description */}
@@ -424,16 +509,24 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                       <ArrowDownToLine className='mr-2 h-4 w-4' />
                       <span>Export as JSON</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('excel')}>
+                    <DropdownMenuItem onClick={() => handleExport('xlsx')}>
                       <ArrowDownToLine className='mr-2 h-4 w-4' />
                       <span>Export as Excel</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                      <ArrowDownToLine className='mr-2 h-4 w-4' />
+                      <span>Export as PDF</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('html')}>
+                      <ArrowDownToLine className='mr-2 h-4 w-4' />
+                      <span>Export as HTML</span>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
               {/* Import */}
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleImport}>
                 <Upload className='mr-2 h-4 w-4' />
                 <span>Import Data</span>
               </DropdownMenuItem>

@@ -157,14 +157,14 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
               }
               const blob = new Blob([bytes], { type: contentType });
               const url = URL.createObjectURL(blob);
-              
+
               // Create a temporary link and trigger download
               const a = document.createElement('a');
               a.href = url;
               a.download = name;
               document.body.appendChild(a);
               a.click();
-              
+
               // Clean up
               setTimeout(() => {
                 document.body.removeChild(a);
@@ -172,21 +172,21 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
               }, 100);
               break;
             }
-            
+
             case 'client.store.set': {
               const { key, value } = item.Attributes;
               // Store in localStorage
               localStorage.setItem(key, value);
               break;
             }
-            
+
             case 'client.cookie.set': {
               const { key, value } = item.Attributes;
               // Set cookie
               document.cookie = value;
               break;
             }
-            
+
             case 'client.notify': {
               const { message, title, type } = item.Attributes;
               // Show notification
@@ -197,7 +197,7 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
               });
               break;
             }
-            
+
             case 'client.redirect': {
               const { delay, location, window: target } = item.Attributes;
               // Handle redirection
@@ -210,14 +210,14 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
               }, delay);
               break;
             }
-            
+
             default:
               // For unhandled response types, just log them
               console.log('Unhandled response type:', item.ResponseType, item);
           }
         });
       }
-      
+
       // Only show a generic success toast if no client.notify response was included
       if (!Array.isArray(response) || !response.some(r => r.ResponseType === 'client.notify')) {
         toast({
