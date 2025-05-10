@@ -3,8 +3,10 @@ import { useEntityActions } from '../../hooks/useEntityActions'
 import { Button } from '@/components/ui/button'
 import { Loader2, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import EntityActionDialog from './EntityActionDialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import ActionExecuteComponent from './ActionExecuteComponent'
 import EntityActionResponseViewer from './EntityActionResponseViewer'
+import { EntityApiService } from '@/features/entity/services/EntityApiService.ts'
 
 interface EntityActionsPanelProps {
   entityName: string
@@ -70,9 +72,8 @@ const ActionCard = memo(({
 export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
                                                                         entityName,
                                                                         entityId,
-                                                                        onActionComplete,
                                                                       }) => {
-  const [selectedActionName, setSelectedActionName] = useState<string | null>(null)
+  const [showActionDialog, setShowActionDialog] = useState<boolean>(false)
 
   const {
     actions,
@@ -86,29 +87,24 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
   // Find the selected action object - memoize to prevent recalculations
   const selectedAction = React.useMemo(() =>
       actions?.find(action => action.ActionName === selectedActionName),
-    [actions, selectedActionName]
+    [actions]
   )
 
-  // Handle action execution with useCallback to prevent function recreation
-  const handleExecuteAction = useCallback(async (actionName: string, payload: Record<string, any>) => {
-    try {
-      await executeAction(actionName, payload)
-      if (onActionComplete) {
-        onActionComplete()
-      }
-    } catch (err) {
-      console.error('Error executing action:', err)
-    }
-  }, [executeAction, onActionComplete])
 
   // Handle closing dialog
   const handleCloseDialog = useCallback(() => {
     setSelectedActionName(null)
+    setShowActionDialog(false)
   }, [])
 
+  const [actionSchema, setActionSchema] = useState(null)
   // Handle selecting an action
-  const handleSelectAction = useCallback((actionName: string) => {
-    setSelectedActionName(actionName)
+  const handleSelectAction = useCallback(async (actionId: string) => {
+    const actionSchema = EntityApiService.executeAction("action", "get_action_schema", {
+      action_id: actionId
+    });
+    setActionSchema(actionSchema)
+    setShowActionDialog(true)
   }, [])
 
   if (isLoading) {
@@ -166,19 +162,24 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
         ))}
       </div>
 
-      {/* Action dialog */}
-      {selectedAction && (
-        <EntityActionDialog
-          action={selectedAction}
-          isOpen={!!selectedActionName}
-          isLoading={actionInProgress === selectedActionName}
-          onClose={handleCloseDialog}
-          onExecute={handleExecuteAction}
-        />
-      )}
+      {/* Action dialog with ActionExecuteComponent */}
+      <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
+        <DialogContent>
+          <ActionExecuteComponent
+            actionSchema={actionSchema}
+            onExecute={async (payload) => {
+              const actionResult = await executeAction(selectedAction.OnType, selectedAction.Name, payload)
+              console.log("Action result:", actionResult)
+            }}
+            onCancel={handleCloseDialog}
+            isLoading={actionInProgress === selectedAction.Name}
+            variant="default"
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Display action responses if available */}
-      {selectedActionName && actionResponses[selectedActionName] && (
+      {actionResponses && (
         <EntityActionResponseViewer
           responses={actionResponses[selectedActionName]}
           actionName={selectedActionName}
