@@ -55,7 +55,7 @@ export interface EntityStats {
 }
 
 /**
- * Process aggregate data into chart format
+ * Process aggregate data into chart format for daily counts
  */
 export const processChartData = (
   aggregateData: AggregateData[] | undefined,
@@ -75,6 +75,34 @@ export const processChartData = (
     count: item.attributes.count,
     formattedDate: format(new Date(item.attributes.date), dateFormat),
   }))
+}
+
+/**
+ * Process aggregate data into cumulative chart format
+ */
+export const processCumulativeChartData = (
+  aggregateData: AggregateData[] | undefined,
+  dateFormat: string = 'MMM dd'
+): ChartData[] => {
+  if (!aggregateData || aggregateData.length === 0) {
+    return generateEmptyChartData()
+  }
+
+  // Sort by date
+  const sortedData = [...aggregateData].sort((a, b) => {
+    return new Date(a.attributes.date).getTime() - new Date(b.attributes.date).getTime()
+  })
+
+  let cumulativeCount = 0;
+  
+  return sortedData.map(item => {
+    cumulativeCount += item.attributes.count;
+    return {
+      date: item.attributes.date,
+      count: cumulativeCount,
+      formattedDate: format(new Date(item.attributes.date), dateFormat),
+    };
+  })
 }
 
 /**

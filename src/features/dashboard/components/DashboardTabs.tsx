@@ -1,21 +1,18 @@
 import React from 'react'
-import { Activity, BarChart, Database, LayoutDashboard, Settings } from 'lucide-react'
+import { BarChart, LayoutDashboard, Settings } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SystemStatus } from './SystemStatus'
 import { QuickActions } from './QuickActions'
-import { ActivityOverview } from './ActivityOverview'
-import { EntityStatCard } from './EntityStatCard'
 import { DatabaseStats } from './DatabaseStats'
-import { EntityActions } from './EntityActions'
-import { DashboardAreaChart, DashboardBarChart, DashboardPieChart } from './DataCharts'
+import { DashboardAreaChart, DashboardPieChart } from './DataCharts'
 import {
   ChartData,
   EntityDistributionData,
   EntityStats as EntityStatsType,
   getEntityColor,
-  getEntityIcon,
 } from '../utils/dashboardUtils.tsx'
 import { SystemDashboard } from '@/features/dashboard/components/system/SystemDashboard.tsx'
+import { EntityGrowthData } from '@/features/dashboard/components/EntityGrowthData.tsx'
 
 interface DashboardTabsProps {
   activeTab: string
@@ -81,27 +78,8 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         />
 
         <QuickActions />
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* User Registration Chart */}
-          <DashboardAreaChart
-            title="User Registrations"
-            description="User registration trend over time"
-            data={userChartData}
-            isLoading={isLoadingUserAggregates}
-            color="#3b82f6"
-            dataKey="count"
-            yAxisLabel="Users"
-          />
-
-          {/* Entity Distribution */}
-          <DashboardPieChart
-            title="Entity Distribution"
-            description="Distribution of records across entity types"
-            data={entityDistributionData}
-            isLoading={isLoadingEntities}
-          />
-        </div>
+        <EntityGrowthData entityName={"user_account"}></EntityGrowthData>
+        <EntityGrowthData entityName={"rpatask"}></EntityGrowthData>
       </TabsContent>
 
       {/* Analytics Tab */}
@@ -110,27 +88,6 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         <DatabaseStats />
 
         {/* User Registration Trends */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <DashboardAreaChart
-            title="User Growth Trend"
-            description="Cumulative user growth over time"
-            data={userChartData}
-            isLoading={isLoadingUserAggregates}
-            color="#22c55e"
-            dataKey="count"
-            yAxisLabel="Total Users"
-          />
-
-          <DashboardBarChart
-            title="User Registration Activity"
-            description="New user registrations by date"
-            data={userChartData}
-            isLoading={isLoadingUserAggregates}
-            dataKey="count"
-            nameKey="formattedDate"
-            color="#a855f7"
-          />
-        </div>
       </TabsContent>
 
       {/* System Tab */}
