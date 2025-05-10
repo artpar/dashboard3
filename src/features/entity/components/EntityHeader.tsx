@@ -22,7 +22,7 @@ import {
 import { useWorldEntities } from '@/hooks/use-world-entities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox.tsx'
+import { Dialog, DialogContent } from '@/components/ui/dialog.tsx'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -43,6 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import ActionExecuteComponent from '@/features/entity/components/actions/ActionExecuteComponent.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
 import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
 import EntityFilters from './filter/EntityFilters'
@@ -81,6 +82,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     selectAllItems,
     setShowBulkDeleteDialog,
     clearSelectedItems,
+    getActionSchema,
     executeAction,
     sortColumns,
     setShowPasteDialog,
@@ -95,6 +97,14 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   // Find current entity in world entities
   const currentEntity = entities.find((e: any) => e.table_name === entityName)
+
+  const [actionSchema, setActionSchema] = useState<any>()
+  const [showActionExecute, setShowActionExecute] = useState(false)
+  const handleExecuteAction = async (actionId: string) => {
+    const actionSchema = await getActionSchema(actionId)
+    setActionSchema(actionSchema)
+    setShowActionExecute(true)
+  }
 
   // Handle export
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
@@ -115,6 +125,21 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   return (
     <div className='flex flex-col space-y-4'>
+      <Dialog
+        open={showActionExecute}
+        onClose={() => setShowActionExecute(false)}
+      >
+        <DialogContent>
+          <ActionExecuteComponent
+            actionSchema={actionSchema}
+            onCancel={() => setShowActionExecute(false)}
+            onExecute={async (payload) => {
+              const actionResponse = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
+              console.log("actionResponse", actionResponse)
+            }}
+          ></ActionExecuteComponent>
+        </DialogContent>
+      </Dialog>
       {/* Header with title and description */}
       <div className='flex items-start justify-between'>
         <div>
@@ -440,10 +465,12 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                       .filter((e) => e.InstanceOptional)
                       .map((action: any) => (
                         <DropdownMenuItem
-                          key={action.ActionName}
-                          onClick={() => executeAction(action.ActionName)}
+                          key={action.ReferenceId}
+                          onClick={() =>
+                            handleExecuteAction(action.ReferenceId)
+                          }
                         >
-                          <span>{action.ActionName}</span>
+                          <span>{action.Label}</span>
                         </DropdownMenuItem>
                       ))}
                   </DropdownMenuGroup>

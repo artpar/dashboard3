@@ -60,6 +60,8 @@ export class EntityApiService {
                 actions = actionsResponse.data.map(row => {
                   return {
                     ActionName: row.action_name,
+                    Label: row.label,
+                    ReferenceId: row.reference_id,
                     InstanceOptional: row.instance_optional,
                   }
                 })
@@ -94,12 +96,12 @@ export class EntityApiService {
   ): Promise<any> {
     try {
       const params: Record<string, any> = {}
-      
+
       // Add included relations if specified
       if (options.includedRelations) {
         params['included_relations'] = options.includedRelations
       }
-      
+
       const response = await daptinClient.jsonApi.find(entityName, entityId, params)
 
       if (response.errors && response.errors.length) {

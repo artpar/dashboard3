@@ -87,29 +87,43 @@ export const BaseEntityDataProvider: React.FC<{
     fetchSchemaData()
   }, [entityName])
 
+  const getActionSchema = useCallback(
+    async (actionId: string) => {
+      try {
+        const actionSchemaBase64 = await EntityApiService.executeAction('action',
+          'get_action_schema',
+          {
+            action_id: actionId,
+          }
+        );
+        const actionSchema = JSON.parse(atob(actionSchemaBase64[0].Attributes.content));
+        console.log("actionSchema", actionSchema);
+        queryClient.invalidateQueries({ queryKey: [`action-${actionId}`] })
+        return actionSchema;
+      } catch (error) {
+        console.error(`Error executing action ${actionId}:`, error)
+        toast({
+          variant: 'destructive',
+          title: `Failed to execute ${actionId}`,
+          description:
+            error instanceof Error ? error.message : 'An error occurred',
+        })
+        throw error
+      }
+    },
+    [queryClient, toast]
+  );
+
   // Execute custom action on an entity
   const executeAction = useCallback(
-    async (actionName: string, payload: any) => {
+    async (entityName: string, actionName: string, payload: any) => {
       try {
-        // Check if the action exists
-        const action = availableActions.find(
-          (a) => a.action_name === actionName
-        )
-        if (!action) {
-          throw new Error(
-            `Action '${actionName}' not found for entity '${entityName}'`
-          )
-        }
-
         // Execute the action
         const response = await EntityApiService.executeAction(
           entityName,
           actionName,
           payload
         )
-
-        // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: [`entity-${entityName}`] })
 
         toast({
           title: 'Success',
@@ -128,7 +142,7 @@ export const BaseEntityDataProvider: React.FC<{
         throw error
       }
     },
-    [availableActions, entityName, queryClient, toast]
+    [toast]
   )
 
   // Refresh data
@@ -171,6 +185,7 @@ export const BaseEntityDataProvider: React.FC<{
     error: schemaError,
     refresh,
     executeAction,
+    getActionSchema,
     visibleColumns,
     toggleColumnVisibility,
     resetColumnVisibility,
