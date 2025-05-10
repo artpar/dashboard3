@@ -3,7 +3,16 @@ import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -15,8 +24,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 
 // Define the field interface based on the action schema
 export interface ActionSchemaField {
@@ -70,7 +77,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
   onCancel,
   className,
   isLoading = false,
-  variant = 'default'
+  variant = 'default',
 }) => {
   // Generate a dynamic schema based on action fields
   const [formSchema, setFormSchema] = useState<z.ZodObject<any>>(z.object({}))
@@ -112,7 +119,9 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             fieldSchema = z.string().email({ message: 'Invalid email address' })
             break
           case 'password':
-            fieldSchema = z.string().min(8, { message: 'Password must be at least 8 characters' })
+            fieldSchema = z
+              .string()
+              .min(8, { message: 'Password must be at least 8 characters' })
             break
           case 'file':
           case 'file.json':
@@ -129,37 +138,25 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             fieldSchema = z.string()
         }
 
-        // Apply nullable constraint
-        // if (field.IsNullable) {
-          fieldSchema = fieldSchema.optional()
-        // } else {
-        //   fieldSchema = fieldSchema.min(1, {
-        //     message: 'This field is required',
-        //   })
-        // }
-
-        // Handle special case for password confirmation
-        if (field.ColumnName === 'passwordConfirm') {
-          const passwordField = actionSchema.InFields.find(f => f.ColumnName === 'password')
-          if (passwordField) {
-            schemaFields['passwordConfirm'] = z.string().min(1, { message: 'Please confirm your password' })
-          }
-        } else {
-          schemaFields[field.ColumnName] = fieldSchema
-        }
+        fieldSchema = fieldSchema.optional()
+        schemaFields[field.ColumnName] = fieldSchema
       })
     }
 
     // Add special validation for password confirmation if it exists
     const schema = z.object(schemaFields)
-    const passwordField = actionSchema.InFields.find(f => f.ColumnName === 'password')
-    const passwordConfirmField = actionSchema.InFields.find(f => f.ColumnName === 'passwordConfirm')
+    const passwordField = actionSchema.InFields.find(
+      (f) => f.ColumnName === 'password'
+    )
+    const passwordConfirmField = actionSchema.InFields.find(
+      (f) => f.ColumnName === 'passwordConfirm'
+    )
 
     if (passwordField && passwordConfirmField) {
       setFormSchema(
         schema.refine((data) => data.password === data.passwordConfirm, {
           message: "Passwords don't match",
-          path: ["passwordConfirm"],
+          path: ['passwordConfirm'],
         })
       )
     } else {
@@ -236,15 +233,17 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             control={form.control}
             name={field.ColumnName}
             render={({ field: formField }) => (
-              <FormItem className={cn(
-                'flex flex-row items-center justify-between',
-                isCompact ? 'p-2' : 'rounded-lg border p-4'
-              )}>
-                <div className="space-y-0.5">
+              <FormItem
+                className={cn(
+                  'flex flex-row items-center justify-between',
+                  isCompact ? 'p-2' : 'rounded-lg border p-4'
+                )}
+              >
+                <div className='space-y-0.5'>
                   <FormLabel className={isCompact ? 'text-sm' : 'text-base'}>
                     {field.Name}
                     {field.ColumnDescription && (
-                      <span className="ml-1 text-muted-foreground text-xs">
+                      <span className='text-muted-foreground ml-1 text-xs'>
                         ({field.ColumnDescription})
                       </span>
                     )}
@@ -274,15 +273,24 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
               <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
                 <FormLabel>
                   {field.Name}
-                  {field.IsNullable && <span className="text-muted-foreground ml-1">(Optional)</span>}
+                  {field.IsNullable && (
+                    <span className='text-muted-foreground ml-1'>
+                      (Optional)
+                    </span>
+                  )}
                 </FormLabel>
                 {field.ColumnDescription && (
-                  <p className="text-xs text-muted-foreground">{field.ColumnDescription}</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {field.ColumnDescription}
+                  </p>
                 )}
                 <FormControl>
                   <Textarea
                     placeholder={`Enter ${field.Name.toLowerCase()}`}
-                    className={cn('resize-y', isCompact ? 'min-h-[80px]' : 'min-h-[100px]')}
+                    className={cn(
+                      'resize-y',
+                      isCompact ? 'min-h-[80px]' : 'min-h-[100px]'
+                    )}
                     {...formField}
                   />
                 </FormControl>
@@ -302,14 +310,20 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
               <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
                 <FormLabel>
                   {field.Name}
-                  {field.IsNullable && <span className="text-muted-foreground ml-1">(Optional)</span>}
+                  {field.IsNullable && (
+                    <span className='text-muted-foreground ml-1'>
+                      (Optional)
+                    </span>
+                  )}
                 </FormLabel>
                 {field.ColumnDescription && (
-                  <p className="text-xs text-muted-foreground">{field.ColumnDescription}</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {field.ColumnDescription}
+                  </p>
                 )}
                 <FormControl>
                   <Input
-                    type="password"
+                    type='password'
                     placeholder={`Enter ${field.Name.toLowerCase()}`}
                     {...formField}
                   />
@@ -334,10 +348,16 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
               <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
                 <FormLabel>
                   {field.Name}
-                  {field.IsNullable && <span className="text-muted-foreground ml-1">(Optional)</span>}
+                  {field.IsNullable && (
+                    <span className='text-muted-foreground ml-1'>
+                      (Optional)
+                    </span>
+                  )}
                 </FormLabel>
                 {field.ColumnDescription && (
-                  <p className="text-xs text-muted-foreground">{field.ColumnDescription}</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {field.ColumnDescription}
+                  </p>
                 )}
                 <FormControl>
                   <Input
@@ -356,11 +376,14 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
 
   // Memoize the rendered fields to prevent unnecessary re-renders
   const fieldElements = React.useMemo(() => {
-    if (!actionSchema || !actionSchema.InFields) return <p>No input fields required</p>
+    if (!actionSchema || !actionSchema.InFields)
+      return <p>No input fields required</p>
 
-    return actionSchema.InFields.length > 0
-      ? actionSchema.InFields.map((field) => renderField(field))
-      : <p>No input fields required</p>
+    return actionSchema.InFields.length > 0 ? (
+      actionSchema.InFields.map((field) => renderField(field))
+    ) : (
+      <p>No input fields required</p>
+    )
   }, [actionSchema, renderField])
 
   if (!actionSchema) return null
@@ -380,24 +403,24 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             <form
               id={`action-form-${actionSchema.Name}`}
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
+              className='space-y-4'
             >
               {fieldElements}
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
+        <CardFooter className='flex justify-end space-x-2'>
           <Button
             onClick={() => {
               onCancel()
             }}
-            type="cancel"
+            type='cancel'
             form={`action-form-${actionSchema.Name}`}
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 Processing...
               </>
             ) : (
@@ -405,13 +428,13 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             )}
           </Button>
           <Button
-            type="submit"
+            type='submit'
             form={`action-form-${actionSchema.Name}`}
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 Processing...
               </>
             ) : (
@@ -430,26 +453,22 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
         <form
           id={`action-form-${actionSchema.Name}`}
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-3"
+          className='space-y-3'
         >
-          <div className="mb-3">
-            <h3 className="text-lg font-medium">{actionSchema.Label}</h3>
-            <p className="text-sm text-muted-foreground">
+          <div className='mb-3'>
+            <h3 className='text-lg font-medium'>{actionSchema.Label}</h3>
+            <p className='text-muted-foreground text-sm'>
               Fill in the required information to execute this action.
             </p>
           </div>
 
           {fieldElements}
 
-          <div className="flex justify-end pt-2">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              size="sm"
-            >
+          <div className='flex justify-end pt-2'>
+            <Button type='submit' disabled={isLoading} size='sm'>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  <Loader2 className='mr-2 h-3 w-3 animate-spin' />
                   Processing...
                 </>
               ) : (
