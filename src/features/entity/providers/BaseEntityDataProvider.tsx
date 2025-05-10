@@ -15,7 +15,6 @@ export interface BaseEntityContextType {
   isLoading: boolean
   error: Error | null
   refresh: () => void
-  executeAction: (actionName: string, payload: any) => Promise<any>
   visibleColumns: string[]
   toggleColumnVisibility: (columnKey: string) => void
   resetColumnVisibility: () => void
@@ -87,63 +86,6 @@ export const BaseEntityDataProvider: React.FC<{
     fetchSchemaData()
   }, [entityName])
 
-  const getActionSchema = useCallback(
-    async (actionId: string) => {
-      try {
-        const actionSchemaBase64 = await EntityApiService.executeAction('action',
-          'get_action_schema',
-          {
-            action_id: actionId,
-          }
-        );
-        const actionSchema = JSON.parse(atob(actionSchemaBase64[0].Attributes.content));
-        console.log("actionSchema", actionSchema);
-        queryClient.invalidateQueries({ queryKey: [`action-${actionId}`] })
-        return actionSchema;
-      } catch (error) {
-        console.error(`Error executing action ${actionId}:`, error)
-        toast({
-          variant: 'destructive',
-          title: `Failed to execute ${actionId}`,
-          description:
-            error instanceof Error ? error.message : 'An error occurred',
-        })
-        throw error
-      }
-    },
-    [queryClient, toast]
-  );
-
-  // Execute custom action on an entity
-  const executeAction = useCallback(
-    async (entityName: string, actionName: string, payload: any) => {
-      try {
-        // Execute the action
-        const response = await EntityApiService.executeAction(
-          entityName,
-          actionName,
-          payload
-        )
-
-        toast({
-          title: 'Success',
-          description: `Action ${actionName} executed successfully`,
-        })
-
-        return response
-      } catch (error) {
-        console.error(`Error executing action ${actionName}:`, error)
-        toast({
-          variant: 'destructive',
-          title: `Failed to execute ${actionName}`,
-          description:
-            error instanceof Error ? error.message : 'An error occurred',
-        })
-        throw error
-      }
-    },
-    [toast]
-  )
 
   // Refresh data
   const refresh = useCallback(() => {
@@ -184,8 +126,6 @@ export const BaseEntityDataProvider: React.FC<{
     isLoading: schemaLoading,
     error: schemaError,
     refresh,
-    executeAction,
-    getActionSchema,
     visibleColumns,
     toggleColumnVisibility,
     resetColumnVisibility,

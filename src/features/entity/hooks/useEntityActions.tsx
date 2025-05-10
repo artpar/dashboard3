@@ -72,6 +72,33 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
     enabled: !!entityName,
   })
 
+  const getActionSchema = useCallback(
+    async (actionId: string) => {
+      try {
+        const actionSchemaBase64 = await EntityApiService.executeAction('action',
+          'get_action_schema',
+          {
+            action_id: actionId,
+          }
+        );
+        const actionSchema = JSON.parse(atob(actionSchemaBase64[0].Attributes.content));
+        console.log("actionSchema", actionSchema);
+        return actionSchema;
+      } catch (error) {
+        console.error(`Error executing action ${actionId}:`, error)
+        toast({
+          variant: 'destructive',
+          title: `Failed to execute ${actionId}`,
+          description:
+            error instanceof Error ? error.message : 'An error occurred',
+        })
+        throw error
+      }
+    },
+    [toast]
+  );
+
+
   // Filter actions based on whether they require an instance or not
   const getAvailableActions = useCallback(() => {
     if (!actions) return []
@@ -87,6 +114,7 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
 
   // Execute an action
   const executeAction = useCallback(async (
+    entityName: string,
     actionName: string,
     payload: Record<string, any>
   ) => {
@@ -141,6 +169,7 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
   return {
     actions: getAvailableActions(),
     isLoading,
+    getActionSchema,
     error,
     executeAction,
     actionInProgress,

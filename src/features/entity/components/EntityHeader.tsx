@@ -47,6 +47,7 @@ import ActionExecuteComponent from '@/features/entity/components/actions/ActionE
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
 import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
 import EntityFilters from './filter/EntityFilters'
+import { useEntityActions } from '@/features/entity/hooks/useEntityActions.tsx'
 
 interface EntityHeaderProps {
   title: string
@@ -82,8 +83,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     selectAllItems,
     setShowBulkDeleteDialog,
     clearSelectedItems,
-    getActionSchema,
-    executeAction,
     sortColumns,
     setShowPasteDialog,
     copySelectedItems,
@@ -91,6 +90,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
     setSortColumn,
     clearSorting,
   } = useEntityCollectionData()
+  const { executeAction, getActionSchema } = useEntityActions({entityName, entityId: null})
 
   // Get world entities for related navigation
   const { entities } = useWorldEntities()

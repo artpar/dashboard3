@@ -26,8 +26,8 @@ const ActionCard = memo(({
 }) => {
   // Use callback to prevent new function creation on each render
   const handleClick = useCallback(() => {
-    onSelectAction(action.ActionName)
-  }, [action.ActionName, onSelectAction])
+    onSelectAction(action.ReferenceId)
+  }, [action.ReferenceId, onSelectAction])
 
   return (
     <Card key={action.ActionName} className="hover:shadow-md transition-shadow">
@@ -80,29 +80,23 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
     isLoading,
     error,
     executeAction,
+    getActionSchema,
     actionInProgress,
     actionResponses,
   } = useEntityActions({ entityName, entityId })
 
   // Find the selected action object - memoize to prevent recalculations
-  const selectedAction = React.useMemo(() =>
-      actions?.find(action => action.ActionName === selectedActionName),
-    [actions]
-  )
-
 
   // Handle closing dialog
   const handleCloseDialog = useCallback(() => {
-    setSelectedActionName(null)
+    // setSelectedActionName(null)
     setShowActionDialog(false)
   }, [])
 
   const [actionSchema, setActionSchema] = useState(null)
   // Handle selecting an action
   const handleSelectAction = useCallback(async (actionId: string) => {
-    const actionSchema = EntityApiService.executeAction("action", "get_action_schema", {
-      action_id: actionId
-    });
+    const actionSchema = await getActionSchema(actionId);
     setActionSchema(actionSchema)
     setShowActionDialog(true)
   }, [])
@@ -168,11 +162,10 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
           <ActionExecuteComponent
             actionSchema={actionSchema}
             onExecute={async (payload) => {
-              const actionResult = await executeAction(selectedAction.OnType, selectedAction.Name, payload)
+              const actionResult = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
               console.log("Action result:", actionResult)
             }}
             onCancel={handleCloseDialog}
-            isLoading={actionInProgress === selectedAction.Name}
             variant="default"
           />
         </DialogContent>
@@ -181,8 +174,8 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
       {/* Display action responses if available */}
       {actionResponses && (
         <EntityActionResponseViewer
-          responses={actionResponses[selectedActionName]}
-          actionName={selectedActionName}
+          responses={actionResponses["selectedActionName"]}
+          actionName={"selectedActionName"}
         />
       )}
     </div>
