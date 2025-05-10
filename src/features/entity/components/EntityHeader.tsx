@@ -22,7 +22,7 @@ import {
 import { useWorldEntities } from '@/hooks/use-world-entities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog.tsx'
+// Dialog is now handled internally by ActionExecuteComponent
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -125,21 +125,17 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   return (
     <div className='flex flex-col space-y-4'>
-      <Dialog
+      <ActionExecuteComponent
+        actionSchema={actionSchema}
+        viewType="dialog"
         open={showActionExecute}
-        onClose={() => setShowActionExecute(false)}
-      >
-        <DialogContent>
-          <ActionExecuteComponent
-            actionSchema={actionSchema}
-            onCancel={() => setShowActionExecute(false)}
-            onExecute={async (payload) => {
-              const actionResponse = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
-              console.log("actionResponse", actionResponse)
-            }}
-          ></ActionExecuteComponent>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowActionExecute}
+        onCancel={() => setShowActionExecute(false)}
+        onExecute={async (payload) => {
+          const actionResponse = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
+          console.log("actionResponse", actionResponse)
+        }}
+      />
       {/* Header with title and description */}
       <div className='flex items-start justify-between'>
         <div>
@@ -456,7 +452,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
               </DropdownMenuItem>
 
               {/* Custom actions */}
-              {availableActions && availableActions.length > 0 && (
+              {availableActions && availableActions.filter((e) => e.InstanceOptional).length > 0 && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>

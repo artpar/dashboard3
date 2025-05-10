@@ -142,10 +142,89 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
         [actionName]: response
       }))
 
-      toast({
-        title: 'Action Completed',
-        description: `${actionName} was executed successfully`,
-      })
+      // Process the response based on response types
+      if (Array.isArray(response)) {
+        // Handle different response types
+        response.forEach((item) => {
+          switch (item.ResponseType) {
+            case 'client.file.download': {
+              const { content, contentType, name } = item.Attributes;
+              // Convert base64 to blob and trigger download
+              const binaryString = window.atob(content);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              const blob = new Blob([bytes], { type: contentType });
+              const url = URL.createObjectURL(blob);
+              
+              // Create a temporary link and trigger download
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = name;
+              document.body.appendChild(a);
+              a.click();
+              
+              // Clean up
+              setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }, 100);
+              break;
+            }
+            
+            case 'client.store.set': {
+              const { key, value } = item.Attributes;
+              // Store in localStorage
+              localStorage.setItem(key, value);
+              break;
+            }
+            
+            case 'client.cookie.set': {
+              const { key, value } = item.Attributes;
+              // Set cookie
+              document.cookie = value;
+              break;
+            }
+            
+            case 'client.notify': {
+              const { message, title, type } = item.Attributes;
+              // Show notification
+              toast({
+                title,
+                description: message,
+                variant: type === 'error' ? 'destructive' : undefined,
+              });
+              break;
+            }
+            
+            case 'client.redirect': {
+              const { delay, location, window: target } = item.Attributes;
+              // Handle redirection
+              setTimeout(() => {
+                if (target === 'new') {
+                  window.open(location, '_blank');
+                } else {
+                  window.location.href = location;
+                }
+              }, delay);
+              break;
+            }
+            
+            default:
+              // For unhandled response types, just log them
+              console.log('Unhandled response type:', item.ResponseType, item);
+          }
+        });
+      }
+      
+      // Only show a generic success toast if no client.notify response was included
+      if (!Array.isArray(response) || !response.some(r => r.ResponseType === 'client.notify')) {
+        toast({
+          title: 'Action Completed',
+          description: `${actionName} was executed successfully`,
+        })
+      }
 
       return response
     } catch (err: any) {

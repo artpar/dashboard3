@@ -24,6 +24,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 // Define the field interface based on the action schema
 export interface ActionSchemaField {
@@ -65,10 +73,14 @@ export interface ActionSchema {
 
 interface ActionExecuteComponentProps {
   actionSchema: ActionSchema
-  onExecute: (actionName: string, payload: Record<string, any>) => Promise<any>
+  onExecute: (payload: Record<string, any>) => Promise<any>
+  onCancel?: () => void
   className?: string
   isLoading?: boolean
   variant?: 'default' | 'compact'
+  viewType?: 'inline' | 'dialog'
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
@@ -78,6 +90,9 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
   className,
   isLoading = false,
   variant = 'default',
+  viewType = 'inline',
+  open,
+  onOpenChange,
 }) => {
   // Generate a dynamic schema based on action fields
   const [formSchema, setFormSchema] = useState<z.ZodObject<any>>(z.object({}))
@@ -216,6 +231,9 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
     try {
       await onExecute(values)
       form.reset() // Reset form after successful submission
+      if (viewType === 'dialog' && onOpenChange) {
+        onOpenChange(false) // Close dialog after successful submission
+      }
     } catch (error) {
       console.error('Error executing action:', error)
     }
@@ -388,98 +406,186 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
 
   if (!actionSchema) return null
 
-  // Render as a card for default variant
-  if (variant === 'default') {
-    return (
-      <Card className={cn('w-full border-0 shadow-none', className)}>
-        <CardHeader>
-          <CardTitle>{actionSchema.Label}</CardTitle>
-          <CardDescription>
-            Fill in the required information to execute this action.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              id={`action-form-${actionSchema.Name}`}
-              onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-4'
-            >
-              {fieldElements}
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className='flex justify-end space-x-2'>
-          <Button
-            onClick={() => {
-              onCancel()
-            }}
-            type='reset'
-            form={`action-form-${actionSchema.Name}`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                Processing...
-              </>
-            ) : (
-              'Cancel'
-            )}
-          </Button>
-          <Button
-            type='submit'
-            form={`action-form-${actionSchema.Name}`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                Processing...
-              </>
-            ) : (
-              'Execute'
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
-    )
-  }
-
-  // Render as a compact form for compact variant
-  return (
-    <div className={cn('w-full', className)}>
-      <Form {...form}>
-        <form
-          id={`action-form-${actionSchema.Name}`}
-          onSubmit={form.handleSubmit(onSubmit)}
-          className='space-y-3'
-        >
-          <div className='mb-3'>
-            <h3 className='text-lg font-medium'>{actionSchema.Label}</h3>
-            <p className='text-muted-foreground text-sm'>
+  // Create the content based on variant - only used for inline view
+  const renderContent = () => {
+    // Render as a card for default variant
+    if (variant === 'default') {
+      return (
+        <Card className={cn('w-full border-0 shadow-none', className)}>
+          <CardHeader>
+            <CardTitle>{actionSchema.Label}</CardTitle>
+            <CardDescription>
               Fill in the required information to execute this action.
-            </p>
-          </div>
-
-          {fieldElements}
-
-          <div className='flex justify-end pt-2'>
-            <Button type='submit' disabled={isLoading} size='sm'>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                id={`action-form-${actionSchema.Name}`}
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-4'
+              >
+                {fieldElements}
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter className='flex justify-end space-x-2'>
+            {onCancel && (
+              <Button
+                onClick={() => {
+                  if (onCancel) onCancel()
+                }}
+                type='reset'
+                variant="outline"
+                form={`action-form-${actionSchema.Name}`}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Processing...
+                  </>
+                ) : (
+                  'Cancel'
+                )}
+              </Button>
+            )}
+            <Button
+              type='submit'
+              form={`action-form-${actionSchema.Name}`}
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Processing...
                 </>
               ) : (
                 'Execute'
               )}
             </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
-  )
+          </CardFooter>
+        </Card>
+      )
+    }
+
+    // Render as a compact form for compact variant
+    return (
+      <div className={cn('w-full', className)}>
+        <Form {...form}>
+          <form
+            id={`action-form-${actionSchema.Name}`}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-3'
+          >
+            <div className='mb-3'>
+              <h3 className='text-lg font-medium'>{actionSchema.Label}</h3>
+              <p className='text-muted-foreground text-sm'>
+                Fill in the required information to execute this action.
+              </p>
+            </div>
+
+            {fieldElements}
+
+            <div className='flex justify-end space-x-2 pt-2'>
+              {onCancel && (
+                <Button 
+                  onClick={() => {
+                    if (onCancel) onCancel()
+                    if (viewType === 'dialog' && onOpenChange) {
+                      onOpenChange(false)
+                    }
+                  }} 
+                  type='reset' 
+                  disabled={isLoading} 
+                  size='sm'
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button type='submit' disabled={isLoading} size='sm'>
+                {isLoading ? (
+                  <>
+                    <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                    Processing...
+                  </>
+                ) : (
+                  'Execute'
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    )
+  }
+
+  // Special rendering for dialog viewType
+  if (viewType === 'dialog') {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{actionSchema?.Label}</DialogTitle>
+            <DialogDescription>
+              Fill in the required information to execute this action.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form
+              id={`action-form-${actionSchema?.Name}`}
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='space-y-4 py-4'
+            >
+              {fieldElements}
+            </form>
+          </Form>
+          
+          <DialogFooter className="flex justify-end space-x-2">
+            {onCancel && (
+              <Button
+                onClick={() => {
+                  if (onCancel) onCancel()
+                  if (onOpenChange) onOpenChange(false)
+                }}
+                type='reset'
+                variant="outline"
+                form={`action-form-${actionSchema?.Name}`}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Processing...
+                  </>
+                ) : (
+                  'Cancel'
+                )}
+              </Button>
+            )}
+            <Button
+              type='submit'
+              form={`action-form-${actionSchema?.Name}`}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Processing...
+                </>
+              ) : (
+                'Execute'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Render inline
+  return renderContent()
 }
 
 export default ActionExecuteComponent

@@ -3,7 +3,7 @@ import { useEntityActions } from '../../hooks/useEntityActions'
 import { Button } from '@/components/ui/button'
 import { Loader2, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+// Dialog is now handled internally by ActionExecuteComponent
 import ActionExecuteComponent from './ActionExecuteComponent'
 import EntityActionResponseViewer from './EntityActionResponseViewer'
 import { EntityApiService } from '@/features/entity/services/EntityApiService.ts'
@@ -48,6 +48,7 @@ const ActionCard = memo(({
           </div>
           <Button
             size="sm"
+            variant="outline"
             onClick={handleClick}
             disabled={!!actionInProgress}
           >
@@ -156,20 +157,19 @@ export const EntityActionsPanel: React.FC<EntityActionsPanelProps> = ({
         ))}
       </div>
 
-      {/* Action dialog with ActionExecuteComponent */}
-      <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
-        <DialogContent>
-          <ActionExecuteComponent
-            actionSchema={actionSchema}
-            onExecute={async (payload) => {
-              const actionResult = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
-              console.log("Action result:", actionResult)
-            }}
-            onCancel={handleCloseDialog}
-            variant="default"
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Action execution component with internal dialog */}
+      <ActionExecuteComponent
+        actionSchema={actionSchema}
+        viewType="dialog"
+        open={showActionDialog}
+        onOpenChange={setShowActionDialog}
+        onExecute={async (payload) => {
+          const actionResult = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
+          console.log("Action result:", actionResult)
+        }}
+        onCancel={handleCloseDialog}
+        variant="default"
+      />
 
       {/* Display action responses if available */}
       {actionResponses && (
