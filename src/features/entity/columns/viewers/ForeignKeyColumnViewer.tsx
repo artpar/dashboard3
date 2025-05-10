@@ -1,7 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, ExternalLink, FileIcon } from 'lucide-react'
+import { AlertCircle, ExternalLink, FileIcon, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,10 +11,38 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useToast } from '@/components/ui/use-toast'
 import { ColumnViewerProps } from '../types'
 
 
 export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
+
+// Helper function to download a file from a URL
+const downloadFile = async (url: string, fileName: string, onError: (message: string) => void) => {
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.status} ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Clean up the URL object
+    setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100)
+  } catch (error) {
+    console.error('Error downloading file:', error)
+    onError(error instanceof Error ? error.message : 'Failed to download file')
+  }
+}
 
 /**
  * Component for displaying foreign key values with reference data
@@ -27,9 +55,11 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 }) => {
   // console.log('ForeignKeyColumnViewer', value, column)
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [referenceData, setReferenceData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDownloading, setIsDownloading] = useState<boolean>(false)
 
   // Extract necessary information from the column
   const foreignKeyData = column.ForeignKeyData
@@ -156,15 +186,19 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
       const fileData = fileDataArray[0]
 
       // Generate asset URL
-      const assetUrl =
+      let assetUrl =
         DAPTIN_ENDPOINT +
         '/asset/' +
         entity['__type'] +
         '/' +
         entity.reference_id +
         '/' +
-        column.ColumnName +
-        '.png'
+        column.ColumnName;
+      if (isImage) {
+        assetUrl += '.png'
+      } else {
+        assetUrl += ("?token=" + localStorage.getItem("token"))
+      }
 
       // Get file name or use placeholder
       const fileName =
@@ -205,10 +239,34 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <div onClick={() => {
-                    // TODO: fetch content from assetUrl and serve as file download to user
-                  }} className='flex items-center gap-2 p-2 cursor-pointer'>
-                    <FileIcon className='h-4 w-4' />
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      if (isDownloading) return
+
+                      setIsDownloading(true)
+                      downloadFile(
+                        assetUrl,
+                        fileName,
+                        (errorMessage) => {
+                          toast({
+                            variant: 'destructive',
+                            title: 'Download failed',
+                            description: errorMessage,
+                          })
+                          setIsDownloading(false)
+                        }
+                      ).finally(() => {
+                        setIsDownloading(false)
+                      })
+                    }}
+                    className='flex items-center gap-2 p-2 cursor-pointer'>
+                    {isDownloading ? (
+                      <span className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-1"></span>
+                    ) : (
+                      <Download className='h-4 w-4' />
+                    )}
                     <span className='truncate max-w-40'>
                       {fileName}
                     </span>
@@ -284,11 +342,38 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                         </span>
                 </div>
               ) : (
-                <div className='flex items-center gap-1 p-1'>
-                  <FileIcon className='h-3 w-3' />
+                <div
+                  className='flex items-center gap-1 p-1 cursor-pointer'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (isDownloading) return
+
+                    setIsDownloading(true)
+                    downloadFile(
+                      fileAssetUrl,
+                      fileName,
+                      (errorMessage) => {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Download failed',
+                          description: errorMessage,
+                        })
+                        setIsDownloading(false)
+                      }
+                    ).finally(() => {
+                      setIsDownloading(false)
+                    })
+                  }}
+                >
+                  {isDownloading ? (
+                    <span className="animate-spin h-3 w-3 border-2 border-gray-500 border-t-transparent rounded-full mr-1"></span>
+                  ) : (
+                    <Download className='h-3 w-3' />
+                  )}
                   <span className='truncate max-w-24 text-xs'>
-                          {fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName}
-                        </span>
+                    {fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName}
+                  </span>
                 </div>
               )}
             </Badge>

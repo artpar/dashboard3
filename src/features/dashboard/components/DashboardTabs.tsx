@@ -12,7 +12,7 @@ import {
   getEntityColor,
 } from '../utils/dashboardUtils.tsx'
 import { SystemDashboard } from '@/features/dashboard/components/system/SystemDashboard.tsx'
-import { EntityGrowthData } from '@/features/dashboard/components/EntityGrowthData.tsx'
+import { EntityAggregateViewComponent } from '@/features/dashboard/components/EntityAggregateViewComponent.tsx'
 
 interface DashboardTabsProps {
   activeTab: string
@@ -78,8 +78,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         />
 
         <QuickActions />
-        <EntityGrowthData entityName={"user_account"}></EntityGrowthData>
-        <EntityGrowthData entityName={"rpatask"}></EntityGrowthData>
+        <EntityAggregateViewComponent entityName={"user_account"}></EntityAggregateViewComponent>
       </TabsContent>
 
       {/* Analytics Tab */}

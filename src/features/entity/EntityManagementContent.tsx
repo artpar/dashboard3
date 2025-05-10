@@ -8,6 +8,7 @@ import EntityFilterDialog from '@/features/entity/components/dialogs/EntityFilte
 import EntityPagination from '@/features/entity/components/pagination/EntityPagination.tsx'
 import EntityDataTable from '@/features/entity/components/table/EntityDataTable.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
+import { EntityAggregateViewComponent } from '@/features/dashboard/components/EntityAggregateViewComponent.tsx'
 
 export interface EntityManagementProps {
   entityName: string
@@ -92,7 +93,6 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
             entityName={entityName}
           />
         </div>
-
         {/* Main content with data table */}
         {isLoading ? (
           <div className='space-y-4 p-6'>

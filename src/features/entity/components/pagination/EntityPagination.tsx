@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
+import { EntityAggregateViewComponent } from '@/features/dashboard/components/EntityAggregateViewComponent.tsx'
 
 interface EntityPaginationProps {
   currentPage: number

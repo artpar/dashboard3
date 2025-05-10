@@ -5,14 +5,16 @@ import { processChartData, processCumulativeChartData } from '../utils/dashboard
 interface UserGrowthProps {
   areaChartTitle?: string
   entityName?: string
+  className?: string
   barChartTitle?: string
 }
 
-export const EntityGrowthData: React.FC<UserGrowthProps> = ({
-                                                              entityName = 'user_account',
-                                                              areaChartTitle = entityName + ' Growth Trend',
-                                                              barChartTitle = entityName + ' Activity',
-                                                            }) => {
+export const EntityAggregateViewComponent: React.FC<UserGrowthProps> = ({
+                                                                          entityName = 'user_account',
+                                                                          className = '',
+                                                                          areaChartTitle = entityName + ' Growth Trend',
+                                                                          barChartTitle = entityName + ' Activity',
+                                                                        }) => {
   // Fetch user aggregate data using the aggregate endpoint
   const { data: userAggregateData, isLoading } = useEntityAggregateData(entityName, 'date(created_at)')
 
@@ -27,7 +29,7 @@ export const EntityGrowthData: React.FC<UserGrowthProps> = ({
   }, [userAggregateData])
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className={className + ' grid grid-cols-1 gap-4 md:grid-cols-2'}>
       {/* User Growth Area Chart - Cumulative */}
       <DashboardAreaChart
         title={areaChartTitle}
