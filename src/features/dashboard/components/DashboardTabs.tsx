@@ -60,14 +60,6 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Overview
         </TabsTrigger>
-        <TabsTrigger value="activity">
-          <Activity className="mr-2 h-4 w-4" />
-          Activity
-        </TabsTrigger>
-        <TabsTrigger value="entities">
-          <Database className="mr-2 h-4 w-4" />
-          Entities
-        </TabsTrigger>
         <TabsTrigger value="analytics">
           <BarChart className="mr-2 h-4 w-4" />
           Analytics
@@ -110,65 +102,6 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
             isLoading={isLoadingEntities}
           />
         </div>
-      </TabsContent>
-
-      {/* Activity Tab */}
-      <TabsContent value="activity" className="space-y-4">
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {Object.entries(recentActivity).map(([entityName, items]) => (
-            <ActivityOverview
-              key={entityName}
-              entityName={entityName}
-              items={items}
-              icon={getEntityIcon(entityName)}
-            />
-          ))}
-        </div>
-
-        {/* User Registration Bar Chart */}
-        <DashboardBarChart
-          title="User Registrations by Date"
-          description="Detailed view of user registrations"
-          data={userChartData}
-          isLoading={isLoadingUserAggregates}
-          dataKey="count"
-          nameKey="formattedDate"
-          color="#3b82f6"
-        />
-
-        {/* Entity Actions */}
-        <EntityActions />
-      </TabsContent>
-
-      {/* Entities Tab */}
-      <TabsContent value="entities" className="space-y-4">
-        {/* Entity Stats */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {entityStats.map((stat) => (
-            <EntityStatCard
-              key={stat.entityName}
-              entityName={stat.entityName}
-              count={stat.count}
-              icon={stat.icon}
-              description={stat.description}
-              path={stat.path}
-              isLoading={stat.isLoading}
-            />
-          ))}
-        </div>
-
-        {/* Entity Distribution Chart */}
-        <DashboardBarChart
-          title="Entity Distribution"
-          description="Distribution of records across entity types"
-          data={entityStats.filter(stat => !stat.isLoading)}
-          isLoading={isLoadingEntities}
-          dataKey="count"
-          nameKey="entityName"
-          color="#3b82f6"
-          layout="vertical"
-        />
       </TabsContent>
 
       {/* Analytics Tab */}
