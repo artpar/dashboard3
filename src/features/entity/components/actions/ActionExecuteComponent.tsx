@@ -414,7 +414,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             onClick={() => {
               onCancel()
             }}
-            type='cancel'
+            type='reset'
             form={`action-form-${actionSchema.Name}`}
             disabled={isLoading}
           >
