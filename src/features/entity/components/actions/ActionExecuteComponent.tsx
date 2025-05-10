@@ -130,13 +130,13 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
         }
 
         // Apply nullable constraint
-        if (field.IsNullable) {
+        // if (field.IsNullable) {
           fieldSchema = fieldSchema.optional()
-        } else {
-          fieldSchema = fieldSchema.min(1, {
-            message: 'This field is required',
-          })
-        }
+        // } else {
+        //   fieldSchema = fieldSchema.min(1, {
+        //     message: 'This field is required',
+        //   })
+        // }
 
         // Handle special case for password confirmation
         if (field.ColumnName === 'passwordConfirm') {
