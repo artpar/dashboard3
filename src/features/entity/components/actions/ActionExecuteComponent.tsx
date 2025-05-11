@@ -14,17 +14,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -32,6 +21,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager.tsx'
+
+// Define the field interface based on the action schema
 
 // Define the field interface based on the action schema
 export interface ActionSchemaField {
@@ -108,7 +108,11 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
         let fieldSchema: any = z.string()
 
         // Handle different field types
-        switch (field.ColumnType) {
+        let columnType = field.ColumnType
+        if (columnType.startsWith('file.')) {
+          columnType = 'file'
+        }
+        switch (columnType) {
           case 'truefalse':
             fieldSchema = z.boolean()
             break
@@ -192,6 +196,9 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
     const defaultValues: Record<string, any> = {}
 
     actionSchema.InFields.forEach((field: ActionSchemaField) => {
+      if (field.ColumnType.startsWith('file.')) {
+        defaultValues[field.ColumnName] = []
+      }
       if (field.DefaultValue) {
         // Parse default values based on field type
         switch (field.ColumnType) {
@@ -244,7 +251,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
     const isCompact = variant === 'compact'
 
     switch (field.ColumnType) {
-      case 'truefalse':
+      default:
         return (
           <FormField
             key={field.ColumnName}
@@ -268,121 +275,11 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
                   </FormLabel>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={formField.value}
-                    onCheckedChange={formField.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )
-
-      case 'content':
-      case 'json':
-      case 'description':
-        return (
-          <FormField
-            key={field.ColumnName}
-            control={form.control}
-            name={field.ColumnName}
-            render={({ field: formField }) => (
-              <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
-                <FormLabel>
-                  {field.Name}
-                  {field.IsNullable && (
-                    <span className='text-muted-foreground ml-1'>
-                      (Optional)
-                    </span>
-                  )}
-                </FormLabel>
-                {field.ColumnDescription && (
-                  <p className='text-muted-foreground text-xs'>
-                    {field.ColumnDescription}
-                  </p>
-                )}
-                <FormControl>
-                  <Textarea
-                    placeholder={`Enter ${field.Name.toLowerCase()}`}
-                    className={cn(
-                      'resize-y',
-                      isCompact ? 'min-h-[80px]' : 'min-h-[100px]'
-                    )}
-                    {...formField}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )
-
-      case 'password':
-        return (
-          <FormField
-            key={field.ColumnName}
-            control={form.control}
-            name={field.ColumnName}
-            render={({ field: formField }) => (
-              <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
-                <FormLabel>
-                  {field.Name}
-                  {field.IsNullable && (
-                    <span className='text-muted-foreground ml-1'>
-                      (Optional)
-                    </span>
-                  )}
-                </FormLabel>
-                {field.ColumnDescription && (
-                  <p className='text-muted-foreground text-xs'>
-                    {field.ColumnDescription}
-                  </p>
-                )}
-                <FormControl>
-                  <Input
-                    type='password'
-                    placeholder={`Enter ${field.Name.toLowerCase()}`}
-                    {...formField}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )
-
-      case 'email':
-      case 'label':
-      case 'name':
-      case 'alias':
-      default:
-        return (
-          <FormField
-            key={field.ColumnName}
-            control={form.control}
-            name={field.ColumnName}
-            render={({ field: formField }) => (
-              <FormItem className={isCompact ? 'space-y-1' : 'space-y-2'}>
-                <FormLabel>
-                  {field.Name}
-                  {field.IsNullable && (
-                    <span className='text-muted-foreground ml-1'>
-                      (Optional)
-                    </span>
-                  )}
-                </FormLabel>
-                {field.ColumnDescription && (
-                  <p className='text-muted-foreground text-xs'>
-                    {field.ColumnDescription}
-                  </p>
-                )}
-                <FormControl>
-                  <Input
-                    type={field.ColumnType === 'email' ? 'email' : 'text'}
-                    placeholder={`Enter ${field.Name.toLowerCase()}`}
-                    {...formField}
-                  />
+                  <ColumnEditor
+                    column={field}
+                    onChange={formField.onChange}
+                    value={formField.value}
+                  ></ColumnEditor>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -436,7 +333,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
                   if (onCancel) onCancel()
                 }}
                 type='reset'
-                variant="outline"
+                variant='outline'
                 form={`action-form-${actionSchema.Name}`}
                 disabled={isLoading}
               >
@@ -489,15 +386,15 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
 
             <div className='flex justify-end space-x-2 pt-2'>
               {onCancel && (
-                <Button 
+                <Button
                   onClick={() => {
                     if (onCancel) onCancel()
                     if (viewType === 'dialog' && onOpenChange) {
                       onOpenChange(false)
                     }
-                  }} 
-                  type='reset' 
-                  disabled={isLoading} 
+                  }}
+                  type='reset'
+                  disabled={isLoading}
                   size='sm'
                 >
                   Cancel
@@ -524,14 +421,14 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
   if (viewType === 'dialog') {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className='sm:max-w-[500px]'>
           <DialogHeader>
             <DialogTitle>{actionSchema?.Label}</DialogTitle>
             <DialogDescription>
               Fill in the required information to execute this action.
             </DialogDescription>
           </DialogHeader>
-          
+
           <Form {...form}>
             <form
               id={`action-form-${actionSchema?.Name}`}
@@ -541,8 +438,8 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
               {fieldElements}
             </form>
           </Form>
-          
-          <DialogFooter className="flex justify-end space-x-2">
+
+          <DialogFooter className='flex justify-end space-x-2'>
             {onCancel && (
               <Button
                 onClick={() => {
@@ -550,7 +447,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
                   if (onOpenChange) onOpenChange(false)
                 }}
                 type='reset'
-                variant="outline"
+                variant='outline'
                 form={`action-form-${actionSchema?.Name}`}
                 disabled={isLoading}
               >

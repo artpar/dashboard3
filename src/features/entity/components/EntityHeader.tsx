@@ -1,53 +1,18 @@
-import React, { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import {
-  ArrowDown,
-  ArrowDownToLine,
-  ArrowUp,
-  Clipboard,
-  Columns,
-  Copy,
-  Download,
-  Eye,
-  EyeOff,
-  MoreHorizontal,
-  Plus,
-  RefreshCw,
-  Settings,
-  Share2,
-  Trash2,
-  Upload,
-  X,
-} from 'lucide-react'
-import { useWorldEntities } from '@/hooks/use-world-entities'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import React, { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { ArrowDown, ArrowDownToLine, ArrowUp, Clipboard, Columns, Copy, Download, Eye, EyeOff, MoreHorizontal, Plus, RefreshCw, Settings, Share2, Trash2, Upload, X } from 'lucide-react';
+import { useWorldEntities } from '@/hooks/use-world-entities';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 // Dialog is now handled internally by ActionExecuteComponent
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import ActionExecuteComponent from '@/features/entity/components/actions/ActionExecuteComponent.tsx'
-import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
-import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
-import EntityFilters from './filter/EntityFilters'
-import { useEntityActions } from '@/features/entity/hooks/useEntityActions.tsx'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import ActionExecuteComponent from '@/features/entity/components/actions/ActionExecuteComponent.tsx';
+import { useEntityActions } from '@/features/entity/hooks/useEntityActions.tsx';
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData';
+import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters';
+import EntityFilters from './filter/EntityFilters';
+
 
 interface EntityHeaderProps {
   title: string
@@ -213,9 +178,14 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           // Add the current entity name to the payload
           const importPayload = {
             ...payload,
-            table_name: entityName
+            table_name: entityName,
+            world_id: currentEntity.reference_id
           }
-          const actionResponse = await executeAction('world', 'import_data', importPayload)
+          const actionResponse = await executeAction(
+            'world',
+            'import_data',
+            importPayload
+          )
           console.log("Import response:", actionResponse)
           // Refresh the data after import
           refresh()
