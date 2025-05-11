@@ -84,7 +84,7 @@ export async function sendMessageToBackgroundScript(request) {
             signinWithEmailOtpResponse =
               await daptinClient.actionManager.doAction(
                 'user_account',
-                'signin_100xbot_email',
+                'signin',
                 {
                   token: btoa(
                     JSON.stringify({ email: request.email, otp: request.otp })
@@ -161,7 +161,7 @@ export async function sendMessageToBackgroundScript(request) {
           try {
             const signinResponse1 = await daptinClient.actionManager.doAction(
               'user_account',
-              'signin_100xbot',
+              'signin',
               {
                 email: request.email,
                 password: request.password,
@@ -1021,7 +1021,7 @@ export async function sendMessageToBackgroundScript(request) {
           const signinWithEmailResponse1 =
             await daptinClient.actionManager.doAction(
               'user_account',
-              'signup_100xbot_email',
+              'signup',
               {
                 email: request.email,
               }
@@ -1040,10 +1040,10 @@ export async function sendMessageToBackgroundScript(request) {
           const signinWithEmailResponse =
             await daptinClient.actionManager.doAction(
               'user_account',
-              'signup_100xbot_email_referral',
+              'signup',
               {
                 email: request.email,
-                referral_code: request.referral_code,
+                password: request.password,
               }
             )
           resolve(signinWithEmailResponse)

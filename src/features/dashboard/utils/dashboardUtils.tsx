@@ -1,12 +1,12 @@
 import { format, subDays } from 'date-fns'
-import { 
-  Users, 
-  Database, 
-  Lightbulb, 
-  FileText, 
-  ClipboardList, 
-  Layers, 
-  Mail, 
+import {
+  Users,
+  Database,
+  Lightbulb,
+  FileText,
+  ClipboardList,
+  Layers,
+  Mail,
   Calendar,
   Globe,
   Shield,
@@ -73,7 +73,7 @@ export const processChartData = (
   return sortedData.map(item => ({
     date: item.attributes.date,
     count: item.attributes.count,
-    formattedDate: format(new Date(item.attributes.date), dateFormat),
+    formattedDate: format(new Date(item.attributes["date(created_at)"]), dateFormat),
   }))
 }
 
@@ -94,13 +94,13 @@ export const processCumulativeChartData = (
   })
 
   let cumulativeCount = 0;
-  
+
   return sortedData.map(item => {
     cumulativeCount += item.attributes.count;
     return {
       date: item.attributes.date,
       count: cumulativeCount,
-      formattedDate: format(new Date(item.attributes.date), dateFormat),
+      formattedDate: format(new Date(item.attributes["date(created_at)"]), dateFormat),
     };
   })
 }

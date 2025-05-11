@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Command, LayoutDashboard } from 'lucide-react'
+import { Command } from 'lucide-react'
 import { useWorldEntities } from '@/hooks/use-world-entities.tsx'
 import { type SidebarData } from '../types'
 
@@ -48,10 +48,10 @@ export function useSidebarData(): SidebarData {
       {
         title: 'Dashboard',
         url: '/',
-        icon: "",
+        icon: '',
       },
-    ];
-    console.log("sidebar.groupedEntities", groupedEntities)
+    ]
+    console.log('sidebar.groupedEntities', groupedEntities)
 
     // Create nav items from top-level entities
     const entityItems = isLoading
@@ -77,67 +77,4 @@ export function useSidebarData(): SidebarData {
       ],
     }
   }, [groupedEntities, isLoading])
-}
-
-// Export a static version for SSR/initial render
-export const sidebarData: SidebarData = {
-  user: userData,
-  teams: teamsData,
-  navGroups: [
-    {
-      title: 'General',
-      items: [
-        {
-          title: 'Dashboard',
-          url: '/',
-          icon: 'fa-dashboard',
-        },
-        {
-          title: 'Memories',
-          url: '/memory',
-          icon: 'fa-bulb',
-        },
-        {
-          title: 'User accounts',
-          url: '/user_account',
-          icon: 'fa-user',
-        },
-        {
-          title: 'User groups',
-          url: '/usergroup',
-          icon: 'fa-users',
-        },
-        {
-          title: 'Customer',
-          url: '/customer',
-          icon: 'fa-user',
-        },
-        {
-          title: 'Creator',
-          url: '/creator',
-          icon: '',
-        },
-        {
-          title: 'Articles',
-          url: '/article',
-          icon: '',
-        },
-        {
-          title: 'Tasks',
-          url: '/rpatask',
-          icon: '',
-        },
-
-        {
-          title: 'Workgroups',
-          url: '/workgroup',
-          icon: 'fa-building',
-        },
-      ],
-    },
-    {
-      title: 'Other',
-      items: otherItems,
-    },
-  ],
 }

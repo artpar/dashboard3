@@ -106,7 +106,7 @@ export const SystemDashboard: React.FC<SystemDashboardProps> = ({
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={isFirstRender.current ? 'loading' : 'loaded'}
+          key={'loaded'}
           initial="hidden"
           animate={"visible"}
           exit="hidden"
@@ -115,7 +115,7 @@ export const SystemDashboard: React.FC<SystemDashboardProps> = ({
         >
           {/* Primary Stats - First Row */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4"
             variants={itemVariants}
           >
             <WebServerStats webStats={statistics?.web || null} isLoading={showLoading} />
@@ -134,7 +134,7 @@ export const SystemDashboard: React.FC<SystemDashboardProps> = ({
 
           {/* System Metrics - Third Row */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 xl:gap-4"
             variants={itemVariants}
           >
             <LoadStats loadStats={statistics?.load || null} isLoading={showLoading} />

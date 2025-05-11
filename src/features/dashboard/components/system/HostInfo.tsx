@@ -47,7 +47,7 @@ export const HostInfo: React.FC<HostInfoProps> = ({ hostStats, isLoading }) => {
 
               <div className="flex items-center justify-between py-1 border-b">
                 <span className="text-sm font-medium">Hostname</span>
-                <span className="text-sm">{hostStats.info.hostname}</span>
+                <span className="text-xs font-mono">{hostStats.info.hostname}</span>
               </div>
 
               <div className="flex items-center justify-between py-1 border-b">

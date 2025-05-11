@@ -64,7 +64,7 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={checkIsActive(href, item)}>
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
-          <DynamicIcon icon={item.icon && item.icon.length > 0 ? item.icon : "table"} / >
+          <DynamicIcon icon={item.icon && item.icon.length > 0 ? item.icon : "table"} />
           {state === 'expanded' && <span>{item.title}</span>}
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>
