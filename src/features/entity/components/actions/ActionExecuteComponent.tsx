@@ -247,7 +247,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
   }
 
   // Render field based on its type
-  const renderField = (field: ActionSchemaField) => {
+  const renderField = React.useCallback((field: ActionSchemaField) => {
     const isCompact = variant === 'compact'
 
     switch (field.ColumnType) {
@@ -289,7 +289,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
           />
         )
     }
-  }
+  }, [variant, form.control])
 
   // Memoize the rendered fields to prevent unnecessary re-renders
   const fieldElements = React.useMemo(() => {
