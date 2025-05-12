@@ -260,11 +260,11 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             render={({ field: formField }) => (
               <FormItem
                 className={cn(
-                  'flex flex-row items-center justify-between',
-                  isCompact ? 'p-2' : 'rounded-lg border p-4'
+                  'flex flex-col items-left',
+                  isCompact ? 'p-0' : 'rounded-lg border p-2'
                 )}
               >
-                <div className='space-y-0.5'>
+                <div className='flex space-y-0.5'>
                   <FormLabel className={isCompact ? 'text-sm' : 'text-base'}>
                     {field.Name}
                     {field.ColumnDescription && (
@@ -274,13 +274,15 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
                     )}
                   </FormLabel>
                 </div>
-                <FormControl>
-                  <ColumnEditor
-                    column={field}
-                    onChange={formField.onChange}
-                    value={formField.value}
-                  ></ColumnEditor>
-                </FormControl>
+                <div className="flex">
+                  <FormControl>
+                    <ColumnEditor
+                      column={field}
+                      onChange={formField.onChange}
+                      value={formField.value}
+                    ></ColumnEditor>
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -312,11 +314,11 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
           <CardHeader>
             <CardTitle>{actionSchema.Label}</CardTitle>
             <CardDescription>
-              Fill in the required information to execute this action.
+              Fill in the required information to execute this action. 2
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
+          <CardContent >
+            <Form {...form} >
               <form
                 id={`action-form-${actionSchema.Name}`}
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -378,7 +380,7 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
             <div className='mb-3'>
               <h3 className='text-lg font-medium'>{actionSchema.Label}</h3>
               <p className='text-muted-foreground text-sm'>
-                Fill in the required information to execute this action.
+                Fill in the required information to execute this action. 3
               </p>
             </div>
 
@@ -425,19 +427,21 @@ export const ActionExecuteComponent: React.FC<ActionExecuteComponentProps> = ({
           <DialogHeader>
             <DialogTitle>{actionSchema?.Label}</DialogTitle>
             <DialogDescription>
-              Fill in the required information to execute this action.
+              Fill in the required information to execute this action. 4
             </DialogDescription>
           </DialogHeader>
 
-          <Form {...form}>
-            <form
-              id={`action-form-${actionSchema?.Name}`}
-              onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-4 py-4'
-            >
-              {fieldElements}
-            </form>
-          </Form>
+          <div className='space-y-4 max-h-[500px] overflow-y-auto'>
+            <Form {...form} >
+              <form
+                id={`action-form-${actionSchema?.Name}`}
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-4 py-4'
+              >
+                {fieldElements}
+              </form>
+            </Form>
+          </div>
 
           <DialogFooter className='flex justify-end space-x-2'>
             {onCancel && (
