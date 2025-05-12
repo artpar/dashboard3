@@ -73,7 +73,7 @@ export const processChartData = (
   return sortedData.map(item => ({
     date: item.attributes.date,
     count: item.attributes.count,
-    formattedDate: format(new Date(item.attributes["date(created_at)"]), dateFormat),
+    formattedDate: format(new Date(item.attributes["date(created_at)"] || item.attributes["date"]), dateFormat),
   }))
 }
 
@@ -100,7 +100,7 @@ export const processCumulativeChartData = (
     return {
       date: item.attributes.date,
       count: cumulativeCount,
-      formattedDate: format(new Date(item.attributes["date(created_at)"]), dateFormat),
+      formattedDate: format(new Date(item.attributes["date(created_at)"] || item.attributes["date"]), dateFormat),
     };
   })
 }

@@ -1,7 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, Download, ExternalLink } from 'lucide-react'
+import { AlertCircle, Download, ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/use-toast'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { ColumnViewerProps } from '../types'
 
 
@@ -191,10 +192,251 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     const tokenString = '?token=' + localStorage.getItem('token')
 
     // If there's only one file, display it as before but with improved styling
-    if (fileDataArray.length === 1) {
-      const fileData = fileDataArray[0]
+    // if (fileDataArray.length === 1) {
+    //   const fileData = fileDataArray[0]
+    //
+    //   // Generate asset URL
+    //   let assetUrl =
+    //     DAPTIN_ENDPOINT +
+    //     '/asset/' +
+    //     entity['__type'] +
+    //     '/' +
+    //     entity.reference_id +
+    //     '/' +
+    //     column.ColumnName
+    //   if (isImage) {
+    //     assetUrl += '.png'
+    //   } else {
+    //     assetUrl += tokenString
+    //   }
+    //
+    //   // Get file name or use placeholder
+    //   const fileName =
+    //     typeof fileData === 'object' && fileData !== null && 'name' in fileData
+    //       ? fileData.name
+    //       : 'File'
+    //
+    //   return (
+    //     <TooltipProvider>
+    //       <Tooltip>
+    //         <TooltipTrigger asChild>
+    //           <Badge
+    //             variant='outline'
+    //             className={cn(
+    //               'flex items-center hover:bg-gray-100 h-fit',
+    //               className
+    //             )}
+    //             onClick={() => {
+    //               // Handle file preview or download
+    //               if (
+    //                 typeof fileData === 'object' &&
+    //                 fileData !== null &&
+    //                 'url' in fileData
+    //               ) {
+    //                 window.open(fileData.url, '_blank')
+    //               }
+    //             }}
+    //           >
+    //             {isImage ? (
+    //               <div className='flex flex-col items-center p-1'>
+    //                 <img
+    //                   className='h-24 w-24 object-contain'
+    //                   alt={
+    //                     column.ColumnName +
+    //                     ' ' +
+    //                     (column.ColumnDescription || '')
+    //                   }
+    //                   src={assetUrl}
+    //                 />
+    //                 <span className='mt-1 max-w-24 truncate text-xs'>
+    //                   {fileName}
+    //                 </span>
+    //               </div>
+    //             ) : (
+    //               <div
+    //                 onClick={(e) => {
+    //                   e.preventDefault()
+    //                   e.stopPropagation()
+    //                   if (isDownloading) return
+    //
+    //                   setIsDownloading(true)
+    //                   downloadFile(assetUrl, fileName, (errorMessage) => {
+    //                     toast({
+    //                       variant: 'destructive',
+    //                       title: 'Download failed',
+    //                       description: errorMessage,
+    //                     })
+    //                     setIsDownloading(false)
+    //                   }).finally(() => {
+    //                     setIsDownloading(false)
+    //                   })
+    //                 }}
+    //                 className='flex cursor-pointer items-center gap-2 p-2'
+    //               >
+    //                 {isDownloading ? (
+    //                   <span className='mr-1 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
+    //                 ) : (
+    //                   <Download className='h-4 w-4' />
+    //                 )}
+    //                 <span className='max-w-40 truncate'>{fileName}</span>
+    //               </div>
+    //             )}
+    //           </Badge>
+    //         </TooltipTrigger>
+    //         <TooltipContent>
+    //           <div className='text-xs'>
+    //             <p className='font-bold'>{isImage ? 'Image' : 'File'}</p>
+    //             <p>{fileName}</p>
+    //             {typeof fileData === 'object' &&
+    //               fileData !== null &&
+    //               'size' in fileData && (
+    //                 <p>Size: {formatFileSize(fileData.size)}</p>
+    //               )}
+    //           </div>
+    //         </TooltipContent>
+    //       </Tooltip>
+    //     </TooltipProvider>
+    //   )
+    // }
 
-      // Generate asset URL
+    // If there are multiple files, handle differently based on type
+    if (isImage) {
+      // For images, implement stacked card viewer with preview dialog
+      const [showPreview, setShowPreview] = useState(false)
+      const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+      // Generate asset URLs for all images
+      const imageAssetUrls = fileDataArray.map((fileData, index) => {
+        return entity && column.ColumnName
+          ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`
+          : ''
+      })
+
+      // Get file names for all images
+      const fileNames = fileDataArray.map((fileData, index) => {
+        return typeof fileData === 'object' && fileData !== null && 'name' in fileData
+          ? fileData.name
+          : `Image ${index + 1}`
+      })
+
+      // Navigate to previous image
+      const goToPrevious = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setCurrentImageIndex((prev) => (prev === 0 ? imageAssetUrls.length - 1 : prev - 1))
+      }
+
+      // Navigate to next image
+      const goToNext = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setCurrentImageIndex((prev) => (prev === imageAssetUrls.length - 1 ? 0 : prev + 1))
+      }
+
+      return (
+        <>
+          <div
+            className={cn('relative flex h-28 w-auto cursor-pointer', className)}
+            onClick={() => {
+              setCurrentImageIndex(0)
+              setShowPreview(true)
+            }}
+          >
+            {/* Display stacked cards (limited to max 3 visible) */}
+            {fileDataArray.slice(0, Math.min(3, fileDataArray.length)).map((fileData, index) => {
+              const fileAssetUrl = imageAssetUrls[index]
+              const fileName = fileNames[index]
+              const offset = index * 4 // Offset for stacked effect
+
+              return (
+                <div
+                  key={fileAssetUrl}
+                  className={cn(
+                    'absolute rounded-md border border-gray-200 bg-white shadow-sm transition-all',
+                    {
+                      'z-30 rotate-0': index === 0,
+                      'z-20 -rotate-3': index === 1,
+                      'z-10 -rotate-6': index === 2
+                    }
+                  )}
+                  style={{
+                    left: `${offset}px`,
+                    top: `${offset}px`,
+                  }}
+                >
+                  <div className='flex flex-col items-center p-1'>
+                    <img
+                      src={fileAssetUrl}
+                      alt={fileName}
+                      className='h-16 w-16 object-contain'
+                    />
+                    <span className='mt-1 max-w-16 truncate text-xs'>
+                      {fileName.length > 10 ? fileName.substring(0, 8) + '...' : fileName}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* Show count badge if more than 3 images */}
+            {fileDataArray.length > 3 && (
+              <div className='absolute bottom-1 right-1 z-40 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-medium text-white'>
+                +{fileDataArray.length - 3}
+              </div>
+            )}
+          </div>
+
+          {/* Image Preview Dialog */}
+          <Dialog open={showPreview} onOpenChange={setShowPreview}>
+            <DialogContent className='max-w-4xl p-0 sm:rounded-lg'>
+              <div className='relative flex h-full max-h-[80vh] w-full flex-col items-center justify-center bg-black/90 p-4'>
+                {/* Close button */}
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className='absolute right-2 top-2 z-50 rounded-full bg-black/50 p-1 text-white hover:bg-black/70'
+                >
+                  <X className='h-5 w-5' />
+                </button>
+
+                {/* Navigation buttons */}
+                {imageAssetUrls.length > 1 && (
+                  <>
+                    <button
+                      onClick={goToPrevious}
+                      className='absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70'
+                    >
+                      <ChevronLeft className='h-6 w-6' />
+                    </button>
+                    <button
+                      onClick={goToNext}
+                      className='absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70'
+                    >
+                      <ChevronRight className='h-6 w-6' />
+                    </button>
+                  </>
+                )}
+
+                {/* Current image */}
+                <div className='flex h-full w-full items-center justify-center'>
+                  <img
+                    src={imageAssetUrls[currentImageIndex]}
+                    alt={fileNames[currentImageIndex]}
+                    className='max-h-full max-w-full object-contain'
+                  />
+                </div>
+
+                {/* Image info footer */}
+                <div className='mt-2 w-full text-center text-sm text-white'>
+                  <p>{fileNames[currentImageIndex]}</p>
+                  <p className='text-xs text-gray-300'>
+                    {currentImageIndex + 1} of {imageAssetUrls.length}
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )
+    }
+
       let assetUrl =
         DAPTIN_ENDPOINT +
         '/asset/' +
@@ -202,118 +444,17 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         '/' +
         entity.reference_id +
         '/' +
-        column.ColumnName
-      if (isImage) {
-        assetUrl += '.png'
-      } else {
-        assetUrl += tokenString
-      }
+        column.ColumnName + tokenString
 
-      // Get file name or use placeholder
-      const fileName =
-        typeof fileData === 'object' && fileData !== null && 'name' in fileData
-          ? fileData.name
-          : 'File'
 
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Badge
-                variant='outline'
-                className={cn(
-                  'flex h-auto items-center bg-gray-50 hover:bg-gray-100',
-                  className
-                )}
-                onClick={() => {
-                  // Handle file preview or download
-                  if (
-                    typeof fileData === 'object' &&
-                    fileData !== null &&
-                    'url' in fileData
-                  ) {
-                    window.open(fileData.url, '_blank')
-                  }
-                }}
-              >
-                {isImage ? (
-                  <div className='flex flex-col items-center p-1'>
-                    <img
-                      className='h-24 w-24 object-contain'
-                      alt={
-                        column.ColumnName +
-                        ' ' +
-                        (column.ColumnDescription || '')
-                      }
-                      src={assetUrl}
-                    />
-                    <span className='mt-1 max-w-24 truncate text-xs'>
-                      {fileName}
-                    </span>
-                  </div>
-                ) : (
-                  <div
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (isDownloading) return
-
-                      setIsDownloading(true)
-                      downloadFile(assetUrl, fileName, (errorMessage) => {
-                        toast({
-                          variant: 'destructive',
-                          title: 'Download failed',
-                          description: errorMessage,
-                        })
-                        setIsDownloading(false)
-                      }).finally(() => {
-                        setIsDownloading(false)
-                      })
-                    }}
-                    className='flex cursor-pointer items-center gap-2 p-2'
-                  >
-                    {isDownloading ? (
-                      <span className='mr-1 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
-                    ) : (
-                      <Download className='h-4 w-4' />
-                    )}
-                    <span className='max-w-40 truncate'>{fileName}</span>
-                  </div>
-                )}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className='text-xs'>
-                <p className='font-bold'>{isImage ? 'Image' : 'File'}</p>
-                <p>{fileName}</p>
-                {typeof fileData === 'object' &&
-                  fileData !== null &&
-                  'size' in fileData && (
-                    <p>Size: {formatFileSize(fileData.size)}</p>
-                  )}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )
-    }
-
-    // If there are multiple files, display them in a grid
+    // For non-image files, display them in a grid as before
     return (
       <div className={cn('flex w-full flex-wrap gap-2', className)}>
         {fileDataArray
           .filter((val, index) => index < 3)
           .map((fileData, index) => {
             // Generate a unique asset URL for each file if possible
-            const fileAssetUrl =
-              entity &&
-              column.ColumnName &&
-              (typeof fileData === 'object' &&
-              fileData !== null &&
-              'reference_id' in fileData
-                ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.${isImage ? 'png' : 'file'}?index=${index}`
-                : `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`)
-
+            const fileAssetUrl =assetUrl;
             // Get file name or use placeholder
             const fileName =
               typeof fileData === 'object' &&
@@ -321,14 +462,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
               'name' in fileData
                 ? fileData.name
                 : `File ${index + 1}`
-
-            // Get file size if available
-            const fileSize =
-              typeof fileData === 'object' &&
-              fileData !== null &&
-              'size' in fileData
-                ? formatFileSize(fileData.size as number)
-                : ''
 
             return (
               <Badge
@@ -348,52 +481,37 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   }
                 }}
               >
-                {isImage ? (
-                  <div className='flex flex-col items-center p-1'>
-                    <img
-                      src={fileAssetUrl}
-                      alt={fileName}
-                      className='h-16 w-16 object-contain'
-                    />
-                    <span className='mt-1 max-w-16 truncate text-xs'>
-                      {fileName.length > 10
-                        ? fileName.substring(0, 8) + '...'
-                        : fileName}
-                    </span>
-                  </div>
-                ) : (
-                  <div
-                    className='flex cursor-pointer items-center gap-1 p-1'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (isDownloading) return
+                <div
+                  className='flex cursor-pointer items-center gap-1 p-1'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (isDownloading) return
 
-                      setIsDownloading(true)
-                      downloadFile(fileAssetUrl, fileName, (errorMessage) => {
-                        toast({
-                          variant: 'destructive',
-                          title: 'Download failed',
-                          description: errorMessage,
-                        })
-                        setIsDownloading(false)
-                      }).finally(() => {
-                        setIsDownloading(false)
+                    setIsDownloading(true)
+                    downloadFile(fileAssetUrl, fileName, (errorMessage) => {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Download failed',
+                        description: errorMessage,
                       })
-                    }}
-                  >
-                    {isDownloading ? (
-                      <span className='mr-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
-                    ) : (
-                      <Download className='h-3 w-3' />
-                    )}
-                    <span className='max-w-24 truncate text-xs'>
-                      {fileName.length > 15
-                        ? fileName.substring(0, 12) + '...'
-                        : fileName}
-                    </span>
-                  </div>
-                )}
+                      setIsDownloading(false)
+                    }).finally(() => {
+                      setIsDownloading(false)
+                    })
+                  }}
+                >
+                  {isDownloading ? (
+                    <span className='mr-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
+                  ) : (
+                    <Download className='h-3 w-3' />
+                  )}
+                  <span className='max-w-24 truncate text-xs'>
+                    {fileName.length > 15
+                      ? fileName.substring(0, 12) + '...'
+                      : fileName}
+                  </span>
+                </div>
               </Badge>
             )
           })}
