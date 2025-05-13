@@ -16,7 +16,6 @@ interface UseSystemStatsResult {
   isRefreshing: boolean; // Added to indicate background refresh
 }
 
-const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL || daptinClient.endpoint;
 
 export function useSystemStats({
   refreshInterval = 30000,
@@ -27,7 +26,8 @@ export function useSystemStats({
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
+  const DAPTIN_ENDPOINT = daptinClient.appConfig.getEndpoint();
+
   // Use refs to track previous values for smooth transitions
   const prevStatsRef = useRef<SystemStatistics | null>(null);
   const isMountedRef = useRef<boolean>(true);
@@ -40,14 +40,14 @@ export function useSystemStats({
       prevStatsRef.current = newData;
       return;
     }
-    
+
     // Merge the new data with previous data for smoother transitions
     // This creates a transitional state that will be updated on the next refresh
     const mergedData = { ...newData };
-    
+
     // Update the reference for next time
     prevStatsRef.current = newData;
-    
+
     // Set the merged data
     setStatistics(mergedData);
   };
@@ -60,15 +60,15 @@ export function useSystemStats({
         setIsRefreshing(true);
       }
       setError(null);
-      
+
       const response = await fetch(`${DAPTIN_ENDPOINT}/statistics`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch statistics: ${response.status} ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (isMountedRef.current) {
         smoothlyUpdateStatistics(data);
         setLastUpdated(new Date());
@@ -88,7 +88,7 @@ export function useSystemStats({
 
   useEffect(() => {
     isMountedRef.current = true;
-    
+
     if (initialFetch) {
       fetchStatistics(true);
     }
@@ -100,7 +100,7 @@ export function useSystemStats({
         isMountedRef.current = false;
       };
     }
-    
+
     return () => {
       isMountedRef.current = false;
     };
