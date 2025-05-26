@@ -1,7 +1,11 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, Download, ExternalLink, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react'
+import { 
+  AlertCircle, Download, ExternalLink, X, ChevronLeft, ChevronRight, 
+  PlayCircle, FileText, Music, FileIcon, Image, Video, FileCode,
+  FileSpreadsheet, FileArchive, File
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,10 +17,76 @@ import {
 } from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/use-toast'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { ColumnViewerProps } from '../types'
 
 
 export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
+
+// Enhanced file type detection with comprehensive MIME type mapping
+interface FileTypeInfo {
+  category: 'image' | 'video' | 'audio' | 'pdf' | 'document' | 'spreadsheet' | 'code' | 'archive' | 'file'
+  icon: any
+  canPreview: boolean
+  displayName: string
+}
+
+const getFileTypeInfo = (fileData: any): FileTypeInfo => {
+  if (!fileData || typeof fileData !== 'object' || !fileData.type) {
+    return { category: 'file', icon: File, canPreview: false, displayName: 'File' }
+  }
+  
+  const mimeType = fileData.type.toLowerCase()
+  
+  // Image files
+  if (mimeType.startsWith('image/')) {
+    return { category: 'image', icon: Image, canPreview: true, displayName: 'Image' }
+  }
+  
+  // Video files
+  if (mimeType.startsWith('video/')) {
+    return { category: 'video', icon: Video, canPreview: true, displayName: 'Video' }
+  }
+  
+  // Audio files
+  if (mimeType.startsWith('audio/')) {
+    return { category: 'audio', icon: Music, canPreview: true, displayName: 'Audio' }
+  }
+  
+  // PDF files
+  if (mimeType.includes('pdf')) {
+    return { category: 'pdf', icon: FileText, canPreview: false, displayName: 'PDF' }
+  }
+  
+  // Spreadsheet files
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || 
+      mimeType.includes('csv') || fileData.name?.match(/\.(xlsx?|csv|ods)$/i)) {
+    return { category: 'spreadsheet', icon: FileSpreadsheet, canPreview: false, displayName: 'Spreadsheet' }
+  }
+  
+  // Code files
+  if (mimeType.includes('javascript') || mimeType.includes('json') || 
+      mimeType.includes('xml') || mimeType.includes('html') ||
+      fileData.name?.match(/\.(js|jsx|ts|tsx|json|xml|html|css|py|java|cpp|c|h)$/i)) {
+    return { category: 'code', icon: FileCode, canPreview: false, displayName: 'Code' }
+  }
+  
+  // Archive files
+  if (mimeType.includes('zip') || mimeType.includes('rar') || 
+      mimeType.includes('tar') || mimeType.includes('gz') ||
+      fileData.name?.match(/\.(zip|rar|tar|gz|7z|bz2)$/i)) {
+    return { category: 'archive', icon: FileArchive, canPreview: false, displayName: 'Archive' }
+  }
+  
+  // Word/Document files
+  if (mimeType.includes('word') || mimeType.includes('document') ||
+      mimeType.includes('text') || fileData.name?.match(/\.(docx?|odt|rtf|txt)$/i)) {
+    return { category: 'document', icon: FileText, canPreview: false, displayName: 'Document' }
+  }
+  
+  // Default
+  return { category: 'file', icon: File, canPreview: false, displayName: 'File' }
+}
 
 // Helper function to download a file from a URL
 const downloadFile = async (
@@ -130,27 +200,17 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     // Normalize value to always be an array
     const fileDataArray = isArrayReference ? value : [value]
 
-    // Helper function to check if a file is an image based on MIME type
-    const isImageFile = (fileData: any) => {
-      if (typeof fileData === 'object' && fileData !== null && 'type' in fileData) {
-        const mimeType = fileData.type.toLowerCase()
-        return mimeType.startsWith('image/')
-      }
-      return false
-    }
-
-    // Helper function to check if a file is a video based on MIME type
-    const isVideoFile = (fileData: any) => {
-      if (typeof fileData === 'object' && fileData !== null && 'type' in fileData) {
-        const mimeType = fileData.type.toLowerCase()
-        return mimeType.startsWith('video/')
-      }
-      return false
-    }
-
-    // Check if all files are images or videos
-    const hasImages = fileDataArray.some(isImageFile)
-    const hasVideos = fileDataArray.some(isVideoFile)
+    // Process file information for all files
+    const fileInfoArray = fileDataArray.map((fileData, index) => {
+      const typeInfo = getFileTypeInfo(fileData)
+      const fileName = typeof fileData === 'object' && fileData !== null && 'name' in fileData
+        ? fileData.name
+        : `${typeInfo.displayName} ${index + 1}`
+      const size = typeof fileData === 'object' && fileData !== null && 'size' in fileData
+        ? fileData.size
+        : null
+      return { fileData, typeInfo, fileName, size }
+    })
 
     // If there are no files, return a placeholder
     if (fileDataArray.length === 0) {
@@ -161,8 +221,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     const tokenString = '?token=' + localStorage.getItem('token')
 
 
-    // If there are media files (images or videos), handle with preview dialog
-    if (hasImages || hasVideos) {
+    // Always show unified file viewer for all file types
+    if (fileDataArray.length > 0) {
       // For images/videos, implement stacked card viewer with preview dialog
       const [showPreview, setShowPreview] = useState(false)
       const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -174,12 +234,8 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
           : ''
       })
 
-      // Get file names for all media files
-      const fileNames = fileDataArray.map((fileData, index) => {
-        return typeof fileData === 'object' && fileData !== null && 'name' in fileData
-          ? fileData.name
-          : isVideoFile(fileData) ? `Video ${index + 1}` : `Image ${index + 1}`
-      })
+      // Extract file names for backward compatibility
+      const fileNames = fileInfoArray.map(info => info.fileName)
 
       // Navigate to previous media item
       const goToPrevious = (e: React.MouseEvent) => {
@@ -225,19 +281,23 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   }}
                 >
                   <div className='flex flex-col items-center p-1'>
-                    {isVideoFile(fileData) ? (
-                      <div className='flex h-16 w-16 items-center justify-center rounded bg-gray-100'>
-                        <PlayCircle className='h-8 w-8 text-gray-600' />
-                      </div>
-                    ) : (
+                    {fileInfoArray[index].typeInfo.category === 'image' ? (
                       <img
                         src={fileAssetUrl}
-                        alt={fileName}
+                        alt={fileInfoArray[index].fileName}
                         className='h-16 w-16 object-contain'
                       />
+                    ) : (
+                      <div className='flex h-16 w-16 items-center justify-center rounded bg-gray-100'>
+                        {React.createElement(fileInfoArray[index].typeInfo.icon, {
+                          className: 'h-8 w-8 text-gray-600'
+                        })}
+                      </div>
                     )}
                     <span className='mt-1 max-w-16 truncate text-xs'>
-                      {fileName.length > 10 ? fileName.substring(0, 8) + '...' : fileName}
+                      {fileInfoArray[index].fileName.length > 10 
+                        ? fileInfoArray[index].fileName.substring(0, 8) + '...' 
+                        : fileInfoArray[index].fileName}
                     </span>
                   </div>
                 </div>
@@ -252,7 +312,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             )}
           </div>
 
-          {/* Image/Video Preview Dialog */}
+          {/* Enhanced File Preview Dialog */}
           <Dialog open={showPreview} onOpenChange={setShowPreview}>
             <DialogContent className='max-w-4xl p-0 sm:rounded-lg'>
               <div className='relative flex h-full max-h-[80vh] w-full flex-col items-center justify-center bg-black/90 p-4'>
@@ -282,32 +342,147 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   </>
                 )}
 
-                {/* Current image or video */}
+                {/* Enhanced file preview with support for all file types */}
                 <div className='flex h-full w-full items-center justify-center'>
-                  {isVideoFile(fileDataArray[currentImageIndex]) ? (
-                    <video
-                      src={imageAssetUrls[currentImageIndex]}
-                      controls
-                      autoPlay
-                      className='max-h-full max-w-full object-contain'
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
-                    <img
-                      src={imageAssetUrls[currentImageIndex]}
-                      alt={fileNames[currentImageIndex]}
-                      className='max-h-full max-w-full object-contain'
-                    />
-                  )}
+                  {(() => {
+                    const currentFile = fileInfoArray[currentImageIndex]
+                    const currentFileUrl = imageAssetUrls[currentImageIndex]
+                    
+                    switch (currentFile.typeInfo.category) {
+                      case 'image':
+                        return (
+                          <img
+                            src={currentFileUrl}
+                            alt={currentFile.fileName}
+                            className='max-h-full max-w-full object-contain'
+                          />
+                        )
+                      case 'video':
+                        return (
+                          <video
+                            src={currentFileUrl}
+                            controls
+                            autoPlay
+                            className='max-h-full max-w-full object-contain'
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        )
+                      case 'audio':
+                        return (
+                          <div className='flex flex-col items-center gap-4'>
+                            <div className='flex h-32 w-32 items-center justify-center rounded-full bg-white/10'>
+                              <Music className='h-16 w-16 text-white' />
+                            </div>
+                            <audio
+                              src={currentFileUrl}
+                              controls
+                              autoPlay
+                              className='w-full max-w-md'
+                            >
+                              Your browser does not support the audio tag.
+                            </audio>
+                            <p className='text-lg font-medium text-white'>{currentFile.fileName}</p>
+                            {currentFile.size && (
+                              <p className='text-sm text-gray-300'>{formatFileSize(currentFile.size)}</p>
+                            )}
+                          </div>
+                        )
+                      default:
+                        // Non-previewable files
+                        return (
+                          <div className='flex flex-col items-center gap-4 text-white'>
+                            <div className='flex h-32 w-32 items-center justify-center rounded-lg bg-white/10'>
+                              {React.createElement(currentFile.typeInfo.icon, {
+                                className: 'h-16 w-16 text-white'
+                              })}
+                            </div>
+                            <div className='text-center'>
+                              <p className='text-xl font-medium'>{currentFile.fileName}</p>
+                              {currentFile.size && (
+                                <p className='text-sm text-gray-300 mt-1'>{formatFileSize(currentFile.size)}</p>
+                              )}
+                              <p className='text-sm text-gray-400 mt-2'>This file cannot be previewed in browser</p>
+                            </div>
+                            <Button
+                              variant='secondary'
+                              size='lg'
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (isDownloading) return
+                                
+                                setIsDownloading(true)
+                                downloadFile(currentFileUrl, currentFile.fileName, (errorMessage) => {
+                                  toast({
+                                    variant: 'destructive',
+                                    title: 'Download failed',
+                                    description: errorMessage,
+                                  })
+                                  setIsDownloading(false)
+                                }).finally(() => {
+                                  setIsDownloading(false)
+                                })
+                              }}
+                              disabled={isDownloading}
+                            >
+                              {isDownloading ? (
+                                <>
+                                  <span className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent' />
+                                  Downloading...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className='mr-2 h-4 w-4' />
+                                  Download {currentFile.typeInfo.displayName}
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )
+                    }
+                  })()}
                 </div>
 
-                {/* Media info footer */}
-                <div className='mt-2 w-full text-center text-sm text-white'>
-                  <p>{fileNames[currentImageIndex]}</p>
-                  <p className='text-xs text-gray-300'>
-                    {currentImageIndex + 1} of {imageAssetUrls.length}
-                  </p>
+                {/* Enhanced footer with download button for all files */}
+                <div className='mt-4 flex w-full items-center justify-between px-4'>
+                  <div className='flex-1 text-center'>
+                    <p className='text-sm text-white'>
+                      {currentImageIndex + 1} of {imageAssetUrls.length} files
+                    </p>
+                  </div>
+                  {/* Universal download button */}
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='text-white hover:bg-white/20'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (isDownloading) return
+                      
+                      const currentFile = fileInfoArray[currentImageIndex]
+                      const currentFileUrl = imageAssetUrls[currentImageIndex]
+                      
+                      setIsDownloading(true)
+                      downloadFile(currentFileUrl, currentFile.fileName, (errorMessage) => {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Download failed',
+                          description: errorMessage,
+                        })
+                        setIsDownloading(false)
+                      }).finally(() => {
+                        setIsDownloading(false)
+                      })
+                    }}
+                    disabled={isDownloading}
+                    title='Download current file'
+                  >
+                    {isDownloading ? (
+                      <span className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
+                    ) : (
+                      <Download className='h-4 w-4' />
+                    )}
+                  </Button>
                 </div>
               </div>
             </DialogContent>
@@ -315,87 +490,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         </>
       )
     }
-
-      let assetUrl =
-        DAPTIN_ENDPOINT +
-        '/asset/' +
-        entity['__type'] +
-        '/' +
-        entity.reference_id +
-        '/' +
-        column.ColumnName + tokenString
-
-
-    // For non-image files, display them in a grid as before
-    return (
-      <div className={cn('flex w-full flex-wrap gap-2', className)}>
-        {fileDataArray
-          .filter((val, index) => index < 3)
-          .map((fileData, index) => {
-            // Generate a unique asset URL for each file if possible
-            const fileAssetUrl =assetUrl;
-            // Get file name or use placeholder
-            const fileName =
-              typeof fileData === 'object' &&
-              fileData !== null &&
-              'name' in fileData
-                ? fileData.name
-                : `File ${index + 1}`
-
-            return (
-              <Badge
-                key={fileAssetUrl}
-                variant='outline'
-                className='flex h-auto items-center bg-gray-50 hover:bg-gray-100'
-                onClick={() => {
-                  // Handle file preview or download
-                  if (
-                    typeof fileData === 'object' &&
-                    fileData !== null &&
-                    'url' in fileData
-                  ) {
-                    window.open(fileData.url, '_blank')
-                  } else {
-                    window.open(fileAssetUrl, '_blank')
-                  }
-                }}
-              >
-                <div
-                  className='flex cursor-pointer items-center gap-1 p-1'
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    if (isDownloading) return
-
-                    setIsDownloading(true)
-                    downloadFile(fileAssetUrl, fileName, (errorMessage) => {
-                      toast({
-                        variant: 'destructive',
-                        title: 'Download failed',
-                        description: errorMessage,
-                      })
-                      setIsDownloading(false)
-                    }).finally(() => {
-                      setIsDownloading(false)
-                    })
-                  }}
-                >
-                  {isDownloading ? (
-                    <span className='mr-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
-                  ) : (
-                    <Download className='h-3 w-3' />
-                  )}
-                  <span className='max-w-24 truncate text-xs'>
-                    {fileName.length > 15
-                      ? fileName.substring(0, 12) + '...'
-                      : fileName}
-                  </span>
-                </div>
-              </Badge>
-            )
-          })}
-      </div>
-    )
   }
 
   // Handle UUID references
