@@ -1,7 +1,7 @@
 // src/components/entity/columns/viewers/ForeignKeyColumnViewer.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { AlertCircle, Download, ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { AlertCircle, Download, ExternalLink, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -157,50 +157,64 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     // Normalize value to always be an array
     const fileDataArray = isArrayReference ? value : [value]
 
-    // Determine if it's an image based on column type
-    const isImage =
-      columnType.includes('png') ||
-      columnType.includes('jpg') ||
-      columnType.includes('jpeg') ||
-      columnType.includes('webp') ||
-      columnType.includes('gif')
+    // Helper function to check if a file is an image based on MIME type
+    const isImageFile = (fileData: any) => {
+      if (typeof fileData === 'object' && fileData !== null && 'type' in fileData) {
+        const mimeType = fileData.type.toLowerCase()
+        return mimeType.startsWith('image/')
+      }
+      return false
+    }
+
+    // Helper function to check if a file is a video based on MIME type
+    const isVideoFile = (fileData: any) => {
+      if (typeof fileData === 'object' && fileData !== null && 'type' in fileData) {
+        const mimeType = fileData.type.toLowerCase()
+        return mimeType.startsWith('video/')
+      }
+      return false
+    }
+
+    // Check if all files are images or videos
+    const hasImages = fileDataArray.some(isImageFile)
+    const hasVideos = fileDataArray.some(isVideoFile)
 
     // If there are no files, return a placeholder
     if (fileDataArray.length === 0) {
       return (
-        <span className={className}>No {isImage ? 'images' : 'files'}</span>
+        <span className={className}>No files</span>
       )
     }
     const tokenString = '?token=' + localStorage.getItem('token')
 
 
-    // If there are multiple files, handle differently based on type
-    if (isImage) {
-      // For images, implement stacked card viewer with preview dialog
+    // If there are media files (images or videos), handle with preview dialog
+    if (hasImages || hasVideos) {
+      // For images/videos, implement stacked card viewer with preview dialog
       const [showPreview, setShowPreview] = useState(false)
       const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-      // Generate asset URLs for all images
+      // Generate asset URLs for all images/videos
       const imageAssetUrls = fileDataArray.map((fileData, index) => {
         return entity && column.ColumnName
-          ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}.png?index=${index}`
+          ? `${DAPTIN_ENDPOINT}/asset/${entity.__type}/${entity.reference_id}/${column.ColumnName}${tokenString}&index=${index}`
           : ''
       })
 
-      // Get file names for all images
+      // Get file names for all media files
       const fileNames = fileDataArray.map((fileData, index) => {
         return typeof fileData === 'object' && fileData !== null && 'name' in fileData
           ? fileData.name
-          : `Image ${index + 1}`
+          : isVideoFile(fileData) ? `Video ${index + 1}` : `Image ${index + 1}`
       })
 
-      // Navigate to previous image
+      // Navigate to previous media item
       const goToPrevious = (e: React.MouseEvent) => {
         e.stopPropagation()
         setCurrentImageIndex((prev) => (prev === 0 ? imageAssetUrls.length - 1 : prev - 1))
       }
 
-      // Navigate to next image
+      // Navigate to next media item
       const goToNext = (e: React.MouseEvent) => {
         e.stopPropagation()
         setCurrentImageIndex((prev) => (prev === imageAssetUrls.length - 1 ? 0 : prev + 1))
@@ -238,11 +252,17 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   }}
                 >
                   <div className='flex flex-col items-center p-1'>
-                    <img
-                      src={fileAssetUrl}
-                      alt={fileName}
-                      className='h-16 w-16 object-contain'
-                    />
+                    {isVideoFile(fileData) ? (
+                      <div className='flex h-16 w-16 items-center justify-center rounded bg-gray-100'>
+                        <PlayCircle className='h-8 w-8 text-gray-600' />
+                      </div>
+                    ) : (
+                      <img
+                        src={fileAssetUrl}
+                        alt={fileName}
+                        className='h-16 w-16 object-contain'
+                      />
+                    )}
                     <span className='mt-1 max-w-16 truncate text-xs'>
                       {fileName.length > 10 ? fileName.substring(0, 8) + '...' : fileName}
                     </span>
@@ -251,7 +271,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
               )
             })}
 
-            {/* Show count badge if more than 3 images */}
+            {/* Show count badge if more than 3 images/videos */}
             {fileDataArray.length > 3 && (
               <div className='absolute bottom-1 right-1 z-40 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-medium text-white'>
                 +{fileDataArray.length - 3}
@@ -259,7 +279,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
             )}
           </div>
 
-          {/* Image Preview Dialog */}
+          {/* Image/Video Preview Dialog */}
           <Dialog open={showPreview} onOpenChange={setShowPreview}>
             <DialogContent className='max-w-4xl p-0 sm:rounded-lg'>
               <div className='relative flex h-full max-h-[80vh] w-full flex-col items-center justify-center bg-black/90 p-4'>
@@ -289,16 +309,27 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
                   </>
                 )}
 
-                {/* Current image */}
+                {/* Current image or video */}
                 <div className='flex h-full w-full items-center justify-center'>
-                  <img
-                    src={imageAssetUrls[currentImageIndex]}
-                    alt={fileNames[currentImageIndex]}
-                    className='max-h-full max-w-full object-contain'
-                  />
+                  {isVideoFile(fileDataArray[currentImageIndex]) ? (
+                    <video
+                      src={imageAssetUrls[currentImageIndex]}
+                      controls
+                      autoPlay
+                      className='max-h-full max-w-full object-contain'
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img
+                      src={imageAssetUrls[currentImageIndex]}
+                      alt={fileNames[currentImageIndex]}
+                      className='max-h-full max-w-full object-contain'
+                    />
+                  )}
                 </div>
 
-                {/* Image info footer */}
+                {/* Media info footer */}
                 <div className='mt-2 w-full text-center text-sm text-white'>
                   <p>{fileNames[currentImageIndex]}</p>
                   <p className='text-xs text-gray-300'>
