@@ -123,24 +123,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         reference_id: referenceId,
       })
 
-      // try {
-      //   // Attempt to fetch the referenced object using its ID
-      //   const response = await daptinClient.jsonApi.find(namespace, referenceId)
-      //   if (response.errors && response.errors.length) {
-      //     throw new Error(
-      //       response.errors[0].detail || 'Failed to load reference data'
-      //     )
-      //   }
-      //
-      //   setReferenceData(response.data)
-      // } catch (err) {
-      //   console.error('Error fetching foreign key data:', err)
-      //   setError(
-      //     err instanceof Error ? err.message : 'Failed to load reference data'
-      //   )
-      // } finally {
-      //   setIsLoading(false)
-      // }
     }
 
     fetchReferenceData()
@@ -191,113 +173,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     }
     const tokenString = '?token=' + localStorage.getItem('token')
 
-    // If there's only one file, display it as before but with improved styling
-    // if (fileDataArray.length === 1) {
-    //   const fileData = fileDataArray[0]
-    //
-    //   // Generate asset URL
-    //   let assetUrl =
-    //     DAPTIN_ENDPOINT +
-    //     '/asset/' +
-    //     entity['__type'] +
-    //     '/' +
-    //     entity.reference_id +
-    //     '/' +
-    //     column.ColumnName
-    //   if (isImage) {
-    //     assetUrl += '.png'
-    //   } else {
-    //     assetUrl += tokenString
-    //   }
-    //
-    //   // Get file name or use placeholder
-    //   const fileName =
-    //     typeof fileData === 'object' && fileData !== null && 'name' in fileData
-    //       ? fileData.name
-    //       : 'File'
-    //
-    //   return (
-    //     <TooltipProvider>
-    //       <Tooltip>
-    //         <TooltipTrigger asChild>
-    //           <Badge
-    //             variant='outline'
-    //             className={cn(
-    //               'flex items-center hover:bg-gray-100 h-fit',
-    //               className
-    //             )}
-    //             onClick={() => {
-    //               // Handle file preview or download
-    //               if (
-    //                 typeof fileData === 'object' &&
-    //                 fileData !== null &&
-    //                 'url' in fileData
-    //               ) {
-    //                 window.open(fileData.url, '_blank')
-    //               }
-    //             }}
-    //           >
-    //             {isImage ? (
-    //               <div className='flex flex-col items-center p-1'>
-    //                 <img
-    //                   className='h-24 w-24 object-contain'
-    //                   alt={
-    //                     column.ColumnName +
-    //                     ' ' +
-    //                     (column.ColumnDescription || '')
-    //                   }
-    //                   src={assetUrl}
-    //                 />
-    //                 <span className='mt-1 max-w-24 truncate text-xs'>
-    //                   {fileName}
-    //                 </span>
-    //               </div>
-    //             ) : (
-    //               <div
-    //                 onClick={(e) => {
-    //                   e.preventDefault()
-    //                   e.stopPropagation()
-    //                   if (isDownloading) return
-    //
-    //                   setIsDownloading(true)
-    //                   downloadFile(assetUrl, fileName, (errorMessage) => {
-    //                     toast({
-    //                       variant: 'destructive',
-    //                       title: 'Download failed',
-    //                       description: errorMessage,
-    //                     })
-    //                     setIsDownloading(false)
-    //                   }).finally(() => {
-    //                     setIsDownloading(false)
-    //                   })
-    //                 }}
-    //                 className='flex cursor-pointer items-center gap-2 p-2'
-    //               >
-    //                 {isDownloading ? (
-    //                   <span className='mr-1 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent'></span>
-    //                 ) : (
-    //                   <Download className='h-4 w-4' />
-    //                 )}
-    //                 <span className='max-w-40 truncate'>{fileName}</span>
-    //               </div>
-    //             )}
-    //           </Badge>
-    //         </TooltipTrigger>
-    //         <TooltipContent>
-    //           <div className='text-xs'>
-    //             <p className='font-bold'>{isImage ? 'Image' : 'File'}</p>
-    //             <p>{fileName}</p>
-    //             {typeof fileData === 'object' &&
-    //               fileData !== null &&
-    //               'size' in fileData && (
-    //                 <p>Size: {formatFileSize(fileData.size)}</p>
-    //               )}
-    //           </div>
-    //         </TooltipContent>
-    //       </Tooltip>
-    //     </TooltipProvider>
-    //   )
-    // }
 
     // If there are multiple files, handle differently based on type
     if (isImage) {
@@ -523,27 +398,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   if (isUuidReference) {
     // If we have reference data, use it
     if (referenceData) {
-      // Try to find a display name from the reference data
-      // const displayName = Object.keys(referenceData)
-      //   .map((columnName) => {
-      //     if (["created_at", "updated_at", "type", "__type", "user_account_id"].includes(columnName)) {
-      //       return null;
-      //     }
-      //     if (columnName.endsWith('_id') && columnName !== "id") {
-      //       return null;
-      //     }
-      //     if (
-      //       typeof referenceData[columnName] === 'string' &&
-      //       referenceData[columnName].length < 50
-      //     ) {
-      //       return columnName + '\n' + referenceData[columnName]
-      //     } else {
-      //       return null
-      //     }
-      //   })
-      //   .filter((e) => e !== null)
-      //   .join('\n')
-
       return (
         <TooltipProvider>
           <Tooltip>
