@@ -64,15 +64,12 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
   const navigate = useNavigate()
   const { toast } = useToast()
   const [referenceData, setReferenceData] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState<boolean>(false)
 
   // Extract necessary information from the column
   const foreignKeyData = column.ForeignKeyData
   const namespace = foreignKeyData?.Namespace
   const dataSource = foreignKeyData?.DataSource
-  const keyName = foreignKeyData?.KeyName
   const columnType = column.ColumnType || ''
 
   // If the value is null or undefined, show a placeholder
@@ -127,30 +124,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
 
     fetchReferenceData()
   }, [namespace, value, dataSource, isFileReference, isUuidReference])
-
-  // Display skeleton loader while fetching
-  if (isLoading) {
-    return <Skeleton className={cn('h-4 w-32', className)} />
-  }
-
-  // Display error if any
-  if (error) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className={cn('flex items-center text-red-500', className)}>
-              <AlertCircle className='mr-1 h-3 w-3' />
-              <span>Error loading reference</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{error}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    )
-  }
 
   // Handle file references (cloud_store or file.* column types)
   if (isFileReference) {
