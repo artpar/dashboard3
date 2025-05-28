@@ -42,9 +42,7 @@ export function SingleEntityAllFieldsViewComponent({
             !col.ColumnName.includes('_id') &&
             !SYSTEM_COLUMNS.includes(col.ColumnName) &&
             (!col.ForeignKeyData || !col.ForeignKeyData.DataSource ||
-              col.ForeignKeyData.DataSource.length === 0) &&
-            entityItem[col.ColumnName] !== null &&
-            entityItem[col.ColumnName] !== undefined
+              col.ForeignKeyData.DataSource.length === 0)
         )
         .map((col) => col.ColumnName)
 

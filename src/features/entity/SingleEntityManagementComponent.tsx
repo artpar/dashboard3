@@ -6,9 +6,6 @@ import {
   ArrowLeft,
   ChevronRight,
   Clock,
-  Key,
-  Layers,
-  List,
   MoreHorizontal,
   Trash2,
   User,
@@ -39,11 +36,11 @@ import { ErrorLoadingEntityPanel } from '@/features/entity/ErrorLoadingEntityPan
 import { LoadingEntityPanel } from '@/features/entity/LoadingEntityPanel.tsx'
 import SingleEntityAllRelationsViewComponent from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor.tsx'
+import { EntityActionsPanel } from '@/features/entity/components/actions/EntityActionsPanel'
 import { SingleEntityAllGroupsListWithPermission } from '@/features/entity/components/permission/SingleEntityAllGroupsListWithPermission.tsx'
 import { SingleEntityAllFieldsViewComponent } from '@/features/entity/detail-view'
 import { useEntitySingleData } from '@/features/entity/hooks/useEntitySingleData.tsx'
 import { EntityApiService } from '@/features/entity/services/EntityApiService'
-import { EntityActionsPanel } from '@/features/entity/components/actions/EntityActionsPanel'
 import {
   formatDate,
   formatDateTime,
@@ -75,7 +72,11 @@ export const SingleEntityManagementComponent: React.FC<
     queryKey: [`entity-${entityName}-details`, entityId],
     queryFn: async () => {
       try {
-        const response = await daptinClient.jsonApi.find(entityName, entityId, {})
+        const response = await daptinClient.jsonApi.find(
+          entityName,
+          entityId,
+          {}
+        )
 
         if (response.errors && response.errors.length) {
           throw new Error(
