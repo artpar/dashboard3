@@ -1,23 +1,23 @@
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { FileReferenceEditorProps } from '../types'
+import { processFiles } from '../utils/fileProcessing'
+import { DropZone } from './DropZone'
 import { FileDisplay } from './FileDisplay'
 import { FileUploader } from './FileUploader'
-import { DropZone } from './DropZone'
-import { processFiles } from '../utils/fileProcessing'
-import { FileReferenceEditorProps } from '../types'
 
 export const FileReferenceEditor: React.FC<FileReferenceEditorProps> = ({
-                                                                          value,
-                                                                          onChange,
-                                                                          onBlur,
-                                                                          className,
-                                                                          error,
-                                                                          disabled,
-                                                                          isImage,
-                                                                          column,
-                                                                          entity,
-                                                                          assetUrl,
-                                                                        }) => {
+  value,
+  onChange,
+  onBlur,
+  className,
+  error,
+  disabled,
+  isImage,
+  column,
+  entity,
+  assetUrl,
+}) => {
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -124,30 +124,30 @@ export const FileReferenceEditor: React.FC<FileReferenceEditorProps> = ({
         disabled={disabled || isUploading}
         className={cn(error && 'border-red-500')}
       >
-        <div className="flex flex-col items-center justify-center gap-3">
-          <p className="text-sm font-medium">
+        <div className='flex flex-col items-center justify-center gap-3'>
+          <p className='text-sm font-medium'>
             Drag & drop {isImage ? 'images' : 'files'} here or click to browse
           </p>
-          <p className="text-xs text-gray-500">
+          <p className='text-xs text-gray-500'>
             Upload multiple {isImage ? 'images' : 'files'} at once
           </p>
 
           {isUploading && (
-            <div className="mt-4 space-y-2 w-full">
-              <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
+            <div className='mt-4 w-full space-y-2'>
+              <div className='bg-secondary h-2 w-full overflow-hidden rounded-full'>
                 <div
-                  className="bg-primary h-full transition-all duration-300 ease-in-out"
+                  className='bg-primary h-full transition-all duration-300 ease-in-out'
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-muted-foreground text-center text-xs">
+              <p className='text-muted-foreground text-center text-xs'>
                 {uploadProgress < 100 ? 'Uploading...' : 'Upload complete!'}
               </p>
             </div>
           )}
 
           {uploadError && (
-            <p className="text-destructive mt-2 text-center text-xs">
+            <p className='text-destructive mt-2 text-center text-xs'>
               {uploadError}
             </p>
           )}

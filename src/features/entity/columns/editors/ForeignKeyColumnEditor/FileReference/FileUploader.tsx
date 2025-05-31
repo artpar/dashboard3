@@ -53,7 +53,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             ref={fileInputRef}
             type="file"
             multiple
-            accept={isImage ? 'image/*' : undefined}
+            accept={isImage ? 'image/*' : '*/*'}
             onChange={handleFileInputChange}
             disabled={isUploading || disabled}
             className="cursor-pointer"

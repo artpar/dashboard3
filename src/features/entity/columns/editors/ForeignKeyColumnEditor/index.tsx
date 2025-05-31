@@ -34,12 +34,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
     dataSource === 'cloud_store' || columnType.startsWith('file.')
 
   // Determine if it's an image based on column type
-  const isImage =
-    columnType.includes('png') ||
-    columnType.includes('jpg') ||
-    columnType.includes('jpeg') ||
-    columnType.includes('webp') ||
-    columnType.includes('gif')
+  const isImage = false;
 
   // Find label column for the referenced entity
   useEffect(() => {
