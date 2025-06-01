@@ -43,7 +43,7 @@ export const EntitySelect: React.FC<EntitySelectProps> = ({
         onInputChange={onSearchChange}
         isLoading={isLoading}
         isClearable
-        className={cn('w-full z-50', error ? 'react-select-error' : '')}
+        className={cn('w-full', error ? 'react-select-error' : '')}
         classNamePrefix="react-select"
         formatOptionLabel={(option: any) => (
           <div className="flex flex-col">
