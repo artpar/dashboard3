@@ -31,11 +31,6 @@ const otherItems = [
       },
     ],
   },
-  {
-    title: 'Help Center',
-    url: '/help-center',
-    icon: '',
-  },
 ]
 
 // Custom hook to generate sidebar data from world entities
@@ -69,10 +64,6 @@ export function useSidebarData(): SidebarData {
         {
           title: 'General',
           items: [...defaultItems, ...entityItems],
-        },
-        {
-          title: 'Other',
-          items: otherItems,
         },
       ],
     }

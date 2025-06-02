@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { sendMessageToBackgroundScript } from '@/background.ts'
-import { Menu, Settings } from 'lucide-react'
+import { Menu, Settings, LogOut, User, ArrowUpDown, ChevronsUpDown } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { cn } from '@/lib/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
@@ -13,9 +13,17 @@ import { NavGroup } from '@/components/layout/nav-group'
 import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
 import { Search } from '@/components/search.tsx'
 import { useSidebarData } from './data/sidebar-data'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const AppSidebar = () => {
-  const { user, customer } = useAuthStore()
+  const { user, customer, logout } = useAuthStore()
   const [memories, setMemories] = useState([])
   const [workgroups, setWorkgroups] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -212,18 +220,10 @@ const AppSidebar = () => {
       <div
         data-slot='sidebar-footer'
         data-sidebar='footer'
-        className='flex flex-col gap-2 p-2 absolute bottom-0 bg-white w-64'
+        className='flex flex-col gap-2 p-2 absolute bottom-0 bg-background w-64'
       >
-        <ul
-          data-slot='sidebar-menu'
-          data-sidebar='menu'
-          className='flex w-full min-w-0 flex-col gap-1'
-        >
-          <li
-            data-slot='sidebar-menu-item'
-            data-sidebar='menu-item'
-            className='group/menu-item relative'
-          >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <button
               data-slot='dropdown-menu-trigger'
               data-sidebar='menu-button'
@@ -231,10 +231,6 @@ const AppSidebar = () => {
               data-active='false'
               className='peer/menu-button ring-sidebar-ring active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground flex h-12 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium [&amp;>span:last-child]:truncate [&amp;>svg]:size-4 [&amp;>svg]:shrink-0'
               type='button'
-              id='radix-«re»'
-              aria-haspopup='menu'
-              aria-expanded='false'
-              data-state='closed'
             >
               <span
                 data-slot='avatar'
@@ -244,30 +240,48 @@ const AppSidebar = () => {
                   data-slot='avatar-fallback'
                   className='bg-muted flex size-full items-center justify-center rounded-lg'
                 >
-                  {user.email.substring(0, 2).toUpperCase()}
+                  {user?.email?.substring(0, 2).toUpperCase() || 'GU'}
                 </span>
               </span>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{user.email}</span>
+                <span className='truncate font-semibold'>{user?.email || 'Guest'}</span>
               </div>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='24'
-                height='24'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                className='lucide lucide-chevrons-up-down ml-auto size-4'
-              >
-                <path d='m7 15 5 5 5-5'></path>
-                <path d='m7 9 5-5 5 5'></path>
-              </svg>
+              <ChevronsUpDown></ChevronsUpDown>
             </button>
-          </li>
-        </ul>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-[--radix-dropdown-menu-trigger-width]">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user?.name || user?.email || 'Guest'}</p>
+                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/settings/account" className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Account Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/settings" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                Preferences
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={async () => {
+                await logout()
+                navigate({ to: '/sign-in' })
+              }}
+              className="cursor-pointer text-red-600 focus:text-red-600"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )
