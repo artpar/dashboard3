@@ -222,6 +222,9 @@ export class EntityApiService {
       const advancedFilters = filters?._advanced
       if (advancedFilters) {
         otherFilters = advancedFilters
+      } else {
+        // Remove special keys from otherFilters
+        delete otherFilters._search
         delete otherFilters._advanced
       }
 
@@ -278,7 +281,10 @@ export class EntityApiService {
       }
 
       // Main data query
-      requestObject['query'] = parseFilters()
+      const parsedFilters = parseFilters()
+      requestObject['query'] = parsedFilters
+      console.log('Request object:', requestObject)
+      console.log('Parsed filters:', parsedFilters)
       const response = await daptinClient.jsonApi.findAll(entityName, requestObject)
 
       if (response.errors && response.errors.length) {

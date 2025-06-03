@@ -62,6 +62,8 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
 
   // Handle applying filters from dialog
   const handleApplyFilters = (newFilters: FilterQuery[]) => {
+    console.log('Applying filters from dialog:', newFilters)
+    
     // Create a new filters object preserving search and quick filters
     const updatedFilters: Record<string, any> = {}
 
@@ -82,6 +84,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
       updatedFilters._advanced = newFilters
     }
 
+    console.log('Updated filters object:', updatedFilters)
     setFilters(updatedFilters)
   }
 
@@ -93,11 +96,11 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
       delete newFilters._advanced
       setFilters(newFilters)
     } else if (key.startsWith('_advanced:')) {
-      // Remove a specific advanced filter
-      const columnName = key.substring('_advanced:'.length)
+      // Remove a specific advanced filter by index
+      const filterIndex = parseInt(key.substring('_advanced:'.length))
       const newFilters = { ...filters }
       if (newFilters._advanced && Array.isArray(newFilters._advanced)) {
-        newFilters._advanced = newFilters._advanced.filter((f: FilterQuery) => f.column !== columnName)
+        newFilters._advanced = newFilters._advanced.filter((_, index) => index !== filterIndex)
         if (newFilters._advanced.length === 0) {
           delete newFilters._advanced
         }

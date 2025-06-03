@@ -143,7 +143,7 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
                       variant="ghost"
                       size="icon"
                       className="h-4 w-4 p-0 ml-1 rounded-full"
-                      onClick={() => onRemoveFilter(`_advanced:${filter.column}`)}
+                      onClick={() => onRemoveFilter(`_advanced:${index}`)}
                     >
                       <X className="h-3 w-3" />
                       <span className="sr-only">Remove filter</span>
