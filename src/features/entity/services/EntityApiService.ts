@@ -211,15 +211,50 @@ export class EntityApiService {
 
       // Handle search filter separately
       const searchTerm = filters?._search
-      const otherFilters = { ...filters }
+      let otherFilters = { ...filters }
 
       if (searchTerm && typeof searchTerm === 'string') {
         requestObject['filter'] = [searchTerm]
         delete otherFilters._search // Remove from other filters to avoid duplication
       }
 
+      // Extract advanced filters if present
+      const advancedFilters = filters?._advanced
+      if (advancedFilters) {
+        otherFilters = advancedFilters
+        delete otherFilters._advanced
+      }
+
       // Parse filter query format for daptin
       const parseFilters = () => {
+        // If filters is already an array (new format), use it directly
+        if (Array.isArray(otherFilters)) {
+          // Process special operators
+          const processedFilters = otherFilters.map((filter: any) => {
+            let { column, operator, value } = filter
+
+            // Handle special pattern operators
+            if (operator.includes('::')) {
+              const [baseOp, pattern] = operator.split('::')
+              operator = baseOp
+
+              // Apply pattern transformations
+              if (pattern === 'startsWith') {
+                value = `${value}%`
+              } else if (pattern === 'endsWith') {
+                value = `%${value}`
+              } else if (pattern === 'contains') {
+                value = `%${value}%`
+              }
+            }
+
+            return { column, operator, value }
+          })
+
+          return processedFilters.length > 0 ? JSON.stringify(processedFilters) : undefined
+        }
+
+        // Legacy format - convert object to array
         if (!otherFilters || Object.keys(otherFilters).length === 0) return undefined
 
         const filterQuery = Object.entries(otherFilters)

@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
-import EntityFilterDialog from '../dialogs/EntityFilterDialog'
+import EntityFilterDialog, { FilterQuery } from '../dialogs/EntityFilterDialog'
 import EntityFilterBadges from './EntityFilterBadges'
 
 interface EntityFiltersProps {
@@ -36,9 +36,11 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
   const [showQuickFilters, setShowQuickFilters] = useState(false)
 
   // Count active filters (excluding search)
-  const activeFilterCount = Object.keys(filters).filter(
-    (key) => key !== '_search'
+  const quickFilterCount = Object.keys(filters).filter(
+    (key) => key !== '_search' && key !== '_advanced'
   ).length
+  const advancedFilterCount = filters._advanced?.length || 0
+  const activeFilterCount = quickFilterCount + advancedFilterCount
 
   // Handle search
   const handleSearch = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -59,19 +61,54 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
   }
 
   // Handle applying filters from dialog
-  const handleApplyFilters = (newFilters: Record<string, any>) => {
+  const handleApplyFilters = (newFilters: FilterQuery[]) => {
+    // Create a new filters object preserving search and quick filters
+    const updatedFilters: Record<string, any> = {}
+
     // Preserve search term if it exists
     if (filters._search) {
-      newFilters._search = filters._search
+      updatedFilters._search = filters._search
     }
-    setFilters(newFilters)
+
+    // Preserve quick filters (non-advanced filters)
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key !== '_search' && key !== '_advanced') {
+        updatedFilters[key] = value
+      }
+    })
+
+    // Add advanced filters if any
+    if (newFilters.length > 0) {
+      updatedFilters._advanced = newFilters
+    }
+
+    setFilters(updatedFilters)
   }
 
   // Handle removing a single filter
   const handleRemoveFilter = (key: string) => {
-    const newFilters = { ...filters }
-    delete newFilters[key]
-    setFilters(newFilters)
+    if (key === '_advanced') {
+      // Clear all advanced filters
+      const newFilters = { ...filters }
+      delete newFilters._advanced
+      setFilters(newFilters)
+    } else if (key.startsWith('_advanced:')) {
+      // Remove a specific advanced filter
+      const columnName = key.substring('_advanced:'.length)
+      const newFilters = { ...filters }
+      if (newFilters._advanced && Array.isArray(newFilters._advanced)) {
+        newFilters._advanced = newFilters._advanced.filter((f: FilterQuery) => f.column !== columnName)
+        if (newFilters._advanced.length === 0) {
+          delete newFilters._advanced
+        }
+      }
+      setFilters(newFilters)
+    } else {
+      // Remove a quick filter
+      const newFilters = { ...filters }
+      delete newFilters[key]
+      setFilters(newFilters)
+    }
   }
 
   // Handle clearing all filters
@@ -248,7 +285,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
       <EntityFilterDialog
         open={showFilterDialog}
         onClose={() => setShowFilterDialog(false)}
-        filters={filters}
+        filters={filters._advanced || []}
         onApplyFilters={handleApplyFilters}
       />
     </div>

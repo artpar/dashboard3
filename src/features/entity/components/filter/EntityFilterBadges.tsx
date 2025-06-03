@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
 import { ColumnDefinition } from '@/features/entity/columns'
+import { FilterQuery } from '../dialogs/EntityFilterDialog'
 
 interface EntityFilterBadgesProps {
   filters: Record<string, any>
@@ -23,10 +24,11 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
 }) => {
   const { columns } = useEntityCollectionData()
 
-  // Skip special filter keys like _search
-  const filterKeys = Object.keys(filters).filter(key => key !== '_search')
+  // Extract quick filters and advanced filters
+  const quickFilterKeys = Object.keys(filters).filter(key => key !== '_search' && key !== '_advanced')
+  const advancedFilters = filters._advanced as FilterQuery[] || []
 
-  if (filterKeys.length === 0) {
+  if (quickFilterKeys.length === 0 && advancedFilters.length === 0) {
     return null
   }
 
@@ -61,6 +63,31 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
     return column ? (column.Name || column.ColumnName) : key
   }
 
+  // Format operator for display
+  const formatOperator = (operator: string): string => {
+    const operatorMap: Record<string, string> = {
+      'eq': '=',
+      'neq': '≠',
+      'gt': '>',
+      'gte': '≥',
+      'lt': '<',
+      'lte': '≤',
+      'like::contains': 'contains',
+      'ilike::contains': 'contains',
+      'not like::contains': 'not contains',
+      'not ilike::contains': 'not contains',
+      'like::startsWith': 'starts with',
+      'like::endsWith': 'ends with',
+      'not like::startsWith': 'not starts with',
+      'not like::endsWith': 'not ends with',
+      'is null': 'is empty',
+      'is not null': 'is not empty',
+      'is true': 'is true',
+      'is false': 'is false',
+    }
+    return operatorMap[operator] || operator
+  }
+
   return (
     <div className="flex flex-col gap-2 mb-2">
       <div className="flex items-center justify-between space-x-2">
@@ -78,7 +105,8 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
       <ScrollArea className="max-w-full">
         <div className="flex flex-wrap gap-2 pb-1">
           <TooltipProvider>
-            {filterKeys.map(key => (
+            {/* Quick filters */}
+            {quickFilterKeys.map(key => (
               <Tooltip key={key}>
                 <TooltipTrigger asChild>
                   <Badge variant="secondary" className="px-2 py-1 gap-1 max-w-[250px]">
@@ -97,6 +125,33 @@ const EntityFilterBadges: React.FC<EntityFilterBadgesProps> = ({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
                   {getFilterName(key)}: {formatFilterValue(key, filters[key])}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+            
+            {/* Advanced filters */}
+            {advancedFilters.map((filter, index) => (
+              <Tooltip key={`advanced-${filter.column}-${index}`}>
+                <TooltipTrigger asChild>
+                  <Badge variant="secondary" className="px-2 py-1 gap-1 max-w-[300px]">
+                    <span className="font-medium truncate">{getFilterName(filter.column)}</span>
+                    <span className="text-xs">{formatOperator(filter.operator)}</span>
+                    {filter.value !== null && filter.value !== undefined && (
+                      <span className="truncate">{formatFilterValue(filter.column, filter.value)}</span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 p-0 ml-1 rounded-full"
+                      onClick={() => onRemoveFilter(`_advanced:${filter.column}`)}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove filter</span>
+                    </Button>
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {getFilterName(filter.column)} {formatOperator(filter.operator)} {filter.value !== null && filter.value !== undefined ? formatFilterValue(filter.column, filter.value) : ''}
                 </TooltipContent>
               </Tooltip>
             ))}
