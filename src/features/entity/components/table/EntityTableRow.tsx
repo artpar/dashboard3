@@ -5,6 +5,7 @@ import { TableRow } from '@/components/ui/table'
 import { ColumnDefinition } from '@/features/entity/columns'
 import EntityAuditCell from './EntityAuditCell'
 import EntityTableCell from './EntityTableCell'
+import { Link } from '@tanstack/react-router'
 
 interface EntityTableRowProps {
   item: any
@@ -63,6 +64,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
       </td>
       <td
         onClick={handleViewDetails}
+        title={item.reference_id}
         className='w-12 pl-3 hover:cursor-pointer hover:bg-gray-200'
       >
         <EyeIcon className='mt-1 h-5 w-5' />

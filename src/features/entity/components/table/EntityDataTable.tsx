@@ -200,10 +200,10 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className={'cursor-pointer'}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
-              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+              className='bg-destructive cursor-pointer text-destructive-foreground hover:bg-destructive/90'
             >
               Delete {selectedItems.length}{' '}
               {selectedItems.length === 1 ? 'item' : 'items'}

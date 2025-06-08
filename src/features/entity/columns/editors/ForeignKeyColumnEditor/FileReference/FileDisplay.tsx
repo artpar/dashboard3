@@ -21,7 +21,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
 }) => {
   return (
     <div className={cn('space-y-4', className)}>
-      <div className='flex flex-wrap gap-2'>
+      <div className='gap-2 space-x-4 grid-cols-1'>
         {files.map((fileData, index) => {
           const fileName =
             typeof fileData === 'object' &&
@@ -44,9 +44,10 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
               : assetUrl
 
           return (
-            <div key={index} className='group relative'>
+            <div key={index} className='group relative space-y-2'>
               <Badge
                 variant='outline'
+                title={fileName}
                 className={cn(
                   'flex h-auto items-center bg-gray-50 hover:bg-gray-100',
                   error && 'border-red-500'
@@ -58,7 +59,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
                       <img
                         src={`data:image/${fileData.type.split('/')[1]};base64,${fileData.contents}`}
                         alt={fileName}
-                        className='h-24 w-24 object-contain'
+                        className='h-full w-24 object-contain'
                       />
                     ) : (
                       <img
