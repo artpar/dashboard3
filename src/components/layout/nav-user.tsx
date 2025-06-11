@@ -7,6 +7,7 @@ import {
   LogOut,
   Sparkles,
 } from 'lucide-react'
+import { useAuth } from '@/stores/authStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -23,8 +24,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { sendMessageToBackgroundScript } from '@/background.ts'
-import { useAuth } from '@/stores/authStore'
 
 export function NavUser({
   user,
@@ -41,7 +40,7 @@ export function NavUser({
 
   const handleLogout = async () => {
     try {
-      console.log("handleLogout")
+      console.log('handleLogout')
       await logout()
       navigate({ to: '/sign-in' })
     } catch (error) {

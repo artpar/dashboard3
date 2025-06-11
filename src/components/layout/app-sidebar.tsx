@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { sendMessageToBackgroundScript } from '@/background.ts'
-import { Menu, Settings, LogOut, User, ArrowUpDown, ChevronsUpDown } from 'lucide-react'
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { ChevronsUpDown, LogOut, Menu, Settings, User } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { cn } from '@/lib/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
-import { ScrollArea } from '@/components/ui/scroll-area.tsx'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useSidebar } from '@/components/ui/sidebar'
-import { SidebarHeader } from '@/components/ui/sidebar.tsx'
-import { NavGroup } from '@/components/layout/nav-group'
-import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
-import { Search } from '@/components/search.tsx'
-import { useSidebarData } from './data/sidebar-data'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,78 +12,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ScrollArea } from '@/components/ui/scroll-area.tsx'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useSidebar } from '@/components/ui/sidebar'
+import { SidebarHeader } from '@/components/ui/sidebar.tsx'
+import { NavGroup } from '@/components/layout/nav-group'
+import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
+import { Search } from '@/components/search.tsx'
+import { useSidebarData } from './data/sidebar-data'
 
 const AppSidebar = () => {
-  const { user, customer, logout } = useAuthStore()
-  const [memories, setMemories] = useState([])
-  const [workgroups, setWorkgroups] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, logout } = useAuthStore()
 
   // Get sidebar state from context
-  const { open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar } =
+  const { open, isMobile, openMobile, setOpenMobile, toggleSidebar } =
     useSidebar()
 
   // Derive isExpanded from sidebar context
   const isExpanded = isMobile ? openMobile : open
   const sidebarData = useSidebarData()
-  const routerState = useRouterState()
-  const currentPath = routerState.location.pathname
   const navigate = useNavigate()
 
   // Fetch sidebar data
-  useEffect(() => {
-    const fetchSidebarData = async () => {
-      setIsLoading(true)
-      try {
-        // Fetch memories
-        const memoriesResponse = await sendMessageToBackgroundScript({
-          type: 'getAllMemories',
-          query: searchQuery || undefined,
-        })
-
-        // Filter to only show memories marked for sidebar
-        const sidebarMemories =
-          memoriesResponse?.filter((memory) => memory.show_on_sidepanel) || []
-
-        // Fetch workgroups
-        const workgroupsResponse = await sendMessageToBackgroundScript({
-          type: 'getWorkgroups',
-        })
-
-        // Filter to only show workgroups marked for sidebar
-        const sidebarWorkgroups =
-          workgroupsResponse?.data?.filter(
-            (group) => group.show_on_sidepanel
-          ) || []
-
-        setMemories(sidebarMemories)
-        setWorkgroups(sidebarWorkgroups)
-      } catch (error) {
-        console.error('Error fetching sidebar data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchSidebarData()
-  }, [searchQuery])
-
-  const isActive = (href) => {
-    return currentPath === href || currentPath.startsWith(`${href}/`)
-  }
-
-  const filteredMemories = memories.filter(
-    (memory: { title }) =>
-      !searchQuery ||
-      memory.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const filteredWorkgroups = workgroups.filter(
-    (group: { name }) =>
-      !searchQuery ||
-      group.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
 
   const handleNavigate = (e, href) => {
     e.preventDefault()
@@ -220,7 +161,7 @@ const AppSidebar = () => {
       <div
         data-slot='sidebar-footer'
         data-sidebar='footer'
-        className='flex flex-col gap-2 p-2 absolute bottom-0 bg-background w-64'
+        className='bg-background absolute bottom-0 flex w-64 flex-col gap-2 p-2'
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -244,28 +185,38 @@ const AppSidebar = () => {
                 </span>
               </span>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{user?.email || 'Guest'}</span>
+                <span className='truncate font-semibold'>
+                  {user?.email || 'Guest'}
+                </span>
               </div>
               <ChevronsUpDown></ChevronsUpDown>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-[--radix-dropdown-menu-trigger-width]">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name || user?.email || 'Guest'}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+          <DropdownMenuContent
+            side='top'
+            align='start'
+            className='w-[--radix-dropdown-menu-trigger-width]'
+          >
+            <DropdownMenuLabel className='font-normal'>
+              <div className='flex flex-col space-y-1'>
+                <p className='text-sm leading-none font-medium'>
+                  {user?.name || user?.email || 'Guest'}
+                </p>
+                <p className='text-muted-foreground text-xs leading-none'>
+                  {user?.email}
+                </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/settings/account" className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
+              <Link to='/settings/account' className='cursor-pointer'>
+                <User className='mr-2 h-4 w-4' />
                 Account Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/settings" className="cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
+              <Link to='/settings' className='cursor-pointer'>
+                <Settings className='mr-2 h-4 w-4' />
                 Preferences
               </Link>
             </DropdownMenuItem>
@@ -275,9 +226,9 @@ const AppSidebar = () => {
                 await logout()
                 navigate({ to: '/sign-in' })
               }}
-              className="cursor-pointer text-red-600 focus:text-red-600"
+              className='cursor-pointer text-red-600 focus:text-red-600'
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className='mr-2 h-4 w-4' />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
