@@ -114,8 +114,8 @@ importers:
         specifier: 1.0.4
         version: 1.0.4(@types/react-dom@19.0.1)(@types/react@19.0.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       daptin-client:
-        specifier: ^0.6.9
-        version: 0.6.9
+        specifier: ^0.7.1
+        version: 0.7.1
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -2198,8 +2198,8 @@ packages:
     resolution: {integrity: sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA==}
     engines: {node: '>=12'}
 
-  daptin-client@0.6.9:
-    resolution: {integrity: sha512-HRpa3YJyLsq6mbzPO5QYMSeWpKvYYA/+YyXsdqOAxdpYW1UYTRuaRnr7/LEmBrB12HquFmegURqFqPO+ceVv2w==}
+  daptin-client@0.7.1:
+    resolution: {integrity: sha512-qdqawVs7gmb+7sX603qPcoVOCnf8ZpDsHVfbodF0PsX4mUPkzn/b4QmWVyVPjnGDdXz1LUYdmsEwU3ZcxqjruA==}
 
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
@@ -5305,7 +5305,7 @@ snapshots:
 
   d3-timer@3.0.1: {}
 
-  daptin-client@0.6.9:
+  daptin-client@0.7.1:
     dependencies:
       axios: 0.18.1
       devour-client: 2.1.2

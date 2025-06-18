@@ -31,7 +31,8 @@ const setTokenExpiryTimeout = async () => {
     console.log(
       'token timed out, removing user ref: ' + JSON.stringify(daptinUserAuth)
     )
-    localStorage.removeItem('daptin')
+    localStorage.removeItem('DAPTIN')
+    localStorage.removeItem('token')
     // await frontAgent.reloadToken()
     daptinUserAuth = {
       user: null,
@@ -209,6 +210,7 @@ export async function sendMessageToBackgroundScript(request) {
 
             localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
             localStorage.setItem('token', newUserToken2)
+            console.log('Token stored in localStorage:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED')
             initializeDaptinClient()
             resolve(signinResponseElement1)
           } catch (error) {

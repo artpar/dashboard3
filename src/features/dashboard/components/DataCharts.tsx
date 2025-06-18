@@ -1,30 +1,10 @@
-import React, { useState } from 'react'
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from 'recharts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { daptinClient } from '@/daptin'
-import { useQuery } from '@tanstack/react-query'
-import { processChartData, generateEmptyChartData } from '../utils/dashboardUtils.tsx'
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { daptinClient } from '@/daptin';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 // Chart data interfaces
 export interface ChartData {
@@ -54,7 +34,10 @@ export interface AggregateResult {
 }
 
 // Hook for fetching entity data with aggregate endpoint
-export const useEntityAggregateData = (entityName: string, groupByField: string = 'date(created_at)') => {
+export const useEntityAggregateData = (
+  entityName: string,
+  groupByField: string = 'date(created_at)'
+) => {
   return useQuery({
     queryKey: [`${entityName}-aggregates`, groupByField],
     queryFn: async () => {
@@ -81,24 +64,24 @@ export const useEntityDistributionData = (entityNames: string[]) => {
   const [results, setResults] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  
+
   useEffect(() => {
     if (!entityNames.length) {
       setResults({})
       setIsLoading(false)
       return
     }
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     // Initialize with empty results
     const initialResults: Record<string, number> = {}
-    entityNames.forEach(name => {
+    entityNames.forEach((name) => {
       initialResults[name] = 0
     })
     setResults(initialResults)
-    
+
     // Sequential fetching function
     const fetchSequentially = async () => {
       for (const entityName of entityNames) {
@@ -107,28 +90,29 @@ export const useEntityDistributionData = (entityNames: string[]) => {
             .entity(entityName)
             .count()
             .execute()
-          
+
           // Update the results for this entity
-          setResults(prev => ({
+          setResults((prev) => ({
             ...prev,
-            [entityName]: result && result.length > 0 ? result[0].attributes.count : 0
+            [entityName]:
+              result && result.length > 0 ? result[0].attributes.count : 0,
           }))
         } catch (error) {
           console.error(`Failed to fetch count for ${entityName}:`, error)
           // Don't update error state, just log it and continue
         }
       }
-      
+
       setIsLoading(false)
     }
-    
-    fetchSequentially().catch(err => {
+
+    fetchSequentially().catch((err) => {
       console.error('Failed to fetch entity distribution:', err)
       setError(err instanceof Error ? err : new Error(String(err)))
       setIsLoading(false)
     })
   }, [entityNames.join(',')])
-  
+
   return { data: results, isLoading, error }
 }
 
@@ -180,35 +164,35 @@ export const DashboardAreaChart: React.FC<AreaChartProps> = ({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center">
-            <Skeleton className="h-[250px] w-full" />
+          <div className='flex h-[300px] items-center justify-center'>
+            <Skeleton className='h-[250px] w-full' />
           </div>
         ) : (
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className='h-[300px]'>
+            <ResponsiveContainer width='100%' height='100%'>
               <AreaChart
                 data={data}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                    <stop offset="95%" stopColor={color} stopOpacity={0} />
+                  <linearGradient id={gradientId} x1='0' y1='0' x2='0' y2='1'>
+                    <stop offset='5%' stopColor={color} stopOpacity={0.8} />
+                    <stop offset='95%' stopColor={color} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
-                  dataKey="formattedDate"
+                  dataKey='formattedDate'
                   tick={{ fontSize: 12 }}
                   tickFormatter={(value) => value}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray='3 3' />
                 <Tooltip
                   formatter={(value: number) => [`${value}`, yAxisLabel]}
                   labelFormatter={(label) => `Date: ${label}`}
                 />
                 <Area
-                  type="monotone"
+                  type='monotone'
                   dataKey={dataKey}
                   stroke={color}
                   fillOpacity={1}
@@ -242,30 +226,37 @@ export const DashboardBarChart: React.FC<BarChartProps> = ({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center">
-            <Skeleton className="h-[250px] w-full" />
+          <div className='flex h-[300px] items-center justify-center'>
+            <Skeleton className='h-[250px] w-full' />
           </div>
         ) : (
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className='h-[300px]'>
+            <ResponsiveContainer width='100%' height='100%'>
               <BarChart
                 data={data}
                 layout={layout}
                 margin={
                   layout === 'vertical'
                     ? { top: 10, right: 30, left: 50, bottom: 0 }
-                    : { top: 10, right: 30, left: 0, bottom: 20 }
+                    : {
+                        top: 10,
+                        right: 30,
+                        left: 0,
+                        bottom: 20,
+                      }
                 }
               >
                 {layout === 'vertical' ? (
                   <>
-                    <XAxis type="number" />
+                    <XAxis type='number' />
                     <YAxis
                       dataKey={nameKey}
-                      type="category"
+                      type='category'
                       tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => 
-                        typeof value === 'string' ? value.replace(/_/g, ' ') : value
+                      tickFormatter={(value) =>
+                        typeof value === 'string'
+                          ? value.replace(/_/g, ' ')
+                          : value
                       }
                     />
                   </>
@@ -274,20 +265,22 @@ export const DashboardBarChart: React.FC<BarChartProps> = ({
                     <XAxis
                       dataKey={nameKey}
                       tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => 
-                        typeof value === 'string' ? value.replace(/_/g, ' ') : value
+                      tickFormatter={(value) =>
+                        typeof value === 'string'
+                          ? value.replace(/_/g, ' ')
+                          : value
                       }
                       angle={-45}
-                      textAnchor="end"
+                      textAnchor='end'
                       height={70}
                     />
                     <YAxis tick={{ fontSize: 12 }} />
                   </>
                 )}
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray='3 3' />
                 <Tooltip
                   formatter={(value: number) => [`${value}`, 'Count']}
-                  labelFormatter={(label) => 
+                  labelFormatter={(label) =>
                     `Entity: ${typeof label === 'string' ? label.replace(/_/g, ' ') : label}`
                   }
                 />
@@ -320,23 +313,23 @@ export const DashboardPieChart: React.FC<PieChartProps> = ({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center">
-            <Skeleton className="h-[250px] w-full" />
+          <div className='flex h-[300px] items-center justify-center'>
+            <Skeleton className='h-[250px] w-full' />
           </div>
         ) : (
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className='h-[300px]'>
+            <ResponsiveContainer width='100%' height='100%'>
               <PieChart>
                 <Pie
                   data={data}
-                  cx="50%"
-                  cy="50%"
+                  cx='50%'
+                  cy='50%'
                   labelLine={false}
                   outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                  nameKey="entityName"
-                  label={({ name, percent }) => 
+                  fill='#8884d8'
+                  dataKey='count'
+                  nameKey='entityName'
+                  label={({ name, percent }) =>
                     `${name.replace(/_/g, ' ')}: ${(percent * 100).toFixed(0)}%`
                   }
                 >
@@ -344,9 +337,11 @@ export const DashboardPieChart: React.FC<PieChartProps> = ({
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [`${value} records`, 'Count']}
-                  labelFormatter={(label) => `Entity: ${label.replace(/_/g, ' ')}`}
+                  labelFormatter={(label) =>
+                    `Entity: ${label.replace(/_/g, ' ')}`
+                  }
                 />
                 <Legend />
               </PieChart>
