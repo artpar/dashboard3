@@ -20,9 +20,12 @@ export function RelationsList({ entityName, entityId }: RelationsListProps) {
 
   const { relations, inboundRelations, outboundRelations, isLoading } =
     useEntityRelations()
-  
+
   // Identify default relations that every entity has (these have dedicated pages)
   const isDefaultRelation = function (e: TableRelation): boolean {
+    if (entityName === "user_account" || entityName === "usergroup") {
+      return false
+    }
     if (e.Relation === 'belongs_to' && e.ObjectName === 'user_account_id') {
       return true
     }
@@ -31,18 +34,18 @@ export function RelationsList({ entityName, entityId }: RelationsListProps) {
     }
     return false
   }
-  
+
   // Filter out default relations from all relation lists
   const [relationsToDisplay, setRelationsToDisplay] = useState<TableRelation[]>([])
   const [filteredInboundRelations, setFilteredInboundRelations] = useState<TableRelation[]>([])
   const [filteredOutboundRelations, setFilteredOutboundRelations] = useState<TableRelation[]>([])
-  
+
   useEffect(() => {
     setRelationsToDisplay(relations.filter((e) => !isDefaultRelation(e)))
     setFilteredInboundRelations(inboundRelations.filter((e) => !isDefaultRelation(e)))
     setFilteredOutboundRelations(outboundRelations.filter((e) => !isDefaultRelation(e)))
-  }, [relations, inboundRelations, outboundRelations])
-  
+  }, [relations, inboundRelations, outboundRelations, isDefaultRelation])
+
   if (isLoading) {
     return <div className='py-4 text-center'>Loading relations...</div>
   }

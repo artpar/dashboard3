@@ -23,13 +23,13 @@ async function reloadToken() {
       daptinClient.worldManager.loadModels(false)
     })()
   }
-  const result = await daptinClient.aggregateClient
-    .entity('user_account')
-    .groupBy('date(created_at)')
-    .count()
-    .max('date(created_at)')
-    .min('date(created_at)')
-    .execute()
+  // const result = await daptinClient.aggregateClient
+  //   .entity('user_account')
+  //   .groupBy('date(created_at)')
+  //   .count()
+  //   .max('date(created_at)')
+  //   .min('date(created_at)')
+  //   .execute()
 
   // console.log('Total users:', result, JSON.stringify(result, null, 2));
 
