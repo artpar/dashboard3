@@ -27,7 +27,7 @@ export function VisualPermissionEditor({
   toggleAllForScope,
   disabled,
 }: VisualPermissionEditorProps) {
-  const scopes = [PermissionScope.Guest, PermissionScope.User];
+  const scopes = [PermissionScope.Guest, PermissionScope.User, PermissionScope.Group];
 
   return (
     <div className="flex flex-col">
