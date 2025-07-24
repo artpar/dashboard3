@@ -225,7 +225,7 @@ export function SingleEntityAllGroupsListWithPermission({
                             size='sm'
                             className='text-destructive hover:text-destructive/90 hover:bg-destructive/10'
                             onClick={() =>
-                              handleRemoveFromGroup(relatedUserGroup.reference_id)
+                              handleRemoveFromGroup(relatedUserGroup.relation_reference_id)
                             }
                             disabled={disabled || isUpdating}
                           >

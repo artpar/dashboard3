@@ -106,6 +106,7 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
     setIsUpdating(true)
 
     try {
+      console.log("RemoveEntityFromGroup", entityName, entityId, groupId)
       // Use the relationships API to delete the relation
       // This follows the pattern used in RelationsApiService.deleteRelation for many-to-many relations
       await daptinClient.jsonApi
