@@ -27,9 +27,18 @@ jobs:
         run: npm install -g pnpm
 
 
-      - name: Get version from package.json
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      - name: Get version from git tag
+        id: get-version
+        run: |
+          # Remove 'v' prefix from tag to get version number
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        run: |
+          # Update package.json with the version from git tag
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -48,9 +57,14 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release v${{ steps.package-version.outputs.version }}
+          name: Release ${{ steps.get-version.outputs.tag }}
           body: |
-            ## Installation
+            ## Release ${{ steps.get-version.outputs.tag }}
+            
+            ### What's Changed
+            - Version bumped to ${{ steps.get-version.outputs.version }}
+            
+            ### Installation
             Download the zip file and extract it to your web server.
           files: |
             dist-archive/shadcn-admin.zip
