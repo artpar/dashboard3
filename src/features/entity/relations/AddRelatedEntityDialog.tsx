@@ -68,13 +68,7 @@ export function AddRelatedEntityDialog({
     try {
       setIsLoading(true)
       const response = await daptinClient.jsonApi.findAll(relatedEntityName, {
-        query: JSON.stringify([
-          {
-            column: 'name',
-            operator: 'like',
-            value: `%${values.searchTerm}%`,
-          },
-        ]),
+        filter: values.searchTerm,
       })
 
       if (response.errors && response.errors.length) {

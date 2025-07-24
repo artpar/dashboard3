@@ -44,7 +44,7 @@ export function RelationsList({ entityName, entityId }: RelationsListProps) {
     setRelationsToDisplay(relations.filter((e) => !isDefaultRelation(e)))
     setFilteredInboundRelations(inboundRelations.filter((e) => !isDefaultRelation(e)))
     setFilteredOutboundRelations(outboundRelations.filter((e) => !isDefaultRelation(e)))
-  }, [relations, inboundRelations, outboundRelations, isDefaultRelation])
+  }, [relations, inboundRelations, outboundRelations, entityName])
 
   if (isLoading) {
     return <div className='py-4 text-center'>Loading relations...</div>
