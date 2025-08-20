@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin.ts'
 import {
   ArrowLeft,
@@ -57,10 +57,39 @@ export const SingleEntityManagementComponent: React.FC<
 > = ({}) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const searchParams = useSearch({ strict: false }) as { 
+    tab?: string
+    relationTab?: string 
+  }
   const { columns, setSelectedItem, entityName, entityId, relations } =
     useEntitySingleData()
 
-  const [activeTab, setActiveTab] = useState<string>('details')
+  // Initialize activeTab from URL or default to 'details'
+  const [activeTab, setActiveTab] = useState<string>(
+    searchParams?.tab || 'details'
+  )
+
+  // Update URL when tab changes
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          tab: value,
+        }),
+        replace: true,
+      })
+    },
+    [navigate]
+  )
+
+  // Sync tab state with URL changes
+  useEffect(() => {
+    if (searchParams?.tab && searchParams.tab !== activeTab) {
+      setActiveTab(searchParams.tab)
+    }
+  }, [searchParams?.tab])
 
   // Fetch the specific entity item
   const {
@@ -298,7 +327,7 @@ export const SingleEntityManagementComponent: React.FC<
         {/* Main content with tabs */}
         <Tabs
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={handleTabChange}
           className='flex h-full w-full flex-col overflow-hidden'
         >
           <TabsList className='flex w-full justify-start'>

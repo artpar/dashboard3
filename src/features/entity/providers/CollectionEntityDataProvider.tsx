@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useEffect, useState, useMemo } from 'react'
+import React, { createContext, useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { BaseEntityContextType, BaseEntityDataProvider } from './BaseEntityDataProvider'
@@ -68,13 +69,42 @@ export const CollectionEntityDataProvider: React.FC<{
   children: React.ReactNode
   entityName: string
 }> = ({ children, entityName }) => {
+  const navigate = useNavigate()
+  const searchParams = useSearch({ strict: false }) as {
+    page?: string | number
+    pageSize?: string | number
+    sort?: string
+    filters?: string
+  }
+
   const [data, setData] = useState<any[]>([])
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [selectedItems, setSelectedItems] = useState<any[]>([])
   // Use a Map for faster lookups of selected items
   const [selectedItemsMap, setSelectedItemsMap] = useState<Map<string, any>>(new Map())
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  
+  // Parse number parameters from URL (they come as strings)
+  const parsePageNumber = (page: string | number | undefined): number => {
+    if (typeof page === 'number') return page
+    if (typeof page === 'string') {
+      const parsed = parseInt(page, 10)
+      return isNaN(parsed) ? 1 : parsed
+    }
+    return 1
+  }
+  
+  const parsePageSize = (size: string | number | undefined): number => {
+    if (typeof size === 'number') return size
+    if (typeof size === 'string') {
+      const parsed = parseInt(size, 10)
+      return isNaN(parsed) ? 10 : parsed
+    }
+    return 10
+  }
+  
+  // Initialize state from URL parameters
+  const [currentPage, setCurrentPageInternal] = useState(parsePageNumber(searchParams?.page))
+  const [pageSize, setPageSizeInternal] = useState(parsePageSize(searchParams?.pageSize))
   const [totalPages, setTotalPages] = useState(1)
   const [pagination, setPagination] = useState<{
     currentPage: number
@@ -84,8 +114,41 @@ export const CollectionEntityDataProvider: React.FC<{
     to: number
     total: number
   } | null>(null)
-  const [filters, setFilters] = useState<Record<string, any>>({})
-  const [sortColumns, setSortColumns] = useState<Record<string, 'asc' | 'desc'>>({})
+  
+  // Parse filters from URL
+  const parseFiltersFromUrl = useCallback(() => {
+    if (searchParams?.filters) {
+      try {
+        return JSON.parse(searchParams.filters)
+      } catch {
+        return {}
+      }
+    }
+    return {}
+  }, [searchParams?.filters])
+  
+  // Parse sort from URL
+  const parseSortFromUrl = useCallback(() => {
+    if (searchParams?.sort) {
+      const sortObj: Record<string, 'asc' | 'desc'> = {}
+      const sortParts = searchParams.sort.split(',')
+      sortParts.forEach(part => {
+        if (part.startsWith('-')) {
+          sortObj[part.substring(1)] = 'desc'
+        } else if (part.startsWith('+')) {
+          sortObj[part.substring(1)] = 'asc'
+        } else {
+          sortObj[part] = 'asc'
+        }
+      })
+      return sortObj
+    }
+    return {}
+  }, [searchParams?.sort])
+  
+  const [filters, setFiltersInternal] = useState<Record<string, any>>(parseFiltersFromUrl())
+  const [sortColumns, setSortColumnsInternal] = useState<Record<string, 'asc' | 'desc'>>(parseSortFromUrl())
+  
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -96,18 +159,95 @@ export const CollectionEntityDataProvider: React.FC<{
 
   const { toast } = useToast()
   const queryClient = useQueryClient()
-
-  // Reset state when entityName changes
+  
+  // Update URL when state changes
+  const updateUrlParams = useCallback((updates: {
+    page?: number
+    pageSize?: number
+    filters?: Record<string, any>
+    sort?: string
+  }) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        ...updates,
+        filters: updates.filters ? JSON.stringify(updates.filters) : prev?.filters,
+      }),
+      replace: true,
+    })
+  }, [navigate])
+  
+  // Wrapper functions to update both state and URL
+  const setCurrentPage = useCallback((page: number) => {
+    setCurrentPageInternal(page)
+    updateUrlParams({ page })
+  }, [updateUrlParams])
+  
+  const setPageSize = useCallback((size: number) => {
+    setPageSizeInternal(size)
+    setCurrentPageInternal(1) // Reset to first page when changing page size
+    updateUrlParams({ pageSize: size, page: 1 })
+  }, [updateUrlParams])
+  
+  const setFilters = useCallback((newFilters: Record<string, any>) => {
+    setFiltersInternal(newFilters)
+    setCurrentPageInternal(1) // Reset to first page when filtering
+    updateUrlParams({ filters: newFilters, page: 1 })
+  }, [updateUrlParams])
+  
+  const setSortColumns = useCallback((newSort: Record<string, 'asc' | 'desc'>) => {
+    setSortColumnsInternal(newSort)
+    const sortString = Object.entries(newSort)
+      .map(([column, direction]) => `${direction === 'desc' ? '-' : '+'}${column}`)
+      .join(',')
+    updateUrlParams({ sort: sortString })
+  }, [updateUrlParams])
+  
+  // Sync state with URL changes
   useEffect(() => {
-    setData([])
-    setSelectedItem(null)
-    setSelectedItems([])
-    setCurrentPage(1)
-    setTotalPages(1)
-    setPagination(null)
-    setFilters({})
-    setSortColumns({})
-  }, [entityName])
+    const urlPage = parsePageNumber(searchParams?.page)
+    const urlPageSize = parsePageSize(searchParams?.pageSize)
+    
+    if (urlPage !== currentPage) {
+      setCurrentPageInternal(urlPage)
+    }
+    if (urlPageSize !== pageSize) {
+      setPageSizeInternal(urlPageSize)
+    }
+    const urlFilters = parseFiltersFromUrl()
+    if (JSON.stringify(urlFilters) !== JSON.stringify(filters)) {
+      setFiltersInternal(urlFilters)
+    }
+    const urlSort = parseSortFromUrl()
+    if (JSON.stringify(urlSort) !== JSON.stringify(sortColumns)) {
+      setSortColumnsInternal(urlSort)
+    }
+  }, [searchParams])
+
+  // Reset state when entityName changes (but not on initial mount)
+  const prevEntityNameRef = useRef(entityName)
+  useEffect(() => {
+    if (prevEntityNameRef.current !== entityName) {
+      // Entity name has actually changed, reset everything
+      setData([])
+      setSelectedItem(null)
+      setSelectedItems([])
+      setCurrentPageInternal(1)
+      setTotalPages(1)
+      setPagination(null)
+      setFiltersInternal({})
+      setSortColumnsInternal({})
+      // Also reset URL parameters for the new entity
+      navigate({
+        search: {
+          page: 1,
+          pageSize: 10
+        },
+        replace: true,
+      })
+    }
+    prevEntityNameRef.current = entityName
+  }, [entityName, navigate])
 
   // Convert sortColumns object to sort string for API
   const getSortString = useCallback(() => {
@@ -346,22 +486,29 @@ export const CollectionEntityDataProvider: React.FC<{
 
   // Set sort column
   const setSortColumn = useCallback((column: string, direction: 'asc' | 'desc') => {
-    setSortColumns(prev => {
+    setSortColumnsInternal(prev => {
       // Create a new object with the updated sort column
       const newSortColumns = { ...prev };
 
       // If the column is already in the sort columns, update its direction
       // If it's not, add it to the sort columns
       newSortColumns[column] = direction;
+      
+      // Update URL with new sort
+      const sortString = Object.entries(newSortColumns)
+        .map(([col, dir]) => `${dir === 'desc' ? '-' : '+'}${col}`)
+        .join(',')
+      updateUrlParams({ sort: sortString })
 
       return newSortColumns;
     });
-  }, []);
+  }, [updateUrlParams]);
 
   // Clear all sorting
   const clearSorting = useCallback(() => {
-    setSortColumns({});
-  }, []);
+    setSortColumnsInternal({});
+    updateUrlParams({ sort: '' })
+  }, [updateUrlParams]);
 
   const fetchData = useCallback(() => {
     console.log("CEDP.fetchData")

@@ -1,5 +1,6 @@
 // src/features/entity/relations/RelationsList.tsx
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useEntityRelations } from '../hooks/useEntityRelations'
@@ -16,10 +17,41 @@ interface RelationsListProps {
  * Excludes default relations (user_account_id and usergroup_id) as they have dedicated pages
  */
 export function RelationsList({ entityName, entityId }: RelationsListProps) {
-  const [activeTab, setActiveTab] = useState<string>('all')
+  const navigate = useNavigate()
+  const searchParams = useSearch({ strict: false }) as { 
+    tab?: string
+    relationTab?: string 
+  }
+  
+  // Initialize activeTab from URL or default to 'all'
+  const [activeTab, setActiveTab] = useState<string>(
+    searchParams?.relationTab || 'all'
+  )
 
   const { relations, inboundRelations, outboundRelations, isLoading } =
     useEntityRelations()
+  
+  // Update URL when relation tab changes
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          relationTab: value,
+        }),
+        replace: true,
+      })
+    },
+    [navigate]
+  )
+
+  // Sync tab state with URL changes
+  useEffect(() => {
+    if (searchParams?.relationTab && searchParams.relationTab !== activeTab) {
+      setActiveTab(searchParams.relationTab)
+    }
+  }, [searchParams?.relationTab])
 
   // Identify default relations that every entity has (these have dedicated pages)
   const isDefaultRelation = function (e: TableRelation): boolean {
@@ -56,7 +88,7 @@ export function RelationsList({ entityName, entityId }: RelationsListProps) {
       <Tabs
         defaultValue='all'
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className='w-full'
       >
         <div className='flex items-center justify-between'>
