@@ -1,7 +1,7 @@
 {
-  "name": "shadcn-admin",
+  "name": "daptin-admin",
   "private": true,
-  "version": "1.1.0",
+  "version": "0.0.34",
   "type": "module",
   "scripts": {
     "dev": "vite",
