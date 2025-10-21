@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 
 export interface FileTypeInfo {
-  category: 'image' | 'video' | 'audio' | 'pdf' | 'document' | 'spreadsheet' | 'code' | 'archive' | 'file'
+  category: 'image' | 'video' | 'audio' | 'pdf' | 'document' | 'spreadsheet' | 'code' | 'archive' | 'text' | 'file'
   icon: any
   canPreview: boolean
   displayName: string
@@ -63,9 +63,15 @@ export const getFileTypeInfo = (fileData: any): FileTypeInfo => {
     return { category: 'archive', icon: FileArchive, canPreview: false, displayName: 'Archive' }
   }
   
+  // Plain text files (including JSON)
+  if (mimeType === 'text/plain' || mimeType === 'application/json' ||
+      fileData.name?.match(/\.(txt|log|md|rst|json)$/i)) {
+    return { category: 'text', icon: FileText, canPreview: true, displayName: 'Text' }
+  }
+  
   // Word/Document files
   if (mimeType.includes('word') || mimeType.includes('document') ||
-      mimeType.includes('text') || fileData.name?.match(/\.(docx?|odt|rtf|txt)$/i)) {
+      mimeType.includes('text') || fileData.name?.match(/\.(docx?|odt|rtf)$/i)) {
     return { category: 'document', icon: FileText, canPreview: false, displayName: 'Document' }
   }
   

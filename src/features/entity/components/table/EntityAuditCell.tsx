@@ -23,7 +23,7 @@ export const EntityAuditCell: React.FC<EntityAuditCellProps> = ({
   const handleAddFilter = useCallback((columnName: string, operator: string, value: any) => {
     // Create new filter object
     const newFilters = { ...filters }
-    
+
     // Map our operators to backend format
     let backendOperator = operator
     switch (operator) {
@@ -58,7 +58,7 @@ export const EntityAuditCell: React.FC<EntityAuditCellProps> = ({
         backendOperator = 'is not null'
         break
     }
-    
+
     // Handle different operator types
     if (operator === 'is_null' || operator === 'is_not_null') {
       // For null checks, add to advanced filters
@@ -97,7 +97,7 @@ export const EntityAuditCell: React.FC<EntityAuditCellProps> = ({
         })
       }
     }
-    
+
     setFilters(newFilters)
   }, [filters, setFilters])
 
@@ -105,19 +105,12 @@ export const EntityAuditCell: React.FC<EntityAuditCellProps> = ({
     <TableCell className='text-xs'>
       <div className='flex flex-col gap-1'>
         {auditColumns.map((column) => (
-          <CellContextMenu
-            key={column.ColumnName}
-            columnName={column.ColumnName}
-            value={item[column.ColumnName]}
-            onAddFilter={handleAddFilter}
-          >
             <div className='flex items-center gap-1'>
               <span className='text-muted-foreground text-xs font-medium'>
                 {column.ColumnName === 'reference_id' ? 'ID:' : 'Created:'}
               </span>
               {formatCellValue(item, column)}
             </div>
-          </CellContextMenu>
         ))}
       </div>
     </TableCell>

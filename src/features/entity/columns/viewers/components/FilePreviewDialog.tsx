@@ -149,6 +149,27 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     }
   }, [fileTextContent])
 
+  // Format content for display (pretty print JSON if possible)
+  const formatContentForDisplay = useCallback((content: string): string => {
+    if (!content) return content
+    
+    // Check if file is JSON by extension or content
+    const isJsonFile = currentFile?.fileName?.toLowerCase().endsWith('.json')
+    const looksLikeJson = content.trim().startsWith('{') || content.trim().startsWith('[')
+    
+    if (isJsonFile || looksLikeJson) {
+      try {
+        const parsed = JSON.parse(content)
+        return JSON.stringify(parsed, null, 2)
+      } catch (error) {
+        // If JSON parsing fails, return original content
+        return content
+      }
+    }
+    
+    return content
+  }, [currentFile?.fileName])
+
   // Handle drawer resizing
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -172,9 +193,10 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     }
   }, [isResizing])
 
-  // Load file content when current file changes and it's not previewable
+  // Load file content when current file changes and it's text or not previewable
   useEffect(() => {
-    if (currentFile && currentFileUrl && !currentFile.typeInfo.canPreview) {
+    if (currentFile && currentFileUrl && 
+        (currentFile.typeInfo.category === 'text' || !currentFile.typeInfo.canPreview)) {
       fetchFileContent(currentFileUrl)
     } else {
       setFileTextContent(null)
@@ -258,6 +280,9 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     }
 
     if (fileTextContent) {
+      const formattedContent = formatContentForDisplay(fileTextContent)
+      const isJsonContent = formattedContent !== fileTextContent
+      
       return (
         <div className='mx-auto flex h-full w-full max-w-6xl flex-col text-white'>
           {/* Header with file info and copy button */}
@@ -270,6 +295,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 <p className='font-medium'>{currentFile.fileName}</p>
                 <p className='text-sm text-gray-400'>
                   {currentFile.typeInfo.displayName}
+                  {isJsonContent && ' (Pretty Printed)'}
                   {currentFile.size && ` • ${formatFileSize(currentFile.size)}`}
                 </p>
               </div>
@@ -288,7 +314,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
           {/* Text content area */}
           <div className='flex-1 overflow-hidden'>
             <textarea
-              value={fileTextContent}
+              value={formattedContent}
               readOnly
               className='scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 h-full w-full resize-none border-0 bg-gray-950 p-4 font-mono text-sm text-gray-100 outline-none'
               style={{
@@ -355,6 +381,8 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
             </div>
           </div>
         )
+      case 'text':
+        return renderTextContent()
       default:
         // Try to show text content for non-previewable files
         const textContent = renderTextContent()

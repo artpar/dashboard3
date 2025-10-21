@@ -21,7 +21,7 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
   const handleAddFilter = useCallback((columnName: string, operator: string, value: any) => {
     // Create new filter object
     const newFilters = { ...filters }
-    
+
     // Map our operators to backend format
     let backendOperator = operator
     switch (operator) {
@@ -56,7 +56,7 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
         backendOperator = 'is not null'
         break
     }
-    
+
     // Handle different operator types
     if (operator === 'is_null' || operator === 'is_not_null') {
       // For null checks, add to advanced filters
@@ -111,24 +111,18 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
         })
       }
     }
-    
+
     setFilters(newFilters)
   }, [filters, setFilters])
 
   // console.log('EntityTableCell', item, column)
   return (
     <TableCell>
-      <CellContextMenu
-        columnName={column.ColumnName}
+      <ColumnViewer
+        column={column}
         value={item[column.ColumnName]}
-        onAddFilter={handleAddFilter}
-      >
-        <ColumnViewer
-          column={column}
-          value={item[column.ColumnName]}
-          entity={item}
-        />
-      </CellContextMenu>
+        entity={item}
+      />
     </TableCell>
   )
 }
