@@ -22,7 +22,6 @@ export const DateColumnViewer: React.FC<ColumnViewerProps> = ({
   let formattedValue: React.ReactNode = null
   let fullFormattedValue: string = '';
   const [currentDate, setCurrentDate] = useState(new Date(value))
-  // console.log("DateColumnViewer", value, currentDate)
 
   if (columnType === ColumnType.DateTime) {
     formattedValue = formatDateTime(value)

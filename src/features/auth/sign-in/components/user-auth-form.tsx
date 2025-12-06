@@ -22,7 +22,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { PasswordInput } from '@/components/password-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PinInput, PinInputField } from '@/components/pin-input'
-import { Separator } from '@/components/ui/separator'
+import { useFormErrorHandler } from '@/features/auth/hooks/useFormErrorHandler'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -53,7 +53,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { login, requestOtp, loginWithOtp, isLoading, error, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
-  const [formError, setFormError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<string>('password')
   const [otpRequested, setOtpRequested] = useState(false)
   const [otpDisabledBtn, setOtpDisabledBtn] = useState(true)
@@ -74,39 +73,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   })
 
+  // Use consolidated form error handler for both forms
+  const { formError, setFormError } = useFormErrorHandler(
+    [passwordForm, otpForm],
+    error
+  )
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate({ to: '/' })
     }
   }, [isAuthenticated, navigate])
-
-  // Update local form error state when auth store error changes
-  useEffect(() => {
-    if (error) {
-      setFormError(error)
-    }
-  }, [error])
-
-  // Clear form error when form values change
-  useEffect(() => {
-    const passwordSubscription = passwordForm.watch(() => {
-      if (formError) {
-        setFormError(null)
-      }
-    })
-    
-    const otpSubscription = otpForm.watch(() => {
-      if (formError) {
-        setFormError(null)
-      }
-    })
-    
-    return () => {
-      passwordSubscription.unsubscribe()
-      otpSubscription.unsubscribe()
-    }
-  }, [passwordForm, otpForm, formError])
 
   async function onPasswordSubmit(data: z.infer<typeof passwordFormSchema>) {
     setFormError(null)

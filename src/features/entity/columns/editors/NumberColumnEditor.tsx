@@ -47,14 +47,6 @@ export const NumberColumnEditor: React.FC<ColumnEditorProps> = ({
     return (
       <div className='space-y-2'>
         <div className='flex items-center space-x-4'>
-          {/*<Slider*/}
-          {/*  defaultValue={sliderValue}*/}
-          {/*  max={max}*/}
-          {/*  step={columnType === ColumnType.Rating100 ? 5 : 1}*/}
-          {/*  onValueChange={(newValue) => onChange(newValue[0])}*/}
-          {/*  disabled={disabled}*/}
-          {/*  className={cn("flex-1", error && "border-red-500")}*/}
-          {/*/>*/}
           <span className='w-12 text-center font-medium'>
             {numValue !== '' ? numValue : 0}
             {columnType === ColumnType.Rating100 && '%'}

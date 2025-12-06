@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { EntityApiService } from '../services/EntityApiService'
 import {

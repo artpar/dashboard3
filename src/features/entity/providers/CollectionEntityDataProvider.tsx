@@ -1,11 +1,13 @@
-import React, { createContext, useCallback, useEffect, useState, useMemo, useRef } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import React, { createContext, useCallback, useEffect, useState, useRef } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useToast } from '@/hooks/use-toast'
-import { useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/components/ui/use-toast'
 import { BaseEntityContextType, BaseEntityDataProvider } from './BaseEntityDataProvider'
 import { EntityApiService } from '../services/EntityApiService'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
+import { useMutationWithToast } from '../hooks/useMutationWithToast'
+import { useEntitySelection } from '../hooks/useEntitySelection'
+import { useDialogStates } from '../hooks/useDialogStates'
 
 // Define the collection entity context type
 export interface CollectionEntityContextType extends BaseEntityContextType {
@@ -149,13 +151,18 @@ export const CollectionEntityDataProvider: React.FC<{
   const [filters, setFiltersInternal] = useState<Record<string, any>>(parseFiltersFromUrl())
   const [sortColumns, setSortColumnsInternal] = useState<Record<string, 'asc' | 'desc'>>(parseSortFromUrl())
   
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-  const [showFilterDialog, setShowFilterDialog] = useState(false)
-  const [showPasteDialog, setShowPasteDialog] = useState(false)
   const [clipboardData, setClipboardData] = useState<any[] | null>(null)
+
+  // Use extracted hooks for dialog states
+  const dialogs = useDialogStates()
+  const {
+    showCreateDialog, setShowCreateDialog,
+    showEditDialog, setShowEditDialog,
+    showDeleteDialog, setShowDeleteDialog,
+    showBulkDeleteDialog, setShowBulkDeleteDialog,
+    showFilterDialog, setShowFilterDialog,
+    showPasteDialog, setShowPasteDialog,
+  } = dialogs
 
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -291,70 +298,32 @@ export const CollectionEntityDataProvider: React.FC<{
     }
   }, [queryData, currentPage])
 
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: async (newItem: any) => {
-      return EntityApiService.createEntity(entityName, newItem)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`entity-${entityName}-collection`] })
-      toast({
-        title: 'Success',
-        description: 'Item created successfully',
-      })
-      setShowCreateDialog(false)
-    },
-    onError: (error: any) => {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to create item',
-        description: error.message || 'An error occurred',
-      })
-    },
+  // Create mutation - using useMutationWithToast for cleaner code
+  const createMutation = useMutationWithToast({
+    mutationFn: (newItem: any) => EntityApiService.createEntity(entityName, newItem),
+    invalidateKey: [`entity-${entityName}-collection`],
+    successMessage: 'Item created successfully',
+    errorMessage: 'Failed to create item',
+    onSuccess: () => setShowCreateDialog(false),
   })
 
   // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, item }: { id: string; item: any }) => {
-      return EntityApiService.updateEntity(entityName, id, item)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`entity-${entityName}-collection`] })
-      toast({
-        title: 'Success',
-        description: 'Item updated successfully',
-      })
-      setShowEditDialog(false)
-    },
-    onError: (error: any) => {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to update item',
-        description: error.message || 'An error occurred',
-      })
-    },
+  const updateMutation = useMutationWithToast({
+    mutationFn: ({ id, item }: { id: string; item: any }) =>
+      EntityApiService.updateEntity(entityName, id, item),
+    invalidateKey: [`entity-${entityName}-collection`],
+    successMessage: 'Item updated successfully',
+    errorMessage: 'Failed to update item',
+    onSuccess: () => setShowEditDialog(false),
   })
 
   // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return EntityApiService.deleteEntity(entityName, id)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`entity-${entityName}-collection`] })
-      toast({
-        title: 'Success',
-        description: 'Item deleted successfully',
-      })
-      setShowDeleteDialog(false)
-    },
-    onError: (error: any) => {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to delete item',
-        description: error.message || 'An error occurred',
-      })
-    },
+  const deleteMutation = useMutationWithToast({
+    mutationFn: (id: string) => EntityApiService.deleteEntity(entityName, id),
+    invalidateKey: [`entity-${entityName}-collection`],
+    successMessage: 'Item deleted successfully',
+    errorMessage: 'Failed to delete item',
+    onSuccess: () => setShowDeleteDialog(false),
   })
 
   // Bulk Delete mutation

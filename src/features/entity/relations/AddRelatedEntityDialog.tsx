@@ -24,9 +24,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { TableRelation, RelationDirection } from './relations-utils'
 import { RelationsApiService } from '@/features/entity/services/RelationsApiService'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
 import { daptinClient } from '@/daptin'
+import { validateDaptinResponse } from '@/lib/utils'
 
 interface AddRelatedEntityDialogProps {
   entityName: string
@@ -70,10 +71,7 @@ export function AddRelatedEntityDialog({
       const response = await daptinClient.jsonApi.findAll(relatedEntityName, {
         filter: values.searchTerm,
       })
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Search failed')
-      }
+      validateDaptinResponse(response, 'Search failed')
 
       let data = response.data || []
       if (!(data instanceof Array)) {

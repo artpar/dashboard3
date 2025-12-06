@@ -1,4 +1,4 @@
-import { HTMLAttributes, useState, useEffect } from 'react'
+import { HTMLAttributes, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,8 +18,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useToast } from '@/components/ui/use-toast'
 import { PasswordInput } from '@/components/password-input'
+import { useFormErrorHandler } from '@/features/auth/hooks/useFormErrorHandler'
 
 type SignUpFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -49,9 +49,7 @@ const formSchema = z
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const { signup, isLoading, error, isAuthenticated } = useAuth()
-  const { toast } = useToast()
   const navigate = useNavigate()
-  const [formError, setFormError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,32 +61,15 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     },
   })
 
+  // Use consolidated form error handler
+  const { formError, setFormError } = useFormErrorHandler(form, error)
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate({ to: '/' })
     }
   }, [isAuthenticated, navigate])
-
-  // Update local form error state when auth store error changes
-  useEffect(() => {
-    if (error) {
-      setFormError(error)
-    }
-  }, [error])
-
-  // Clear form error when form values change
-  useEffect(() => {
-    const subscription = form.watch(() => {
-      if (formError) {
-        setFormError(null)
-      }
-    })
-    
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [form, formError])
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setFormError(null)

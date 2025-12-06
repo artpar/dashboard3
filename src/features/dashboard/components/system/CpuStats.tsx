@@ -1,10 +1,10 @@
 import React from 'react';
 import { Cpu } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CpuStats as CpuStatsType } from './SystemTypes';
 import { getAverageCpuUsage, getProgressColor } from './SystemUtils';
+import { StatsCard } from './StatsCard';
 
 interface CpuStatsProps {
   cpuStats: CpuStatsType | null;
@@ -12,28 +12,30 @@ interface CpuStatsProps {
 }
 
 export const CpuStats: React.FC<CpuStatsProps> = ({ cpuStats, isLoading }) => {
-  const averageCpuUsage = cpuStats ? getAverageCpuUsage(cpuStats.percent) : 0;
-  
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base flex items-center">
-          <Cpu className="h-4 w-4 text-blue-500 mr-2" />
-          CPU Usage
-        </CardTitle>
-        {!isLoading && cpuStats?.info[0] && (
+    <StatsCard
+      title="CPU Usage"
+      icon={<Cpu className="h-4 w-4 text-blue-500 mr-2" />}
+      data={cpuStats}
+      isLoading={isLoading}
+      subtitle={
+        cpuStats?.info[0] && (
           <span className="text-xs text-muted-foreground">
             {cpuStats.info[0].modelName} ({cpuStats.counts} cores)
           </span>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </>
-        ) : cpuStats ? (
+        )
+      }
+      loadingSkeletons={
+        <>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </>
+      }
+      noDataMessage="No CPU data available"
+    >
+      {(data) => {
+        const averageCpuUsage = getAverageCpuUsage(data.percent);
+        return (
           <>
             <div className="space-y-1">
               <div className="flex items-center justify-between">
@@ -42,21 +44,21 @@ export const CpuStats: React.FC<CpuStatsProps> = ({ cpuStats, isLoading }) => {
                   {averageCpuUsage.toFixed(1)}%
                 </span>
               </div>
-              <Progress 
-                value={averageCpuUsage} 
+              <Progress
+                value={averageCpuUsage}
                 className="h-2"
                 indicatorClassName={getProgressColor(averageCpuUsage)}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {cpuStats.percent.map((percent, index) => (
+              {data.percent.map((percent, index) => (
                 <div key={index} className="space-y-1">
                   <div className="text-xs font-medium">Core {index}</div>
                   <div className="h-16 bg-muted rounded-sm relative overflow-hidden">
-                    <div 
+                    <div
                       className={`absolute bottom-0 w-full ${getProgressColor(percent)}`}
-                      style={{ 
+                      style={{
                         height: `${percent}%`,
                         transition: 'height 0.5s ease-in-out'
                       }}
@@ -69,12 +71,8 @@ export const CpuStats: React.FC<CpuStatsProps> = ({ cpuStats, isLoading }) => {
               ))}
             </div>
           </>
-        ) : (
-          <div className="py-4 text-center text-sm text-muted-foreground">
-            No CPU data available
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        );
+      }}
+    </StatsCard>
   );
 };

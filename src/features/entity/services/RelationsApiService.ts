@@ -1,5 +1,6 @@
 import { daptinClient } from '@/daptin'
 import { safelySerializeData } from '@/features/entity/utils/serializer'
+import { validateDaptinResponse } from '@/lib/utils'
 import {
   categorizeRelations,
   getRelationQueryParams,
@@ -98,12 +99,7 @@ export class RelationsApiService {
         enhancedParams
       )
 
-      if (response.errors && response.errors.length) {
-        throw new Error(
-          response.errors[0].detail ||
-            `Failed to fetch related ${relatedEntityName}`
-        )
-      }
+      validateDaptinResponse(response, `Failed to fetch related ${relatedEntityName}`)
 
       let data = response.data || []
       if (!(data instanceof Array)) {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { EntityApiService } from '../services/EntityApiService'
 
 export interface ActionField {
@@ -82,7 +82,6 @@ export const useEntityActions = ({ entityName, entityId }: UseEntityActionsProps
           }
         );
         const actionSchema = JSON.parse(atob(actionSchemaBase64[0].Attributes.content));
-        console.log("actionSchema", actionSchema);
         return actionSchema;
       } catch (error) {
         console.error(`Error executing action ${actionId}:`, error)

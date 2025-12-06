@@ -1,7 +1,7 @@
 // src/features/entity/relations/UpdateBelongsToDialog.tsx
 import { useState } from 'react'
 import { PencilIcon, Loader2Icon } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

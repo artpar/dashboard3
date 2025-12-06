@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { formatDateTime } from '@/features/entity/utils/entityFormatters'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 
 interface EntityCreateHeaderProps {
   entityName: string

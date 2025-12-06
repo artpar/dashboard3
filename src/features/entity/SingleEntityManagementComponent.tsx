@@ -46,6 +46,7 @@ import {
   formatDateTime,
 } from '@/features/entity/utils/entityFormatters.tsx'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
+import { validateDaptinResponse } from '@/lib/utils'
 
 interface EntityDetailsContentProps {
   entityName: string
@@ -106,12 +107,7 @@ export const SingleEntityManagementComponent: React.FC<
           entityId,
           {}
         )
-
-        if (response.errors && response.errors.length) {
-          throw new Error(
-            response.errors[0].detail || `Failed to fetch ${entityName} details`
-          )
-        }
+        validateDaptinResponse(response, `Failed to fetch ${entityName} details`)
 
         // Safely serialize the data to handle circular references
         return safelySerializeData(response.data)
@@ -256,9 +252,7 @@ export const SingleEntityManagementComponent: React.FC<
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56'>
-                  {/*<DropdownMenuSeparator />*/}
-
-                  <DropdownMenuItem
+                    <DropdownMenuItem
                     onClick={handleDelete}
                     className='text-red-600'
                   >
@@ -368,7 +362,6 @@ export const SingleEntityManagementComponent: React.FC<
                   // Refresh the entity data to show the updated permissions
                   refreshEntityData()
 
-                  console.log('Permission value updated successfully', v)
                 } catch (error) {
                   console.error('Failed to update permission:', error)
                   // You could add a toast notification here to inform the user of the error

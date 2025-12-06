@@ -115,7 +115,6 @@ export const EntityTableCell: React.FC<EntityTableCellProps> = ({
     setFilters(newFilters)
   }, [filters, setFilters])
 
-  // console.log('EntityTableCell', item, column)
   return (
     <TableCell>
       <ColumnViewer

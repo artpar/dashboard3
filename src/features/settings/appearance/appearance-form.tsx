@@ -6,7 +6,7 @@ import { fonts } from '@/config/fonts'
 import { cn } from '@/lib/utils'
 import { useFont } from '@/context/font-context'
 import { useTheme } from '@/context/theme-context'
-import { toast } from '@/hooks/use-toast'
+import { toast } from '@/components/ui/use-toast'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Form,

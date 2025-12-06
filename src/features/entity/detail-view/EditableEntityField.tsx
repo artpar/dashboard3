@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Check, Edit2, X } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
 import { ColumnEditor } from '@/features/entity/columns/ColumnComponentManager'

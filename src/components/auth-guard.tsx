@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '@/stores/authStore'
-import { toast } from '@/hooks/use-toast'
+import { toast } from '@/components/ui/use-toast'
 
 interface AuthGuardProps {
   children: React.ReactNode

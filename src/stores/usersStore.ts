@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { daptinClient } from '../daptin';
 import { User, userListSchema } from '../features/users/data/schema';
+import { validateDaptinResponse } from '@/lib/utils';
 
 
 interface UsersState {
@@ -31,9 +32,7 @@ export const useUsersStore = create<UsersState>((set) => ({
         sort: '-created_at',
       })
 
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to fetch users')
-      }
+      validateDaptinResponse(response, 'Failed to fetch users')
 
       // Transform the API response to match our User schema
       const transformedUsers = response.data.map((user: any) => ({
@@ -71,10 +70,7 @@ export const useUsersStore = create<UsersState>((set) => ({
       }
 
       const response = await daptinClient.jsonApi.create('user_account', apiUserData)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to create user')
-      }
+      validateDaptinResponse(response, 'Failed to create user')
 
       // Refresh the user list
       await useUsersStore.getState().fetchUsers()
@@ -96,11 +92,7 @@ export const useUsersStore = create<UsersState>((set) => ({
 
       // First, fetch the current user data to ensure we have the latest
       const currentUserResponse = await daptinClient.jsonApi.find('user_account', id)
-
-      if (currentUserResponse.errors && currentUserResponse.errors.length) {
-        throw new Error(currentUserResponse.errors[0].detail || 'Failed to fetch user data')
-      }
-
+      validateDaptinResponse(currentUserResponse, 'Failed to fetch user data')
       const currentUser = currentUserResponse.data
 
       // Prepare update data
@@ -127,10 +119,7 @@ export const useUsersStore = create<UsersState>((set) => ({
         id: id,
         ...updateData
       })
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to update user')
-      }
+      validateDaptinResponse(response, 'Failed to update user')
 
       // Refresh the user list to get the updated data
       await useUsersStore.getState().fetchUsers()
@@ -152,17 +141,11 @@ export const useUsersStore = create<UsersState>((set) => ({
 
       // First, check if the user exists
       const userResponse = await daptinClient.jsonApi.find('user_account', id)
-
-      if (userResponse.errors && userResponse.errors.length) {
-        throw new Error(userResponse.errors[0].detail || 'User not found')
-      }
+      validateDaptinResponse(userResponse, 'User not found')
 
       // Proceed with deletion
       const response = await daptinClient.jsonApi.destroy('user_account', id)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to delete user')
-      }
+      validateDaptinResponse(response, 'Failed to delete user')
 
       // Update the local state by removing the deleted user
       set((state) => ({

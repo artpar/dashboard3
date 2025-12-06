@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
-// Import icon packs as needed
 import { ColumnDefinition } from '@/features/entity/columns'
+import { validateDaptinResponse } from '@/lib/utils'
 
 export interface WorldEntity {
   id: string
@@ -81,11 +81,7 @@ export function useWorldEntities() {
           query: JSON.stringify([]),
         })
 
-        if (response.errors && response.errors.length) {
-          throw new Error(
-            response.errors[0].detail || 'Failed to fetch world entities'
-          )
-        }
+        validateDaptinResponse(response, 'Failed to fetch world entities')
         console.log("useWorldEntities: ", response.data)
 
         return response.data.map((entity: any) => ({

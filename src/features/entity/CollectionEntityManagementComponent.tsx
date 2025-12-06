@@ -1,7 +1,7 @@
 import React from 'react'
 import { EntityManagementContent, EntityManagementProps } from '@/features/entity/EntityManagementContent.tsx'
 import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 
 /**
  * Container component that wraps the data provider

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import EntityForm from '@/features/entity/components/EntityForm'
 
 interface EntityCreateFormProps {

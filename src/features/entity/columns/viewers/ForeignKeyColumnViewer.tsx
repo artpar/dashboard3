@@ -72,8 +72,6 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
     if (!referenceId) return
 
     const fetchReferenceData = async () => {
-      // setIsLoading(true)
-      // setError(null)
       setReferenceData({
         __type: namespace,
         reference_id: referenceId,

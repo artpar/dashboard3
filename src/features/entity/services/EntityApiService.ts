@@ -3,6 +3,7 @@ import { TableInfo } from '@/hooks/use-world-entities.tsx'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
+import { validateDaptinResponse } from '@/lib/utils'
 
 /**
  * Centralized service for all entity API operations
@@ -103,13 +104,7 @@ export class EntityApiService {
       }
 
       const response = await daptinClient.jsonApi.find(entityName, entityId, params)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(
-          response.errors[0].detail || `Failed to fetch ${entityName} data`
-        )
-      }
-
+      validateDaptinResponse(response, `Failed to fetch ${entityName} data`)
       return safelySerializeData(response.data)
     } catch (err) {
       console.error(
@@ -286,12 +281,7 @@ export class EntityApiService {
       console.log('Request object:', requestObject)
       console.log('Parsed filters:', parsedFilters)
       const response = await daptinClient.jsonApi.findAll(entityName, requestObject)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(
-          response.errors[0].detail || `Failed to fetch ${entityName} data`
-        )
-      }
+      validateDaptinResponse(response, `Failed to fetch ${entityName} data`)
 
       // Extract pagination information from response.links
       const links = response.links || {}
@@ -324,11 +314,7 @@ export class EntityApiService {
   static async createEntity(entityName: string, item: any): Promise<any> {
     try {
       const response = await daptinClient.jsonApi.create(entityName, item)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to create item')
-      }
-
+      validateDaptinResponse(response, 'Failed to create item')
       return response.data
     } catch (err) {
       console.error(`Error creating ${entityName}:`, err)
@@ -349,11 +335,7 @@ export class EntityApiService {
         id: entityId,
         ...item,
       })
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to update item')
-      }
-
+      validateDaptinResponse(response, 'Failed to update item')
       return response.data
     } catch (err) {
       console.error(`Error updating ${entityName}:`, err)
@@ -370,11 +352,7 @@ export class EntityApiService {
   ): Promise<any> {
     try {
       const response = await daptinClient.jsonApi.destroy(entityName, entityId)
-
-      if (response.errors && response.errors.length) {
-        throw new Error(response.errors[0].detail || 'Failed to delete item')
-      }
-
+      validateDaptinResponse(response, 'Failed to delete item')
       return entityId
     } catch (err) {
       console.error(`Error deleting ${entityName}:`, err)

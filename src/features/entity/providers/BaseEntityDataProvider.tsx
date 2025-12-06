@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 import { EntityApiService } from '../services/EntityApiService'

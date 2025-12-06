@@ -1,5 +1,4 @@
 // src/features/entity/utils/entityFormatters.ts
-// src/features/entity/utils/entityFormatters.ts
 import { format, isValid, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
