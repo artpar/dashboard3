@@ -19,9 +19,7 @@ async function reloadToken() {
     await daptinClient.worldManager.loadModel('action', false)
     await daptinClient.worldManager.loadModel('memory', false)
     await daptinClient.worldManager.loadModel('workgroup', false)
-    ;(() => {
-      daptinClient.worldManager.loadModels(false)
-    })()
+    await daptinClient.worldManager.loadModels(false)
   }
   // const result = await daptinClient.aggregateClient
   //   .entity('user_account')

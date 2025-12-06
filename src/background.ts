@@ -2,7 +2,7 @@ import { daptinClient } from './daptin'
 
 let daptinUserAuth = {}
 try {
-  daptinUserAuth = JSON.parse(localStorage.getItem('DAPTIN'))
+  daptinUserAuth = JSON.parse(localStorage.getItem('DAPTIN')) || {}
 } catch (e) {
   console.error('no existing auth', e)
 }
@@ -113,7 +113,7 @@ export async function sendMessageToBackgroundScript(request) {
           localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
           localStorage.setItem('token', newUserToken1)
           // frontAgent.init()
-          initializeDaptinClient()
+          await initializeDaptinClient()
           setTokenExpiryTimeout()
           // TODO: this decision has to be made in FE code
           // window.location = '/'
@@ -211,7 +211,7 @@ export async function sendMessageToBackgroundScript(request) {
             localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
             localStorage.setItem('token', newUserToken2)
             console.log('Token stored in localStorage:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED')
-            initializeDaptinClient()
+            await initializeDaptinClient()
             resolve(signinResponseElement1)
           } catch (error) {
             console.error('Sign in error:', error)
