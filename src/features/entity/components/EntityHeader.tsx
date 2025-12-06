@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowDown, ArrowDownToLine, ArrowUp, Clipboard, Columns, Copy, Download, Eye, EyeOff, MoreHorizontal, Plus, RefreshCw, Settings, Share2, Trash2, Upload, X } from 'lucide-react';
+import { ArrowDown, ArrowDownToLine, ArrowUp, Braces, Clipboard, Columns, Copy, Download, Eye, EyeOff, History, MoreHorizontal, Plus, RefreshCw, Settings, Share2, Trash2, Upload, X } from 'lucide-react';
 import { useWorldEntities } from '@/hooks/use-world-entities';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -501,17 +501,16 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                 <span>Import Data</span>
               </DropdownMenuItem>
 
-              {/* Settings */}
+              {/* Tools */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className='mr-2 h-4 w-4' />
-                <span>Settings</span>
+              <DropdownMenuLabel>Tools</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => navigate({ to: '/tools/audit', search: { entity: entityName } })}>
+                <History className='mr-2 h-4 w-4' />
+                <span>View Audit Logs</span>
               </DropdownMenuItem>
-
-              {/* Share */}
-              <DropdownMenuItem>
-                <Share2 className='mr-2 h-4 w-4' />
-                <span>Share</span>
+              <DropdownMenuItem onClick={() => navigate({ to: '/tools/graphql', search: { entity: entityName } })}>
+                <Braces className='mr-2 h-4 w-4' />
+                <span>Query with GraphQL</span>
               </DropdownMenuItem>
 
               {/* Custom actions */}

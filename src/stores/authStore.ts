@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { sendMessageToBackgroundScript } from '../background'
+import { extractErrorMessage } from './utils/asyncAction'
 
-// Define types for the Daptin auth user
 interface DaptinUser {
   id: string
   email: string
@@ -31,7 +31,6 @@ interface AuthState {
   authMethod: 'password' | 'otp' | null
   emailForOtp: string | null
 
-  // Auth actions
   login: (email: string, password: string) => Promise<void>
   loginWithOtp: (email: string, otp: string) => Promise<void>
   requestOtp: (email: string) => Promise<void>
@@ -54,146 +53,53 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   emailForOtp: null,
 
   login: async (email: string, password: string) => {
+    set({ isLoading: true, error: null })
     try {
-      set({ isLoading: true, error: null })
-
-      const response = await sendMessageToBackgroundScript({
-        type: 'signIn',
-        email,
-        password,
-      })
-
-      // Get the updated auth state after login
+      await sendMessageToBackgroundScript({ type: 'signIn', email, password })
       await get().getAuthState()
-
       set({ isLoading: false })
     } catch (error) {
-      console.error('Login error:', error)
-
-      // Handle structured error responses from the API
-      if (error && typeof error === 'object') {
-        if (error.message) {
-          set({
-            isLoading: false,
-            error: error.message,
-          })
-          return
-        }
-      }
-
-      // Fallback for other types of errors
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to login',
-      })
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to login') })
     }
   },
 
   loginWithOtp: async (email: string, otp: string) => {
+    set({ isLoading: true, error: null })
     try {
-      set({ isLoading: true, error: null })
-
-      const response = await sendMessageToBackgroundScript({
-        type: 'signInWithEmailOtp',
-        email,
-        otp,
-      })
-
-      // Get the updated auth state after login
+      await sendMessageToBackgroundScript({ type: 'signInWithEmailOtp', email, otp })
       await get().getAuthState()
-
       set({ isLoading: false, emailForOtp: null })
     } catch (error) {
-      console.error('OTP login error:', error)
-
-      // Handle structured error responses from the API
-      if (error && typeof error === 'object') {
-        if (error.error || error.message) {
-          set({
-            isLoading: false,
-            error: error.error || error.message,
-          })
-          return
-        }
-      }
-
-      // Fallback for other types of errors
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to login with OTP',
-      })
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to login with OTP') })
     }
   },
 
   requestOtp: async (email: string) => {
+    set({ isLoading: true, error: null, emailForOtp: email })
     try {
-      set({ isLoading: true, error: null, emailForOtp: email })
-
-      // Call the API to request an OTP
-      await sendMessageToBackgroundScript({
-        type: 'signInWithEmail',
-        email,
-      })
-
+      await sendMessageToBackgroundScript({ type: 'signInWithEmail', email })
       set({ isLoading: false, authMethod: 'otp' })
-      return Promise.resolve()
     } catch (error) {
-      console.error('Request OTP error:', error)
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to request OTP',
-      })
-      return Promise.reject(error)
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to request OTP') })
+      throw error
     }
   },
 
   signup: async (name: string, email: string, password: string) => {
+    set({ isLoading: true, error: null })
     try {
-      set({ isLoading: true, error: null })
-
-      // Call the API to sign up
-      await sendMessageToBackgroundScript({
-        type: 'signUp',
-        name,
-        email,
-        password,
-      })
-
-      // After successful signup, automatically log the user in
+      await sendMessageToBackgroundScript({ type: 'signUp', name, email, password })
       await get().login(email, password)
-      
       set({ isLoading: false })
     } catch (error) {
-      console.error('Signup error:', error)
-      
-      // Handle structured error responses from the API
-      if (error && typeof error === 'object') {
-        if (error.error || error.message) {
-          set({
-            isLoading: false,
-            error: error.error || error.message,
-          })
-          return
-        }
-      }
-      
-      // Fallback for other types of errors
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to sign up',
-      })
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to sign up') })
     }
   },
 
   logout: async () => {
-    console.log("Logout invoked")
+    set({ isLoading: true })
     try {
-      set({ isLoading: true })
-
-      await sendMessageToBackgroundScript({
-        type: 'signOut',
-      })
-
+      await sendMessageToBackgroundScript({ type: 'signOut' })
       set({
         user: null,
         token: null,
@@ -205,23 +111,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         emailForOtp: null,
       })
     } catch (error) {
-      console.error('Logout error:', error)
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to logout',
-      })
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to logout') })
     }
   },
 
   getAuthState: async () => {
+    set({ isLoading: true })
     try {
-      set({ isLoading: true })
-
-      const authData = await sendMessageToBackgroundScript({
-        type: 'getAuth',
-      })
-
-      if (authData && authData.token && authData.user) {
+      const authData = await sendMessageToBackgroundScript({ type: 'getAuth' })
+      if (authData?.token && authData?.user) {
         set({
           user: authData.user,
           token: authData.token,
@@ -241,23 +139,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         })
       }
     } catch (error) {
-      console.error('Error getting auth state:', error)
-      set({
-        isLoading: false,
-        error:
-          error instanceof Error ? error.message : 'Failed to get auth state',
-      })
+      set({ isLoading: false, error: extractErrorMessage(error, 'Failed to get auth state') })
     }
   },
 
-  setAuthMethod: (method) => {
-    set({ authMethod: method, error: null })
-  },
-
-  setEmailForOtp: (email) => {
-    set({ emailForOtp: email })
-  },
+  setAuthMethod: (method) => set({ authMethod: method, error: null }),
+  setEmailForOtp: (email) => set({ emailForOtp: email }),
 }))
 
-// Hook for easier access to auth state and actions
 export const useAuth = () => useAuthStore()

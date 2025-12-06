@@ -1,5 +1,27 @@
 import { useMemo } from 'react'
-import { Command } from 'lucide-react'
+import {
+  Command,
+  LayoutDashboard,
+  Zap,
+  Shield,
+  Users,
+  UsersRound,
+  GitBranch,
+  Cloud,
+  Globe,
+  ShieldCheck,
+  KeyRound,
+  Mail,
+  Radio,
+  Upload,
+  Download,
+  RefreshCw,
+  Layers,
+  Plug,
+  Code,
+  ClipboardList,
+  Settings,
+} from 'lucide-react'
 import { useWorldEntities } from '@/hooks/use-world-entities.tsx'
 import { type SidebarData } from '../types'
 
@@ -18,20 +40,69 @@ const teamsData = [
   },
 ]
 
-// Static settings and help items
-const otherItems = [
-  {
-    title: 'Settings',
-    icon: '',
-    items: [
-      {
-        title: 'Account',
-        url: '/settings/account',
-        icon: '',
-      },
-    ],
-  },
+// Admin section items
+const adminItems = [
+  { title: 'Actions', url: '/admin/actions', icon: Zap },
+  { title: 'Permissions', url: '/admin/permissions', icon: Shield },
+  { title: 'Users', url: '/admin/users', icon: Users },
+  { title: 'Groups', url: '/admin/groups', icon: UsersRound },
+  { title: 'State Machines', url: '/admin/state-machines', icon: GitBranch },
 ]
+
+// Storage section items
+const storageItems = [
+  { title: 'Cloud Stores', url: '/storage/cloud-stores', icon: Cloud },
+  { title: 'Sites', url: '/storage/sites', icon: Globe },
+  { title: 'Certificates', url: '/storage/certificates', icon: ShieldCheck },
+]
+
+// Communication section items
+const communicationItems = [
+  { title: 'OAuth', url: '/communication/oauth', icon: KeyRound },
+  { title: 'Email', url: '/communication/email', icon: Mail },
+  { title: 'WebSocket', url: '/communication/websocket', icon: Radio },
+]
+
+// Data section items
+const dataItems = [
+  { title: 'Import', url: '/data/import', icon: Upload },
+  { title: 'Export', url: '/data/export', icon: Download },
+  { title: 'Exchanges', url: '/data/exchanges', icon: RefreshCw },
+  { title: 'Streams', url: '/data/streams', icon: Layers },
+  { title: 'Integrations', url: '/data/integrations', icon: Plug },
+]
+
+// Tools section items
+const toolsItems = [
+  { title: 'GraphQL', url: '/tools/graphql', icon: Code },
+  { title: 'Audit Logs', url: '/tools/audit', icon: ClipboardList },
+]
+
+// Entities that have dedicated pages in other sections - exclude from Entities list
+const excludedEntities = new Set([
+  // Admin section
+  'action',
+  'usergroup',
+  'user_account',
+  'user_otp_account',
+  'smd',
+  // Storage section
+  'cloud_store',
+  'site',
+  'certificate',
+  // Communication section
+  'oauth_connect',
+  'oauth_token',
+  'mail',
+  'mail_account',
+  'mail_box',
+  'mail_server',
+  'outbox',
+  // Data section
+  'data_exchange',
+  'stream',
+  'integration',
+])
 
 // Custom hook to generate sidebar data from world entities
 export function useSidebarData(): SidebarData {
@@ -43,19 +114,20 @@ export function useSidebarData(): SidebarData {
       {
         title: 'Dashboard',
         url: '/',
-        icon: '',
+        icon: LayoutDashboard,
       },
     ]
-    console.log('sidebar.groupedEntities', groupedEntities)
 
-    // Create nav items from top-level entities
+    // Create nav items from top-level entities, excluding those with dedicated sections
     const entityItems = isLoading
       ? []
-      : groupedEntities.topLevel.map((entity) => ({
-          title: entity.table_name,
-          url: `/${entity.table_name}`,
-          icon: entity.icon,
-        }))
+      : groupedEntities.topLevel
+          .filter((entity) => !excludedEntities.has(entity.table_name))
+          .map((entity) => ({
+            title: entity.table_name,
+            url: `/${entity.table_name}`,
+            icon: entity.icon,
+          }))
 
     return {
       user: userData,
@@ -63,7 +135,37 @@ export function useSidebarData(): SidebarData {
       navGroups: [
         {
           title: 'General',
-          items: [...defaultItems, ...entityItems],
+          items: defaultItems,
+        },
+        {
+          title: 'Admin',
+          items: adminItems,
+        },
+        {
+          title: 'Storage',
+          items: storageItems,
+        },
+        {
+          title: 'Communication',
+          items: communicationItems,
+        },
+        {
+          title: 'Data',
+          items: dataItems,
+        },
+        {
+          title: 'Tools',
+          items: toolsItems,
+        },
+        {
+          title: 'Settings',
+          items: [
+            { title: 'Config', url: '/config', icon: Settings },
+          ],
+        },
+        {
+          title: 'Entities',
+          items: entityItems,
         },
       ],
     }

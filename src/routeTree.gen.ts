@@ -21,6 +21,9 @@ import { Route as auth500Import } from './routes/(auth)/500'
 
 // Create Virtual Routes
 
+const AuthenticatedConfigLazyImport = createFileRoute(
+  '/_authenticated/config',
+)()
 const errors503LazyImport = createFileRoute('/(errors)/503')()
 const errors500LazyImport = createFileRoute('/(errors)/500')()
 const errors404LazyImport = createFileRoute('/(errors)/404')()
@@ -48,6 +51,21 @@ const AuthenticatedChatsIndexLazyImport = createFileRoute(
 const AuthenticatedEntityIndexLazyImport = createFileRoute(
   '/_authenticated/$entity/',
 )()
+const AuthenticatedToolsGraphqlLazyImport = createFileRoute(
+  '/_authenticated/tools/graphql',
+)()
+const AuthenticatedToolsAuditLazyImport = createFileRoute(
+  '/_authenticated/tools/audit',
+)()
+const AuthenticatedStorageSitesLazyImport = createFileRoute(
+  '/_authenticated/storage/sites',
+)()
+const AuthenticatedStorageCloudStoresLazyImport = createFileRoute(
+  '/_authenticated/storage/cloud-stores',
+)()
+const AuthenticatedStorageCertificatesLazyImport = createFileRoute(
+  '/_authenticated/storage/certificates',
+)()
 const AuthenticatedSettingsNotificationsLazyImport = createFileRoute(
   '/_authenticated/settings/notifications',
 )()
@@ -60,11 +78,53 @@ const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
 const AuthenticatedSettingsAccountLazyImport = createFileRoute(
   '/_authenticated/settings/account',
 )()
+const AuthenticatedDataStreamsLazyImport = createFileRoute(
+  '/_authenticated/data/streams',
+)()
+const AuthenticatedDataIntegrationsLazyImport = createFileRoute(
+  '/_authenticated/data/integrations',
+)()
+const AuthenticatedDataImportLazyImport = createFileRoute(
+  '/_authenticated/data/import',
+)()
+const AuthenticatedDataExportLazyImport = createFileRoute(
+  '/_authenticated/data/export',
+)()
+const AuthenticatedDataExchangesLazyImport = createFileRoute(
+  '/_authenticated/data/exchanges',
+)()
 const AuthenticatedCreateEntityLazyImport = createFileRoute(
   '/_authenticated/create/$entity',
 )()
+const AuthenticatedCommunicationWebsocketLazyImport = createFileRoute(
+  '/_authenticated/communication/websocket',
+)()
+const AuthenticatedCommunicationOauthLazyImport = createFileRoute(
+  '/_authenticated/communication/oauth',
+)()
+const AuthenticatedCommunicationEmailLazyImport = createFileRoute(
+  '/_authenticated/communication/email',
+)()
+const AuthenticatedAdminUsersLazyImport = createFileRoute(
+  '/_authenticated/admin/users',
+)()
+const AuthenticatedAdminStateMachinesLazyImport = createFileRoute(
+  '/_authenticated/admin/state-machines',
+)()
+const AuthenticatedAdminPermissionsLazyImport = createFileRoute(
+  '/_authenticated/admin/permissions',
+)()
+const AuthenticatedAdminGroupsLazyImport = createFileRoute(
+  '/_authenticated/admin/groups',
+)()
+const AuthenticatedAdminActionsLazyImport = createFileRoute(
+  '/_authenticated/admin/actions',
+)()
 const AuthenticatedEntityReferenceIdIndexLazyImport = createFileRoute(
   '/_authenticated/$entity/$referenceId/',
+)()
+const AuthenticatedAdminActionsActionIdLazyImport = createFileRoute(
+  '/_authenticated/admin/actions/$actionId',
 )()
 const AuthenticatedEntityReferenceIdEditLazyImport = createFileRoute(
   '/_authenticated/$entity/$referenceId/edit',
@@ -82,6 +142,14 @@ const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
+const AuthenticatedConfigLazyRoute = AuthenticatedConfigLazyImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any).lazy(() =>
+  import('./routes/_authenticated/config.lazy').then((d) => d.Route),
+)
 
 const errors503LazyRoute = errors503LazyImport
   .update({
@@ -215,6 +283,55 @@ const AuthenticatedEntityIndexLazyRoute =
     import('./routes/_authenticated/$entity/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedToolsGraphqlLazyRoute =
+  AuthenticatedToolsGraphqlLazyImport.update({
+    id: '/tools/graphql',
+    path: '/tools/graphql',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/tools/graphql.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedToolsAuditLazyRoute =
+  AuthenticatedToolsAuditLazyImport.update({
+    id: '/tools/audit',
+    path: '/tools/audit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/tools/audit.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedStorageSitesLazyRoute =
+  AuthenticatedStorageSitesLazyImport.update({
+    id: '/storage/sites',
+    path: '/storage/sites',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/storage/sites.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedStorageCloudStoresLazyRoute =
+  AuthenticatedStorageCloudStoresLazyImport.update({
+    id: '/storage/cloud-stores',
+    path: '/storage/cloud-stores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/storage/cloud-stores.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedStorageCertificatesLazyRoute =
+  AuthenticatedStorageCertificatesLazyImport.update({
+    id: '/storage/certificates',
+    path: '/storage/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/storage/certificates.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedSettingsNotificationsLazyRoute =
   AuthenticatedSettingsNotificationsLazyImport.update({
     id: '/notifications',
@@ -259,6 +376,53 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
+const AuthenticatedDataStreamsLazyRoute =
+  AuthenticatedDataStreamsLazyImport.update({
+    id: '/data/streams',
+    path: '/data/streams',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/data/streams.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedDataIntegrationsLazyRoute =
+  AuthenticatedDataIntegrationsLazyImport.update({
+    id: '/data/integrations',
+    path: '/data/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/data/integrations.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedDataImportLazyRoute =
+  AuthenticatedDataImportLazyImport.update({
+    id: '/data/import',
+    path: '/data/import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/data/import.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedDataExportLazyRoute =
+  AuthenticatedDataExportLazyImport.update({
+    id: '/data/export',
+    path: '/data/export',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/data/export.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedDataExchangesLazyRoute =
+  AuthenticatedDataExchangesLazyImport.update({
+    id: '/data/exchanges',
+    path: '/data/exchanges',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/data/exchanges.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedCreateEntityLazyRoute =
   AuthenticatedCreateEntityLazyImport.update({
     id: '/create/$entity',
@@ -268,6 +432,88 @@ const AuthenticatedCreateEntityLazyRoute =
     import('./routes/_authenticated/create/$entity.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedCommunicationWebsocketLazyRoute =
+  AuthenticatedCommunicationWebsocketLazyImport.update({
+    id: '/communication/websocket',
+    path: '/communication/websocket',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/communication/websocket.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedCommunicationOauthLazyRoute =
+  AuthenticatedCommunicationOauthLazyImport.update({
+    id: '/communication/oauth',
+    path: '/communication/oauth',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/communication/oauth.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedCommunicationEmailLazyRoute =
+  AuthenticatedCommunicationEmailLazyImport.update({
+    id: '/communication/email',
+    path: '/communication/email',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/communication/email.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAdminUsersLazyRoute =
+  AuthenticatedAdminUsersLazyImport.update({
+    id: '/admin/users',
+    path: '/admin/users',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/users.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedAdminStateMachinesLazyRoute =
+  AuthenticatedAdminStateMachinesLazyImport.update({
+    id: '/admin/state-machines',
+    path: '/admin/state-machines',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/state-machines.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAdminPermissionsLazyRoute =
+  AuthenticatedAdminPermissionsLazyImport.update({
+    id: '/admin/permissions',
+    path: '/admin/permissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/permissions.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAdminGroupsLazyRoute =
+  AuthenticatedAdminGroupsLazyImport.update({
+    id: '/admin/groups',
+    path: '/admin/groups',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/groups.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedAdminActionsLazyRoute =
+  AuthenticatedAdminActionsLazyImport.update({
+    id: '/admin/actions',
+    path: '/admin/actions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/actions.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedEntityReferenceIdIndexLazyRoute =
   AuthenticatedEntityReferenceIdIndexLazyImport.update({
     id: '/$entity/$referenceId/',
@@ -275,6 +521,17 @@ const AuthenticatedEntityReferenceIdIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/$entity/$referenceId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAdminActionsActionIdLazyRoute =
+  AuthenticatedAdminActionsActionIdLazyImport.update({
+    id: '/$actionId',
+    path: '/$actionId',
+    getParentRoute: () => AuthenticatedAdminActionsLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/admin/actions.$actionId.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -378,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof errors503LazyImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated/config': {
+      id: '/_authenticated/config'
+      path: '/config'
+      fullPath: '/config'
+      preLoaderRoute: typeof AuthenticatedConfigLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/': {
       id: '/_authenticated/'
       path: '/'
@@ -385,11 +649,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/admin/actions': {
+      id: '/_authenticated/admin/actions'
+      path: '/admin/actions'
+      fullPath: '/admin/actions'
+      preLoaderRoute: typeof AuthenticatedAdminActionsLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/admin/groups': {
+      id: '/_authenticated/admin/groups'
+      path: '/admin/groups'
+      fullPath: '/admin/groups'
+      preLoaderRoute: typeof AuthenticatedAdminGroupsLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/admin/permissions': {
+      id: '/_authenticated/admin/permissions'
+      path: '/admin/permissions'
+      fullPath: '/admin/permissions'
+      preLoaderRoute: typeof AuthenticatedAdminPermissionsLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/admin/state-machines': {
+      id: '/_authenticated/admin/state-machines'
+      path: '/admin/state-machines'
+      fullPath: '/admin/state-machines'
+      preLoaderRoute: typeof AuthenticatedAdminStateMachinesLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/communication/email': {
+      id: '/_authenticated/communication/email'
+      path: '/communication/email'
+      fullPath: '/communication/email'
+      preLoaderRoute: typeof AuthenticatedCommunicationEmailLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/communication/oauth': {
+      id: '/_authenticated/communication/oauth'
+      path: '/communication/oauth'
+      fullPath: '/communication/oauth'
+      preLoaderRoute: typeof AuthenticatedCommunicationOauthLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/communication/websocket': {
+      id: '/_authenticated/communication/websocket'
+      path: '/communication/websocket'
+      fullPath: '/communication/websocket'
+      preLoaderRoute: typeof AuthenticatedCommunicationWebsocketLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/create/$entity': {
       id: '/_authenticated/create/$entity'
       path: '/create/$entity'
       fullPath: '/create/$entity'
       preLoaderRoute: typeof AuthenticatedCreateEntityLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/data/exchanges': {
+      id: '/_authenticated/data/exchanges'
+      path: '/data/exchanges'
+      fullPath: '/data/exchanges'
+      preLoaderRoute: typeof AuthenticatedDataExchangesLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/data/export': {
+      id: '/_authenticated/data/export'
+      path: '/data/export'
+      fullPath: '/data/export'
+      preLoaderRoute: typeof AuthenticatedDataExportLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/data/import': {
+      id: '/_authenticated/data/import'
+      path: '/data/import'
+      fullPath: '/data/import'
+      preLoaderRoute: typeof AuthenticatedDataImportLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/data/integrations': {
+      id: '/_authenticated/data/integrations'
+      path: '/data/integrations'
+      fullPath: '/data/integrations'
+      preLoaderRoute: typeof AuthenticatedDataIntegrationsLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/data/streams': {
+      id: '/_authenticated/data/streams'
+      path: '/data/streams'
+      fullPath: '/data/streams'
+      preLoaderRoute: typeof AuthenticatedDataStreamsLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/account': {
@@ -419,6 +774,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/notifications'
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
+    '/_authenticated/storage/certificates': {
+      id: '/_authenticated/storage/certificates'
+      path: '/storage/certificates'
+      fullPath: '/storage/certificates'
+      preLoaderRoute: typeof AuthenticatedStorageCertificatesLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/storage/cloud-stores': {
+      id: '/_authenticated/storage/cloud-stores'
+      path: '/storage/cloud-stores'
+      fullPath: '/storage/cloud-stores'
+      preLoaderRoute: typeof AuthenticatedStorageCloudStoresLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/storage/sites': {
+      id: '/_authenticated/storage/sites'
+      path: '/storage/sites'
+      fullPath: '/storage/sites'
+      preLoaderRoute: typeof AuthenticatedStorageSitesLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/tools/audit': {
+      id: '/_authenticated/tools/audit'
+      path: '/tools/audit'
+      fullPath: '/tools/audit'
+      preLoaderRoute: typeof AuthenticatedToolsAuditLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/tools/graphql': {
+      id: '/_authenticated/tools/graphql'
+      path: '/tools/graphql'
+      fullPath: '/tools/graphql'
+      preLoaderRoute: typeof AuthenticatedToolsGraphqlLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/$entity/': {
       id: '/_authenticated/$entity/'
@@ -462,6 +852,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEntityReferenceIdEditLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/admin/actions/$actionId': {
+      id: '/_authenticated/admin/actions/$actionId'
+      path: '/$actionId'
+      fullPath: '/admin/actions/$actionId'
+      preLoaderRoute: typeof AuthenticatedAdminActionsActionIdLazyImport
+      parentRoute: typeof AuthenticatedAdminActionsLazyImport
+    }
     '/_authenticated/$entity/$referenceId/': {
       id: '/_authenticated/$entity/$referenceId/'
       path: '/$entity/$referenceId'
@@ -500,10 +897,44 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
     AuthenticatedSettingsRouteLazyRouteChildren,
   )
 
+interface AuthenticatedAdminActionsLazyRouteChildren {
+  AuthenticatedAdminActionsActionIdLazyRoute: typeof AuthenticatedAdminActionsActionIdLazyRoute
+}
+
+const AuthenticatedAdminActionsLazyRouteChildren: AuthenticatedAdminActionsLazyRouteChildren =
+  {
+    AuthenticatedAdminActionsActionIdLazyRoute:
+      AuthenticatedAdminActionsActionIdLazyRoute,
+  }
+
+const AuthenticatedAdminActionsLazyRouteWithChildren =
+  AuthenticatedAdminActionsLazyRoute._addFileChildren(
+    AuthenticatedAdminActionsLazyRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
+  AuthenticatedConfigLazyRoute: typeof AuthenticatedConfigLazyRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAdminActionsLazyRoute: typeof AuthenticatedAdminActionsLazyRouteWithChildren
+  AuthenticatedAdminGroupsLazyRoute: typeof AuthenticatedAdminGroupsLazyRoute
+  AuthenticatedAdminPermissionsLazyRoute: typeof AuthenticatedAdminPermissionsLazyRoute
+  AuthenticatedAdminStateMachinesLazyRoute: typeof AuthenticatedAdminStateMachinesLazyRoute
+  AuthenticatedAdminUsersLazyRoute: typeof AuthenticatedAdminUsersLazyRoute
+  AuthenticatedCommunicationEmailLazyRoute: typeof AuthenticatedCommunicationEmailLazyRoute
+  AuthenticatedCommunicationOauthLazyRoute: typeof AuthenticatedCommunicationOauthLazyRoute
+  AuthenticatedCommunicationWebsocketLazyRoute: typeof AuthenticatedCommunicationWebsocketLazyRoute
   AuthenticatedCreateEntityLazyRoute: typeof AuthenticatedCreateEntityLazyRoute
+  AuthenticatedDataExchangesLazyRoute: typeof AuthenticatedDataExchangesLazyRoute
+  AuthenticatedDataExportLazyRoute: typeof AuthenticatedDataExportLazyRoute
+  AuthenticatedDataImportLazyRoute: typeof AuthenticatedDataImportLazyRoute
+  AuthenticatedDataIntegrationsLazyRoute: typeof AuthenticatedDataIntegrationsLazyRoute
+  AuthenticatedDataStreamsLazyRoute: typeof AuthenticatedDataStreamsLazyRoute
+  AuthenticatedStorageCertificatesLazyRoute: typeof AuthenticatedStorageCertificatesLazyRoute
+  AuthenticatedStorageCloudStoresLazyRoute: typeof AuthenticatedStorageCloudStoresLazyRoute
+  AuthenticatedStorageSitesLazyRoute: typeof AuthenticatedStorageSitesLazyRoute
+  AuthenticatedToolsAuditLazyRoute: typeof AuthenticatedToolsAuditLazyRoute
+  AuthenticatedToolsGraphqlLazyRoute: typeof AuthenticatedToolsGraphqlLazyRoute
   AuthenticatedEntityIndexLazyRoute: typeof AuthenticatedEntityIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
@@ -515,8 +946,36 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
+  AuthenticatedConfigLazyRoute: AuthenticatedConfigLazyRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAdminActionsLazyRoute:
+    AuthenticatedAdminActionsLazyRouteWithChildren,
+  AuthenticatedAdminGroupsLazyRoute: AuthenticatedAdminGroupsLazyRoute,
+  AuthenticatedAdminPermissionsLazyRoute:
+    AuthenticatedAdminPermissionsLazyRoute,
+  AuthenticatedAdminStateMachinesLazyRoute:
+    AuthenticatedAdminStateMachinesLazyRoute,
+  AuthenticatedAdminUsersLazyRoute: AuthenticatedAdminUsersLazyRoute,
+  AuthenticatedCommunicationEmailLazyRoute:
+    AuthenticatedCommunicationEmailLazyRoute,
+  AuthenticatedCommunicationOauthLazyRoute:
+    AuthenticatedCommunicationOauthLazyRoute,
+  AuthenticatedCommunicationWebsocketLazyRoute:
+    AuthenticatedCommunicationWebsocketLazyRoute,
   AuthenticatedCreateEntityLazyRoute: AuthenticatedCreateEntityLazyRoute,
+  AuthenticatedDataExchangesLazyRoute: AuthenticatedDataExchangesLazyRoute,
+  AuthenticatedDataExportLazyRoute: AuthenticatedDataExportLazyRoute,
+  AuthenticatedDataImportLazyRoute: AuthenticatedDataImportLazyRoute,
+  AuthenticatedDataIntegrationsLazyRoute:
+    AuthenticatedDataIntegrationsLazyRoute,
+  AuthenticatedDataStreamsLazyRoute: AuthenticatedDataStreamsLazyRoute,
+  AuthenticatedStorageCertificatesLazyRoute:
+    AuthenticatedStorageCertificatesLazyRoute,
+  AuthenticatedStorageCloudStoresLazyRoute:
+    AuthenticatedStorageCloudStoresLazyRoute,
+  AuthenticatedStorageSitesLazyRoute: AuthenticatedStorageSitesLazyRoute,
+  AuthenticatedToolsAuditLazyRoute: AuthenticatedToolsAuditLazyRoute,
+  AuthenticatedToolsGraphqlLazyRoute: AuthenticatedToolsGraphqlLazyRoute,
   AuthenticatedEntityIndexLazyRoute: AuthenticatedEntityIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
@@ -542,18 +1001,38 @@ export interface FileRoutesByFullPath {
   '/403': typeof errors403LazyRoute
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
+  '/config': typeof AuthenticatedConfigLazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
+  '/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
+  '/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRoute
+  '/admin/users': typeof AuthenticatedAdminUsersLazyRoute
+  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
+  '/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
+  '/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
+  '/data/export': typeof AuthenticatedDataExportLazyRoute
+  '/data/import': typeof AuthenticatedDataImportLazyRoute
+  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRoute
+  '/storage/sites': typeof AuthenticatedStorageSitesLazyRoute
+  '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
+  '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
@@ -567,18 +1046,38 @@ export interface FileRoutesByTo {
   '/403': typeof errors403LazyRoute
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
+  '/config': typeof AuthenticatedConfigLazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
+  '/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
+  '/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRoute
+  '/admin/users': typeof AuthenticatedAdminUsersLazyRoute
+  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
+  '/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
+  '/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
+  '/data/export': typeof AuthenticatedDataExportLazyRoute
+  '/data/import': typeof AuthenticatedDataImportLazyRoute
+  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRoute
+  '/storage/sites': typeof AuthenticatedStorageSitesLazyRoute
+  '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
+  '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
@@ -596,18 +1095,38 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404LazyRoute
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
+  '/_authenticated/config': typeof AuthenticatedConfigLazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
+  '/_authenticated/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
+  '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
+  '/_authenticated/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersLazyRoute
+  '/_authenticated/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/_authenticated/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
+  '/_authenticated/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/_authenticated/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
+  '/_authenticated/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
+  '/_authenticated/data/export': typeof AuthenticatedDataExportLazyRoute
+  '/_authenticated/data/import': typeof AuthenticatedDataImportLazyRoute
+  '/_authenticated/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/_authenticated/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/_authenticated/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRoute
+  '/_authenticated/storage/sites': typeof AuthenticatedStorageSitesLazyRoute
+  '/_authenticated/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
+  '/_authenticated/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/_authenticated/$entity/': typeof AuthenticatedEntityIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
+  '/_authenticated/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/_authenticated/$entity/$referenceId/': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
 }
 
@@ -625,18 +1144,38 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/503'
+    | '/config'
     | '/'
+    | '/admin/actions'
+    | '/admin/groups'
+    | '/admin/permissions'
+    | '/admin/state-machines'
+    | '/admin/users'
+    | '/communication/email'
+    | '/communication/oauth'
+    | '/communication/websocket'
     | '/create/$entity'
+    | '/data/exchanges'
+    | '/data/export'
+    | '/data/import'
+    | '/data/integrations'
+    | '/data/streams'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/storage/certificates'
+    | '/storage/cloud-stores'
+    | '/storage/sites'
+    | '/tools/audit'
+    | '/tools/graphql'
     | '/$entity'
     | '/chats'
     | '/help-center'
     | '/settings/'
     | '/users'
     | '/$entity/$referenceId/edit'
+    | '/admin/actions/$actionId'
     | '/$entity/$referenceId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -649,18 +1188,38 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/503'
+    | '/config'
     | '/'
+    | '/admin/actions'
+    | '/admin/groups'
+    | '/admin/permissions'
+    | '/admin/state-machines'
+    | '/admin/users'
+    | '/communication/email'
+    | '/communication/oauth'
+    | '/communication/websocket'
     | '/create/$entity'
+    | '/data/exchanges'
+    | '/data/export'
+    | '/data/import'
+    | '/data/integrations'
+    | '/data/streams'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/storage/certificates'
+    | '/storage/cloud-stores'
+    | '/storage/sites'
+    | '/tools/audit'
+    | '/tools/graphql'
     | '/$entity'
     | '/chats'
     | '/help-center'
     | '/settings'
     | '/users'
     | '/$entity/$referenceId/edit'
+    | '/admin/actions/$actionId'
     | '/$entity/$referenceId'
   id:
     | '__root__'
@@ -676,18 +1235,38 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/_authenticated/config'
     | '/_authenticated/'
+    | '/_authenticated/admin/actions'
+    | '/_authenticated/admin/groups'
+    | '/_authenticated/admin/permissions'
+    | '/_authenticated/admin/state-machines'
+    | '/_authenticated/admin/users'
+    | '/_authenticated/communication/email'
+    | '/_authenticated/communication/oauth'
+    | '/_authenticated/communication/websocket'
     | '/_authenticated/create/$entity'
+    | '/_authenticated/data/exchanges'
+    | '/_authenticated/data/export'
+    | '/_authenticated/data/import'
+    | '/_authenticated/data/integrations'
+    | '/_authenticated/data/streams'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/storage/certificates'
+    | '/_authenticated/storage/cloud-stores'
+    | '/_authenticated/storage/sites'
+    | '/_authenticated/tools/audit'
+    | '/_authenticated/tools/graphql'
     | '/_authenticated/$entity/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
     | '/_authenticated/users/'
     | '/_authenticated/$entity/$referenceId/edit'
+    | '/_authenticated/admin/actions/$actionId'
     | '/_authenticated/$entity/$referenceId/'
   fileRoutesById: FileRoutesById
 }
@@ -747,8 +1326,27 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/route.tsx",
       "children": [
         "/_authenticated/settings",
+        "/_authenticated/config",
         "/_authenticated/",
+        "/_authenticated/admin/actions",
+        "/_authenticated/admin/groups",
+        "/_authenticated/admin/permissions",
+        "/_authenticated/admin/state-machines",
+        "/_authenticated/admin/users",
+        "/_authenticated/communication/email",
+        "/_authenticated/communication/oauth",
+        "/_authenticated/communication/websocket",
         "/_authenticated/create/$entity",
+        "/_authenticated/data/exchanges",
+        "/_authenticated/data/export",
+        "/_authenticated/data/import",
+        "/_authenticated/data/integrations",
+        "/_authenticated/data/streams",
+        "/_authenticated/storage/certificates",
+        "/_authenticated/storage/cloud-stores",
+        "/_authenticated/storage/sites",
+        "/_authenticated/tools/audit",
+        "/_authenticated/tools/graphql",
         "/_authenticated/$entity/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
@@ -798,12 +1396,71 @@ export const routeTree = rootRoute
     "/(errors)/503": {
       "filePath": "(errors)/503.lazy.tsx"
     },
+    "/_authenticated/config": {
+      "filePath": "_authenticated/config.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/": {
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/admin/actions": {
+      "filePath": "_authenticated/admin/actions.lazy.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/admin/actions/$actionId"
+      ]
+    },
+    "/_authenticated/admin/groups": {
+      "filePath": "_authenticated/admin/groups.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/admin/permissions": {
+      "filePath": "_authenticated/admin/permissions.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/admin/state-machines": {
+      "filePath": "_authenticated/admin/state-machines.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/admin/users": {
+      "filePath": "_authenticated/admin/users.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/communication/email": {
+      "filePath": "_authenticated/communication/email.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/communication/oauth": {
+      "filePath": "_authenticated/communication/oauth.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/communication/websocket": {
+      "filePath": "_authenticated/communication/websocket.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/create/$entity": {
       "filePath": "_authenticated/create/$entity.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/exchanges": {
+      "filePath": "_authenticated/data/exchanges.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/export": {
+      "filePath": "_authenticated/data/export.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/import": {
+      "filePath": "_authenticated/data/import.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/integrations": {
+      "filePath": "_authenticated/data/integrations.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/streams": {
+      "filePath": "_authenticated/data/streams.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {
@@ -821,6 +1478,26 @@ export const routeTree = rootRoute
     "/_authenticated/settings/notifications": {
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/storage/certificates": {
+      "filePath": "_authenticated/storage/certificates.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/storage/cloud-stores": {
+      "filePath": "_authenticated/storage/cloud-stores.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/storage/sites": {
+      "filePath": "_authenticated/storage/sites.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/tools/audit": {
+      "filePath": "_authenticated/tools/audit.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/tools/graphql": {
+      "filePath": "_authenticated/tools/graphql.lazy.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/$entity/": {
       "filePath": "_authenticated/$entity/index.lazy.tsx",
@@ -845,6 +1522,10 @@ export const routeTree = rootRoute
     "/_authenticated/$entity/$referenceId/edit": {
       "filePath": "_authenticated/$entity/$referenceId/edit.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/_authenticated/admin/actions/$actionId": {
+      "filePath": "_authenticated/admin/actions.$actionId.lazy.tsx",
+      "parent": "/_authenticated/admin/actions"
     },
     "/_authenticated/$entity/$referenceId/": {
       "filePath": "_authenticated/$entity/$referenceId/index.lazy.tsx",

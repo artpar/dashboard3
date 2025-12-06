@@ -129,39 +129,40 @@ const AppSidebar = () => {
         isExpanded ? 'w-64' : 'w-14'
       )}
     >
-      <div className='flex h-full flex-col'>
-        {/* Logo & Toggle */}
-        <SidebarHeader>
-          <div className='flex w-full items-center justify-between'>
-            <TeamSwitcher teams={sidebarData.teams} />
-            <Button
-              variant='ghost'
-              size='icon'
-              className='ml-auto h-8 w-8'
-              onClick={toggleSidebar}
-              aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-            >
-              <Menu className='h-4 w-4' />
-            </Button>
-          </div>
-          {isExpanded && <Search className='mt-2' />}
-        </SidebarHeader>
+      {/* Logo & Toggle */}
+      <SidebarHeader className='shrink-0'>
+        <div className='flex w-full items-center justify-between'>
+          <TeamSwitcher teams={sidebarData.teams} />
+          <Button
+            variant='ghost'
+            size='icon'
+            className='ml-auto h-8 w-8'
+            onClick={toggleSidebar}
+            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <Menu className='h-4 w-4' />
+          </Button>
+        </div>
+        {isExpanded && <Search className='mt-2' />}
+      </SidebarHeader>
 
-        {/* Main navigation */}
-        <ScrollArea className='flex-1 pb-16'>
-          <nav className='mb-4 space-y-1'>
-            {sidebarData.navGroups.map((props) => (
-              <NavGroup key={props.title} {...props} />
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
+      {/* Main navigation - scrollable */}
+      <ScrollArea className='flex-1 min-h-0'>
+        <nav className='space-y-1 pb-4'>
+          {sidebarData.navGroups.map((props) => (
+            <NavGroup key={props.title} {...props} />
+          ))}
+        </nav>
+      </ScrollArea>
 
-      {/* User section */}
+      {/* User section - fixed at bottom */}
       <div
         data-slot='sidebar-footer'
         data-sidebar='footer'
-        className='bg-background absolute bottom-0 flex w-64 flex-col gap-2 p-2'
+        className={cn(
+          'bg-background shrink-0 border-t p-2',
+          isExpanded ? 'w-64' : 'w-14'
+        )}
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
