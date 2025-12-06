@@ -129,6 +129,9 @@ const AuthenticatedStorageSitesSiteIdLazyImport = createFileRoute(
 const AuthenticatedStorageCloudStoresStoreIdLazyImport = createFileRoute(
   '/_authenticated/storage/cloud-stores/$storeId',
 )()
+const AuthenticatedDataIntegrationsIntegrationIdLazyImport = createFileRoute(
+  '/_authenticated/data/integrations/$integrationId',
+)()
 const AuthenticatedAdminActionsActionIdLazyImport = createFileRoute(
   '/_authenticated/admin/actions/$actionId',
 )()
@@ -553,6 +556,17 @@ const AuthenticatedStorageCloudStoresStoreIdLazyRoute =
     ),
   )
 
+const AuthenticatedDataIntegrationsIntegrationIdLazyRoute =
+  AuthenticatedDataIntegrationsIntegrationIdLazyImport.update({
+    id: '/$integrationId',
+    path: '/$integrationId',
+    getParentRoute: () => AuthenticatedDataIntegrationsLazyRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/_authenticated/data/integrations.$integrationId.lazy'
+    ).then((d) => d.Route),
+  )
+
 const AuthenticatedAdminActionsActionIdLazyRoute =
   AuthenticatedAdminActionsActionIdLazyImport.update({
     id: '/$actionId',
@@ -887,6 +901,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminActionsActionIdLazyImport
       parentRoute: typeof AuthenticatedAdminActionsLazyImport
     }
+    '/_authenticated/data/integrations/$integrationId': {
+      id: '/_authenticated/data/integrations/$integrationId'
+      path: '/$integrationId'
+      fullPath: '/data/integrations/$integrationId'
+      preLoaderRoute: typeof AuthenticatedDataIntegrationsIntegrationIdLazyImport
+      parentRoute: typeof AuthenticatedDataIntegrationsLazyImport
+    }
     '/_authenticated/storage/cloud-stores/$storeId': {
       id: '/_authenticated/storage/cloud-stores/$storeId'
       path: '/$storeId'
@@ -954,6 +975,21 @@ const AuthenticatedAdminActionsLazyRouteWithChildren =
     AuthenticatedAdminActionsLazyRouteChildren,
   )
 
+interface AuthenticatedDataIntegrationsLazyRouteChildren {
+  AuthenticatedDataIntegrationsIntegrationIdLazyRoute: typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+}
+
+const AuthenticatedDataIntegrationsLazyRouteChildren: AuthenticatedDataIntegrationsLazyRouteChildren =
+  {
+    AuthenticatedDataIntegrationsIntegrationIdLazyRoute:
+      AuthenticatedDataIntegrationsIntegrationIdLazyRoute,
+  }
+
+const AuthenticatedDataIntegrationsLazyRouteWithChildren =
+  AuthenticatedDataIntegrationsLazyRoute._addFileChildren(
+    AuthenticatedDataIntegrationsLazyRouteChildren,
+  )
+
 interface AuthenticatedStorageCloudStoresLazyRouteChildren {
   AuthenticatedStorageCloudStoresStoreIdLazyRoute: typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
 }
@@ -1000,7 +1036,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDataExchangesLazyRoute: typeof AuthenticatedDataExchangesLazyRoute
   AuthenticatedDataExportLazyRoute: typeof AuthenticatedDataExportLazyRoute
   AuthenticatedDataImportLazyRoute: typeof AuthenticatedDataImportLazyRoute
-  AuthenticatedDataIntegrationsLazyRoute: typeof AuthenticatedDataIntegrationsLazyRoute
+  AuthenticatedDataIntegrationsLazyRoute: typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   AuthenticatedDataStreamsLazyRoute: typeof AuthenticatedDataStreamsLazyRoute
   AuthenticatedStorageCertificatesLazyRoute: typeof AuthenticatedStorageCertificatesLazyRoute
   AuthenticatedStorageCloudStoresLazyRoute: typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
@@ -1039,7 +1075,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDataExportLazyRoute: AuthenticatedDataExportLazyRoute,
   AuthenticatedDataImportLazyRoute: AuthenticatedDataImportLazyRoute,
   AuthenticatedDataIntegrationsLazyRoute:
-    AuthenticatedDataIntegrationsLazyRoute,
+    AuthenticatedDataIntegrationsLazyRouteWithChildren,
   AuthenticatedDataStreamsLazyRoute: AuthenticatedDataStreamsLazyRoute,
   AuthenticatedStorageCertificatesLazyRoute:
     AuthenticatedStorageCertificatesLazyRoute,
@@ -1088,7 +1124,7 @@ export interface FileRoutesByFullPath {
   '/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
   '/data/export': typeof AuthenticatedDataExportLazyRoute
   '/data/import': typeof AuthenticatedDataImportLazyRoute
-  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
@@ -1106,6 +1142,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
+  '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1135,7 +1172,7 @@ export interface FileRoutesByTo {
   '/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
   '/data/export': typeof AuthenticatedDataExportLazyRoute
   '/data/import': typeof AuthenticatedDataImportLazyRoute
-  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
@@ -1153,6 +1190,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
+  '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1186,7 +1224,7 @@ export interface FileRoutesById {
   '/_authenticated/data/exchanges': typeof AuthenticatedDataExchangesLazyRoute
   '/_authenticated/data/export': typeof AuthenticatedDataExportLazyRoute
   '/_authenticated/data/import': typeof AuthenticatedDataImportLazyRoute
-  '/_authenticated/data/integrations': typeof AuthenticatedDataIntegrationsLazyRoute
+  '/_authenticated/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/_authenticated/data/streams': typeof AuthenticatedDataStreamsLazyRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
@@ -1204,6 +1242,7 @@ export interface FileRoutesById {
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/_authenticated/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
+  '/_authenticated/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/_authenticated/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/_authenticated/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/_authenticated/$entity/$referenceId/': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1255,6 +1294,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/$entity/$referenceId/edit'
     | '/admin/actions/$actionId'
+    | '/data/integrations/$integrationId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
     | '/$entity/$referenceId'
@@ -1301,6 +1341,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/$entity/$referenceId/edit'
     | '/admin/actions/$actionId'
+    | '/data/integrations/$integrationId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
     | '/$entity/$referenceId'
@@ -1350,6 +1391,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users/'
     | '/_authenticated/$entity/$referenceId/edit'
     | '/_authenticated/admin/actions/$actionId'
+    | '/_authenticated/data/integrations/$integrationId'
     | '/_authenticated/storage/cloud-stores/$storeId'
     | '/_authenticated/storage/sites/$siteId'
     | '/_authenticated/$entity/$referenceId/'
@@ -1542,7 +1584,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/data/integrations": {
       "filePath": "_authenticated/data/integrations.lazy.tsx",
-      "parent": "/_authenticated"
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/data/integrations/$integrationId"
+      ]
     },
     "/_authenticated/data/streams": {
       "filePath": "_authenticated/data/streams.lazy.tsx",
@@ -1617,6 +1662,10 @@ export const routeTree = rootRoute
     "/_authenticated/admin/actions/$actionId": {
       "filePath": "_authenticated/admin/actions.$actionId.lazy.tsx",
       "parent": "/_authenticated/admin/actions"
+    },
+    "/_authenticated/data/integrations/$integrationId": {
+      "filePath": "_authenticated/data/integrations.$integrationId.lazy.tsx",
+      "parent": "/_authenticated/data/integrations"
     },
     "/_authenticated/storage/cloud-stores/$storeId": {
       "filePath": "_authenticated/storage/cloud-stores.$storeId.lazy.tsx",

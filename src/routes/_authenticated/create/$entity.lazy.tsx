@@ -14,6 +14,12 @@ const CloudStoreForm = lazy(() =>
   }))
 )
 
+const IntegrationForm = lazy(() =>
+  import('@/features/integrations/components/IntegrationForm').then((mod) => ({
+    default: mod.IntegrationForm,
+  }))
+)
+
 // Configuration for specialized entity forms
 const SPECIALIZED_CREATE_FORMS: Record<
   string,
@@ -29,6 +35,12 @@ const SPECIALIZED_CREATE_FORMS: Record<
     title: 'New Cloud Store',
     description: 'Connect a new cloud storage provider',
     backLink: '/storage/cloud-stores',
+  },
+  integration: {
+    component: IntegrationForm,
+    title: 'New Integration',
+    description: 'Connect an external API using OpenAPI or GraphQL specification',
+    backLink: '/data/integrations',
   },
 }
 
