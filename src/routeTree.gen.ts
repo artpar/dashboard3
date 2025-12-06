@@ -132,6 +132,9 @@ const AuthenticatedStorageCloudStoresStoreIdLazyImport = createFileRoute(
 const AuthenticatedDataIntegrationsIntegrationIdLazyImport = createFileRoute(
   '/_authenticated/data/integrations/$integrationId',
 )()
+const AuthenticatedCommunicationEmailServerIdLazyImport = createFileRoute(
+  '/_authenticated/communication/email/$serverId',
+)()
 const AuthenticatedAdminStateMachinesSmdIdLazyImport = createFileRoute(
   '/_authenticated/admin/state-machines/$smdId',
 )()
@@ -570,6 +573,17 @@ const AuthenticatedDataIntegrationsIntegrationIdLazyRoute =
     ).then((d) => d.Route),
   )
 
+const AuthenticatedCommunicationEmailServerIdLazyRoute =
+  AuthenticatedCommunicationEmailServerIdLazyImport.update({
+    id: '/$serverId',
+    path: '/$serverId',
+    getParentRoute: () => AuthenticatedCommunicationEmailLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/communication/email.$serverId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedAdminStateMachinesSmdIdLazyRoute =
   AuthenticatedAdminStateMachinesSmdIdLazyImport.update({
     id: '/$smdId',
@@ -922,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminStateMachinesSmdIdLazyImport
       parentRoute: typeof AuthenticatedAdminStateMachinesLazyImport
     }
+    '/_authenticated/communication/email/$serverId': {
+      id: '/_authenticated/communication/email/$serverId'
+      path: '/$serverId'
+      fullPath: '/communication/email/$serverId'
+      preLoaderRoute: typeof AuthenticatedCommunicationEmailServerIdLazyImport
+      parentRoute: typeof AuthenticatedCommunicationEmailLazyImport
+    }
     '/_authenticated/data/integrations/$integrationId': {
       id: '/_authenticated/data/integrations/$integrationId'
       path: '/$integrationId'
@@ -1011,6 +1032,21 @@ const AuthenticatedAdminStateMachinesLazyRouteWithChildren =
     AuthenticatedAdminStateMachinesLazyRouteChildren,
   )
 
+interface AuthenticatedCommunicationEmailLazyRouteChildren {
+  AuthenticatedCommunicationEmailServerIdLazyRoute: typeof AuthenticatedCommunicationEmailServerIdLazyRoute
+}
+
+const AuthenticatedCommunicationEmailLazyRouteChildren: AuthenticatedCommunicationEmailLazyRouteChildren =
+  {
+    AuthenticatedCommunicationEmailServerIdLazyRoute:
+      AuthenticatedCommunicationEmailServerIdLazyRoute,
+  }
+
+const AuthenticatedCommunicationEmailLazyRouteWithChildren =
+  AuthenticatedCommunicationEmailLazyRoute._addFileChildren(
+    AuthenticatedCommunicationEmailLazyRouteChildren,
+  )
+
 interface AuthenticatedDataIntegrationsLazyRouteChildren {
   AuthenticatedDataIntegrationsIntegrationIdLazyRoute: typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
 }
@@ -1065,7 +1101,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPermissionsLazyRoute: typeof AuthenticatedAdminPermissionsLazyRoute
   AuthenticatedAdminStateMachinesLazyRoute: typeof AuthenticatedAdminStateMachinesLazyRouteWithChildren
   AuthenticatedAdminUsersLazyRoute: typeof AuthenticatedAdminUsersLazyRoute
-  AuthenticatedCommunicationEmailLazyRoute: typeof AuthenticatedCommunicationEmailLazyRoute
+  AuthenticatedCommunicationEmailLazyRoute: typeof AuthenticatedCommunicationEmailLazyRouteWithChildren
   AuthenticatedCommunicationOauthLazyRoute: typeof AuthenticatedCommunicationOauthLazyRoute
   AuthenticatedCommunicationWebsocketLazyRoute: typeof AuthenticatedCommunicationWebsocketLazyRoute
   AuthenticatedCreateEntityLazyRoute: typeof AuthenticatedCreateEntityLazyRoute
@@ -1101,7 +1137,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminStateMachinesLazyRouteWithChildren,
   AuthenticatedAdminUsersLazyRoute: AuthenticatedAdminUsersLazyRoute,
   AuthenticatedCommunicationEmailLazyRoute:
-    AuthenticatedCommunicationEmailLazyRoute,
+    AuthenticatedCommunicationEmailLazyRouteWithChildren,
   AuthenticatedCommunicationOauthLazyRoute:
     AuthenticatedCommunicationOauthLazyRoute,
   AuthenticatedCommunicationWebsocketLazyRoute:
@@ -1153,7 +1189,7 @@ export interface FileRoutesByFullPath {
   '/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
   '/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersLazyRoute
-  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRouteWithChildren
   '/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
   '/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
@@ -1179,6 +1215,7 @@ export interface FileRoutesByFullPath {
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
+  '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1202,7 +1239,7 @@ export interface FileRoutesByTo {
   '/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
   '/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersLazyRoute
-  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/communication/email': typeof AuthenticatedCommunicationEmailLazyRouteWithChildren
   '/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
   '/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
@@ -1228,6 +1265,7 @@ export interface FileRoutesByTo {
   '/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
+  '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1255,7 +1293,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsLazyRoute
   '/_authenticated/admin/state-machines': typeof AuthenticatedAdminStateMachinesLazyRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersLazyRoute
-  '/_authenticated/communication/email': typeof AuthenticatedCommunicationEmailLazyRoute
+  '/_authenticated/communication/email': typeof AuthenticatedCommunicationEmailLazyRouteWithChildren
   '/_authenticated/communication/oauth': typeof AuthenticatedCommunicationOauthLazyRoute
   '/_authenticated/communication/websocket': typeof AuthenticatedCommunicationWebsocketLazyRoute
   '/_authenticated/create/$entity': typeof AuthenticatedCreateEntityLazyRoute
@@ -1281,6 +1319,7 @@ export interface FileRoutesById {
   '/_authenticated/$entity/$referenceId/edit': typeof AuthenticatedEntityReferenceIdEditLazyRoute
   '/_authenticated/admin/actions/$actionId': typeof AuthenticatedAdminActionsActionIdLazyRoute
   '/_authenticated/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
+  '/_authenticated/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/_authenticated/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
   '/_authenticated/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/_authenticated/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1334,6 +1373,7 @@ export interface FileRouteTypes {
     | '/$entity/$referenceId/edit'
     | '/admin/actions/$actionId'
     | '/admin/state-machines/$smdId'
+    | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
@@ -1382,6 +1422,7 @@ export interface FileRouteTypes {
     | '/$entity/$referenceId/edit'
     | '/admin/actions/$actionId'
     | '/admin/state-machines/$smdId'
+    | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
@@ -1433,6 +1474,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$entity/$referenceId/edit'
     | '/_authenticated/admin/actions/$actionId'
     | '/_authenticated/admin/state-machines/$smdId'
+    | '/_authenticated/communication/email/$serverId'
     | '/_authenticated/data/integrations/$integrationId'
     | '/_authenticated/storage/cloud-stores/$storeId'
     | '/_authenticated/storage/sites/$siteId'
@@ -1601,7 +1643,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/communication/email": {
       "filePath": "_authenticated/communication/email.lazy.tsx",
-      "parent": "/_authenticated"
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/communication/email/$serverId"
+      ]
     },
     "/_authenticated/communication/oauth": {
       "filePath": "_authenticated/communication/oauth.lazy.tsx",
@@ -1711,6 +1756,10 @@ export const routeTree = rootRoute
     "/_authenticated/admin/state-machines/$smdId": {
       "filePath": "_authenticated/admin/state-machines.$smdId.lazy.tsx",
       "parent": "/_authenticated/admin/state-machines"
+    },
+    "/_authenticated/communication/email/$serverId": {
+      "filePath": "_authenticated/communication/email.$serverId.lazy.tsx",
+      "parent": "/_authenticated/communication/email"
     },
     "/_authenticated/data/integrations/$integrationId": {
       "filePath": "_authenticated/data/integrations.$integrationId.lazy.tsx",

@@ -91,6 +91,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
       'cloud_store': '/storage/cloud-stores',
       'integration': '/data/integrations',
       'smd': '/admin/state-machines',
+      'mail_server': '/communication/email',
     }
 
     const customRoute = CUSTOM_DETAIL_ROUTES[entityName]

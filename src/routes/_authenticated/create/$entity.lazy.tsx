@@ -20,6 +20,12 @@ const IntegrationForm = lazy(() =>
   }))
 )
 
+const MailServerForm = lazy(() =>
+  import('@/features/communication/components/MailServerForm').then((mod) => ({
+    default: mod.MailServerForm,
+  }))
+)
+
 // Configuration for specialized entity forms
 const SPECIALIZED_CREATE_FORMS: Record<
   string,
@@ -41,6 +47,12 @@ const SPECIALIZED_CREATE_FORMS: Record<
     title: 'New Integration',
     description: 'Connect an external API using OpenAPI or GraphQL specification',
     backLink: '/data/integrations',
+  },
+  mail_server: {
+    component: MailServerForm,
+    title: 'New Mail Server',
+    description: 'Configure SMTP or IMAP mail server connection',
+    backLink: '/communication/email',
   },
 }
 
