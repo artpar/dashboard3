@@ -165,7 +165,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
             <Search className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4' />
             <Input
               type='search'
-              placeholder={`Search ${entityName}...`}
+              placeholder={`Search ${entityName.replace(/_/g, ' ')}...`}
               className='w-full pl-8'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

@@ -18,6 +18,7 @@ interface EntityHeaderProps {
   title: string
   description?: string
   entityName: string
+  displayName?: string // Human-readable name for "New X" button
 }
 
 /**
@@ -27,8 +28,11 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   title,
   description,
   entityName,
+  displayName,
 }) => {
   const navigate = useNavigate()
+  // Use displayName if provided, otherwise format entityName
+  const buttonLabel = displayName || entityName.replace(/_/g, ' ')
   const [viewMode, setViewMode] = useState<'table' | 'grid' | 'list'>('table')
   const [showColumnMenu, setShowColumnMenu] = useState(false)
 
@@ -240,7 +244,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             className='h-8 gap-1'
           >
             <Plus className='h-4 w-4' />
-            New {entityName.replace(/_/g, ' ')}
+            New {buttonLabel}
           </Button>
 
           {/* Refresh button with tooltip */}

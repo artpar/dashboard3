@@ -14,6 +14,7 @@ export interface EntityManagementProps {
   entityName: string
   title?: string
   description?: string
+  displayName?: string // Human-readable name for buttons like "New X"
 }
 
 /**
@@ -23,6 +24,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   entityName,
   title,
   description,
+  displayName,
 }) => {
   const {
     data,
@@ -91,6 +93,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
             }
             description={description || `Manage your ${entityName} records`}
             entityName={entityName}
+            displayName={displayName}
           />
         </div>
         {/* Main content with data table */}

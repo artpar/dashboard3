@@ -7,6 +7,7 @@ function ExchangesPage() {
       entityName="data_exchange"
       title="Data Exchanges"
       description="Manage external data synchronization"
+      displayName="Data Exchange"
     />
   )
 }

@@ -7,6 +7,7 @@ function StateMachinesPage() {
       entityName="smd"
       title="State Machines"
       description="Manage state machine definitions"
+      displayName="State Machine"
     />
   )
 }

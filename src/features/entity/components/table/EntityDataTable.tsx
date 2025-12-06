@@ -83,11 +83,20 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
 
   const handleViewDetails = (item: any) => {
     setSelectedItem(item)
-    const itemId = item.id || item.reference_id
+    const itemId = item.reference_id || item.id
 
-    // This would typically open a view dialog
-    console.log('View details for:', item)
-    navigate({ to: `/${entityName}/${itemId}` })
+    // Use custom routes for entities with specialized detail pages
+    const CUSTOM_DETAIL_ROUTES: Record<string, string> = {
+      'site': '/storage/sites',
+      'cloud_store': '/storage/cloud-stores',
+    }
+
+    const customRoute = CUSTOM_DETAIL_ROUTES[entityName]
+    if (customRoute) {
+      navigate({ to: `${customRoute}/${itemId}` })
+    } else {
+      navigate({ to: `/${entityName}/${itemId}` })
+    }
   }
 
   // If columns are not yet loaded or we're loading data, show a loading state

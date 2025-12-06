@@ -7,6 +7,7 @@ function UsersPage() {
       entityName="user_account"
       title="Users"
       description="Manage user accounts"
+      displayName="User"
     />
   )
 }

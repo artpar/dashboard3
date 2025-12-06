@@ -7,6 +7,7 @@ function OAuthPage() {
       entityName="oauth_connect"
       title="OAuth Connections"
       description="Manage OAuth providers and connections"
+      displayName="OAuth Connection"
     />
   )
 }

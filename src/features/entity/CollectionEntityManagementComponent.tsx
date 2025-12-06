@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/use-toast'
  */
 export const CollectionEntityManagementComponent: React.FC<
   EntityManagementProps
-> = ({ entityName, title, description }) => {
+> = ({ entityName, title, description, displayName }) => {
   const { toast } = useToast()
 
   // Set up keyboard shortcuts for copy/paste
@@ -66,6 +66,7 @@ export const CollectionEntityManagementComponent: React.FC<
           `${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`
         }
         description={description || `Manage ${entityName} records`}
+        displayName={displayName}
       />
     </CollectionEntityDataProvider>
   )

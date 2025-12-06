@@ -51,7 +51,8 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
   return (
     <TableRow
       key={rowKey}
-      className={isSelected ? 'bg-muted/40' : undefined}
+      className={`cursor-pointer hover:bg-muted/60 ${isSelected ? 'bg-muted/40' : ''}`}
+      onClick={handleViewDetails}
     >
       <td
         onClick={handleToggleSelect}

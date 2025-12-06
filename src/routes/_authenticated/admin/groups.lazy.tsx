@@ -7,6 +7,7 @@ function GroupsPage() {
       entityName="usergroup"
       title="Groups"
       description="Manage user groups"
+      displayName="Group"
     />
   )
 }

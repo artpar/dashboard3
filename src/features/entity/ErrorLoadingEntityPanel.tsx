@@ -7,7 +7,7 @@ export function ErrorLoadingEntityPanel(props: {
   error: any
 }) {
   return (
-    <Main>
+    <Main className='flex h-full w-full flex-col'>
       <div className='mb-6 flex items-center'>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>

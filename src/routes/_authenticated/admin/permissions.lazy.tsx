@@ -21,7 +21,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Shield, Search } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Shield, Search, Eye, Pencil, Trash2, Zap, Users, Globe, User } from 'lucide-react'
 
 interface WorldEntity {
   reference_id: string
@@ -78,12 +79,35 @@ function PermissionsPage() {
     updateMutation.mutate({ id: selectedEntity.reference_id, permission: editedPermission })
   }
 
-  const getPermissionSummary = (value: number): string => {
-    if (value === 0) return 'No access'
-    if (value === 2097279) return 'Full public'
-    if (value === 2097152) return 'User only'
-    if (value === 2097154) return 'Public read'
-    return value.toString()
+  // Decode permission bits for a specific level
+  const getLevelPermissions = (value: number, offset: number): string[] => {
+    const perms: string[] = []
+    if (value & (1 << (offset + 0))) perms.push('Peek')
+    if (value & (1 << (offset + 1))) perms.push('Read')
+    if (value & (1 << (offset + 2))) perms.push('Create')
+    if (value & (1 << (offset + 3))) perms.push('Update')
+    if (value & (1 << (offset + 4))) perms.push('Delete')
+    if (value & (1 << (offset + 5))) perms.push('Execute')
+    if (value & (1 << (offset + 6))) perms.push('Refer')
+    return perms
+  }
+
+  // Summarize permissions for a level
+  const getLevelSummary = (perms: string[]): string => {
+    if (perms.length === 0) return 'None'
+    if (perms.length === 7) return 'Full'
+    if (perms.includes('Read') && perms.includes('Create') && perms.includes('Update') && perms.includes('Delete')) return 'CRUD'
+    if (perms.length === 1 && perms[0] === 'Read') return 'Read'
+    if (perms.includes('Read') && perms.includes('Peek') && perms.length === 2) return 'Read'
+    return perms.slice(0, 2).join(', ') + (perms.length > 2 ? '...' : '')
+  }
+
+  // Get parsed permission info
+  const getPermissionInfo = (value: number) => {
+    const guest = getLevelPermissions(value, 0)
+    const user = getLevelPermissions(value, 7)
+    const group = getLevelPermissions(value, 14)
+    return { guest, user, group }
   }
 
   return (
@@ -115,8 +139,24 @@ function PermissionsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Entity</TableHead>
-              <TableHead>Permission</TableHead>
-              <TableHead>Summary</TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  <span>Guest</span>
+                </div>
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <span>User</span>
+                </div>
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  <span>Group</span>
+                </div>
+              </TableHead>
               <TableHead className="w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -125,38 +165,63 @@ function PermissionsPage() {
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-16" /></TableCell>
                 </TableRow>
               ))
             ) : filteredEntities?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                   No entities found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEntities?.map((entity) => (
-                <TableRow key={entity.reference_id}>
-                  <TableCell className="font-medium">{entity.table_name}</TableCell>
-                  <TableCell className="font-mono text-sm">
-                    {entity.default_permission || entity.permission || 0}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {getPermissionSummary(entity.default_permission || entity.permission || 0)}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditClick(entity)}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              filteredEntities?.map((entity) => {
+                const permValue = entity.default_permission || entity.permission || 0
+                const info = getPermissionInfo(permValue)
+                const guestSummary = getLevelSummary(info.guest)
+                const userSummary = getLevelSummary(info.user)
+                const groupSummary = getLevelSummary(info.group)
+
+                const getBadgeVariant = (summary: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+                  if (summary === 'Full') return 'default'
+                  if (summary === 'CRUD') return 'default'
+                  if (summary === 'None') return 'outline'
+                  return 'secondary'
+                }
+
+                return (
+                  <TableRow key={entity.reference_id}>
+                    <TableCell className="font-medium">{entity.table_name}</TableCell>
+                    <TableCell>
+                      <Badge variant={getBadgeVariant(guestSummary)} className="text-xs">
+                        {guestSummary}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getBadgeVariant(userSummary)} className="text-xs">
+                        {userSummary}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getBadgeVariant(groupSummary)} className="text-xs">
+                        {groupSummary}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditClick(entity)}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>
