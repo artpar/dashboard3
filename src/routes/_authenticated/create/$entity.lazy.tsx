@@ -74,7 +74,7 @@ function RouteComponent() {
   if (specializedConfig) {
     const SpecializedForm = specializedConfig.component
     return (
-      <Main className="flex h-screen w-full flex-col overflow-hidden">
+      <Main className="flex h-full w-full flex-col overflow-hidden">
         <div className="p-6 pb-4">
           <Link
             to={specializedConfig.backLink}
@@ -108,7 +108,7 @@ function RouteComponent() {
   // Default generic form for other entities
   return (
     <SingleEntityDataProvider entity={{}} entityId='new' entityName={entity}>
-      <Main className='flex h-screen w-full flex-col overflow-hidden'>
+      <Main className='flex h-full w-full flex-col overflow-hidden'>
         {/* Header component with entity info and navigation */}
         <EntityCreateHeader entityName={entity} />
 

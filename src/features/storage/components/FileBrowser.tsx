@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { daptinClient } from '@/daptin'
 import {
   Folder,
@@ -16,7 +16,21 @@ import {
   Download,
   MoreHorizontal,
   RefreshCcw,
+  Upload,
+  FolderPlus,
+  Loader2,
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { useToast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -114,13 +128,18 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   rootPath = '/',
   onFileSelect,
 }) => {
+  const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [currentPath, setCurrentPath] = useState(rootPath)
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
   const [files, setFiles] = useState<FileInfo[]>([])
   const [isLoadingFiles, setIsLoadingFiles] = useState(false)
   const [isActionsLoading, setIsActionsLoading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
 
   // Fetch files on mount and path change
   useEffect(() => {
@@ -203,13 +222,15 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         'delete_file',
         { site_id: siteId, path }
       )
+      toast({ title: 'File deleted', description: `Deleted ${path.split('/').pop()}` })
       refreshFiles()
     } catch (err: any) {
       console.error('Error deleting file:', err)
+      toast({ title: 'Delete failed', description: err?.message || 'Could not delete file', variant: 'destructive' })
     } finally {
       setIsActionsLoading(false)
     }
-  }, [siteId, refreshFiles])
+  }, [siteId, refreshFiles, toast])
 
   // Sync storage
   const syncStorage = useCallback(async () => {
@@ -221,12 +242,83 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         { site_id: siteId }
       )
       refreshFiles()
+      toast({ title: 'Sync complete', description: 'Storage synchronized successfully' })
     } catch (err: any) {
       console.error('Error syncing storage:', err)
+      toast({ title: 'Sync failed', description: err?.message || 'Failed to sync storage', variant: 'destructive' })
     } finally {
       setIsActionsLoading(false)
     }
-  }, [siteId, refreshFiles])
+  }, [siteId, refreshFiles, toast])
+
+  // Upload file(s)
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadFiles = event.target.files
+    if (!uploadFiles || uploadFiles.length === 0) return
+
+    setIsUploading(true)
+    try {
+      for (const file of Array.from(uploadFiles)) {
+        // Convert file to base64 for upload
+        const reader = new FileReader()
+        const fileData = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+
+        // Upload file via action
+        await daptinClient.actionManager.doAction(
+          'site',
+          'upload_file',
+          {
+            site_id: siteId,
+            path: currentPath === '/' ? `/${file.name}` : `${currentPath}/${file.name}`,
+            file: fileData,
+            filename: file.name,
+          }
+        )
+      }
+      toast({ title: 'Upload complete', description: `${uploadFiles.length} file(s) uploaded` })
+      refreshFiles()
+    } catch (err: any) {
+      console.error('Error uploading file:', err)
+      toast({ title: 'Upload failed', description: err?.message || 'Failed to upload file', variant: 'destructive' })
+    } finally {
+      setIsUploading(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }, [siteId, currentPath, refreshFiles, toast])
+
+  // Create folder
+  const handleCreateFolder = useCallback(async () => {
+    if (!newFolderName.trim()) return
+
+    setIsActionsLoading(true)
+    try {
+      const folderPath = currentPath === '/'
+        ? `/${newFolderName.trim()}`
+        : `${currentPath}/${newFolderName.trim()}`
+
+      await daptinClient.actionManager.doAction(
+        'site',
+        'create_folder',
+        { site_id: siteId, path: folderPath }
+      )
+      toast({ title: 'Folder created', description: `Created folder "${newFolderName}"` })
+      setShowNewFolderDialog(false)
+      setNewFolderName('')
+      refreshFiles()
+    } catch (err: any) {
+      console.error('Error creating folder:', err)
+      toast({ title: 'Failed to create folder', description: err?.message || 'Could not create folder', variant: 'destructive' })
+    } finally {
+      setIsActionsLoading(false)
+    }
+  }, [siteId, currentPath, newFolderName, refreshFiles, toast])
 
   // Navigate to a directory
   const navigateToPath = useCallback((path: string) => {
@@ -269,6 +361,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
 
   // Delete selected files
   const handleDeleteSelected = async () => {
+    const count = selectedFiles.size
     setIsActionsLoading(true)
     try {
       for (const path of selectedFiles) {
@@ -278,10 +371,12 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           { site_id: siteId, path }
         )
       }
+      toast({ title: 'Files deleted', description: `Deleted ${count} item(s)` })
       setSelectedFiles(new Set())
       refreshFiles()
     } catch (err: any) {
       console.error('Error deleting files:', err)
+      toast({ title: 'Delete failed', description: err?.message || 'Could not delete some files', variant: 'destructive' })
     } finally {
       setIsActionsLoading(false)
     }
@@ -342,6 +437,36 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Hidden file input for uploads */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            multiple
+            onChange={handleFileUpload}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4 mr-1" />
+            )}
+            Upload
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowNewFolderDialog(true)}
+            disabled={isActionsLoading}
+          >
+            <FolderPlus className="h-4 w-4 mr-1" />
+            New Folder
+          </Button>
           <Button variant="outline" size="sm" onClick={refreshFiles} disabled={isLoadingFiles}>
             <RefreshCw className={`h-4 w-4 ${isLoadingFiles ? 'animate-spin' : ''}`} />
           </Button>
@@ -362,6 +487,45 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           )}
         </div>
       </div>
+
+      {/* New Folder Dialog */}
+      <Dialog open={showNewFolderDialog} onOpenChange={setShowNewFolderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogDescription>
+              Enter a name for the new folder in {currentPath === '/' ? 'root' : currentPath}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="folderName">Folder Name</Label>
+            <Input
+              id="folderName"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="New folder"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCreateFolder()
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewFolderDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateFolder} disabled={!newFolderName.trim() || isActionsLoading}>
+              {isActionsLoading ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <FolderPlus className="h-4 w-4 mr-1" />
+              )}
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* File list */}
       <div className="flex-1 overflow-auto">

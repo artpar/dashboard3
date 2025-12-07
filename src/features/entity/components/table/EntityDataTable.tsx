@@ -92,6 +92,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
       'integration': '/data/integrations',
       'smd': '/admin/state-machines',
       'mail_server': '/communication/email',
+      'action': '/admin/actions',
     }
 
     const customRoute = CUSTOM_DETAIL_ROUTES[entityName]
@@ -115,7 +116,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
 
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
-      <div className='relative flex overflow-y-auto'>
+      <div className='relative flex-1 overflow-auto'>
         <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>

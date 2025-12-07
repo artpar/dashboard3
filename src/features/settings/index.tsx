@@ -20,7 +20,7 @@ export default function Settings() {
           {/*<aside className='top-0 lg:sticky lg:w-1/5'>*/}
           {/*  <SidebarNav items={sidebarNavItems} />*/}
           {/*</aside>*/}
-          <div className='flex w-full overflow-y-hidden p-1 pr-4'>
+          <div className='flex w-full overflow-auto p-1 pr-4'>
             <Outlet />
           </div>
         </div>

@@ -7,6 +7,11 @@ import { SingleEntityDataProvider } from '@/features/entity/providers/SingleEnti
 // When navigating to /{entity}/{id}, redirect to the specialized route if one exists
 const SPECIALIZED_ENTITY_ROUTES: Record<string, string> = {
   cloud_store: '/storage/cloud-stores',
+  site: '/storage/sites',
+  integration: '/data/integrations',
+  smd: '/admin/state-machines',
+  action: '/admin/actions',
+  mail_server: '/communication/email',
 }
 
 export const Route = createLazyFileRoute(

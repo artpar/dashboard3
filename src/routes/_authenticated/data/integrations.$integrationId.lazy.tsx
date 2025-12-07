@@ -15,7 +15,19 @@ import {
   Settings,
   Copy,
   ExternalLink,
+  Send,
 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -57,11 +69,31 @@ interface ParsedEndpoint {
   operationId?: string
 }
 
+interface ExecuteEndpointState {
+  endpoint: ParsedEndpoint | null
+  pathParams: Record<string, string>
+  queryParams: string
+  requestBody: string
+  response: any | null
+  isLoading: boolean
+  error: string | null
+}
+
 function IntegrationDetailPage() {
   const { integrationId } = Route.useParams()
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState('overview')
   const [showRawSpec, setShowRawSpec] = useState(false)
+  const [showExecuteDialog, setShowExecuteDialog] = useState(false)
+  const [executeState, setExecuteState] = useState<ExecuteEndpointState>({
+    endpoint: null,
+    pathParams: {},
+    queryParams: '',
+    requestBody: '',
+    response: null,
+    isLoading: false,
+    error: null,
+  })
 
   // Fetch integration data
   const { data: integration, isLoading, error } = useQuery({
@@ -125,6 +157,79 @@ function IntegrationDetailPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast({ title: 'Copied to clipboard' })
+  }
+
+  // Extract path parameters from endpoint path (e.g., /pets/{petId} -> ['petId'])
+  const getPathParams = (path: string): string[] => {
+    const matches = path.match(/\{([^}]+)\}/g)
+    return matches ? matches.map(m => m.slice(1, -1)) : []
+  }
+
+  // Open execute dialog for an endpoint
+  const openExecuteDialog = (endpoint: ParsedEndpoint) => {
+    const pathParams: Record<string, string> = {}
+    getPathParams(endpoint.path).forEach(param => {
+      pathParams[param] = ''
+    })
+    setExecuteState({
+      endpoint,
+      pathParams,
+      queryParams: '',
+      requestBody: endpoint.method !== 'GET' && endpoint.method !== 'DELETE' ? '{}' : '',
+      response: null,
+      isLoading: false,
+      error: null,
+    })
+    setShowExecuteDialog(true)
+  }
+
+  // Execute API call via integration action
+  const executeApiCall = async () => {
+    if (!executeState.endpoint || !integration) return
+
+    setExecuteState(prev => ({ ...prev, isLoading: true, error: null, response: null }))
+
+    try {
+      // Build the path with substituted parameters
+      let path = executeState.endpoint.path
+      Object.entries(executeState.pathParams).forEach(([key, value]) => {
+        path = path.replace(`{${key}}`, encodeURIComponent(value))
+      })
+
+      // Add query params if provided
+      if (executeState.queryParams.trim()) {
+        path += (path.includes('?') ? '&' : '?') + executeState.queryParams.trim()
+      }
+
+      // Execute via integration action
+      const response = await daptinClient.actionManager.doAction(
+        'integration',
+        'execute',
+        {
+          integration_id: integration.reference_id,
+          method: executeState.endpoint.method,
+          path: path,
+          body: executeState.requestBody && executeState.endpoint.method !== 'GET' && executeState.endpoint.method !== 'DELETE'
+            ? executeState.requestBody
+            : undefined,
+        }
+      )
+
+      setExecuteState(prev => ({
+        ...prev,
+        isLoading: false,
+        response: response,
+      }))
+      toast({ title: 'API call executed', description: `${executeState.endpoint.method} ${path}` })
+    } catch (err: any) {
+      console.error('API call failed:', err)
+      setExecuteState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: err?.message || 'API call failed',
+      }))
+      toast({ title: 'API call failed', description: err?.message || 'Error executing request', variant: 'destructive' })
+    }
   }
 
   const specLanguage = getSpecificationLanguageById(integration?.specification_language || '')
@@ -409,10 +514,18 @@ function IntegrationDetailPage() {
                         </Badge>
                         <code className="text-sm font-medium flex-1">{endpoint.path}</code>
                         {endpoint.summary && (
-                          <span className="text-sm text-muted-foreground truncate max-w-[300px]">
+                          <span className="text-sm text-muted-foreground truncate max-w-[200px]">
                             {endpoint.summary}
                           </span>
                         )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openExecuteDialog(endpoint)}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Test
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -464,6 +577,148 @@ function IntegrationDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Execute Endpoint Dialog */}
+      <Dialog open={showExecuteDialog} onOpenChange={setShowExecuteDialog}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              Test API Endpoint
+            </DialogTitle>
+            <DialogDescription>
+              {executeState.endpoint && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge
+                    variant="outline"
+                    className={
+                      executeState.endpoint.method === 'GET'
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : executeState.endpoint.method === 'POST'
+                        ? 'bg-blue-100 text-blue-800 border-blue-200'
+                        : executeState.endpoint.method === 'PUT' || executeState.endpoint.method === 'PATCH'
+                        ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                        : executeState.endpoint.method === 'DELETE'
+                        ? 'bg-red-100 text-red-800 border-red-200'
+                        : ''
+                    }
+                  >
+                    {executeState.endpoint.method}
+                  </Badge>
+                  <code className="text-sm">{executeState.endpoint.path}</code>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-auto space-y-4 py-4">
+            {/* Path Parameters */}
+            {executeState.endpoint && getPathParams(executeState.endpoint.path).length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Path Parameters</Label>
+                {getPathParams(executeState.endpoint.path).map((param) => (
+                  <div key={param} className="flex items-center gap-2">
+                    <Label className="w-32 text-sm text-muted-foreground">{`{${param}}`}</Label>
+                    <Input
+                      placeholder={`Enter ${param}`}
+                      value={executeState.pathParams[param] || ''}
+                      onChange={(e) =>
+                        setExecuteState((prev) => ({
+                          ...prev,
+                          pathParams: { ...prev.pathParams, [param]: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Query Parameters */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Query Parameters</Label>
+              <Input
+                placeholder="key1=value1&key2=value2"
+                value={executeState.queryParams}
+                onChange={(e) =>
+                  setExecuteState((prev) => ({ ...prev, queryParams: e.target.value }))
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional query string without leading ?
+              </p>
+            </div>
+
+            {/* Request Body */}
+            {executeState.endpoint &&
+              executeState.endpoint.method !== 'GET' &&
+              executeState.endpoint.method !== 'DELETE' && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Request Body (JSON)</Label>
+                  <Textarea
+                    placeholder='{"key": "value"}'
+                    className="font-mono text-sm min-h-[120px]"
+                    value={executeState.requestBody}
+                    onChange={(e) =>
+                      setExecuteState((prev) => ({ ...prev, requestBody: e.target.value }))
+                    }
+                  />
+                </div>
+              )}
+
+            {/* Error Display */}
+            {executeState.error && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{executeState.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Response Display */}
+            {executeState.response && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Response</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(JSON.stringify(executeState.response, null, 2))}
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <pre className="bg-muted p-3 rounded-lg text-xs overflow-auto max-h-[200px] font-mono">
+                  {JSON.stringify(executeState.response, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExecuteDialog(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={executeApiCall}
+              disabled={executeState.isLoading}
+            >
+              {executeState.isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Execute
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

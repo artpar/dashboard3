@@ -215,7 +215,7 @@ export const SingleEntityManagementComponent: React.FC<
 
   return (
     <>
-      <Main className='flex h-screen w-full flex-col overflow-hidden'>
+      <Main className='flex h-full w-full flex-col overflow-hidden'>
         <div className='flex-shrink-0'>
           <div className='flex items-start justify-between space-y-4'>
             <div className='flex items-center space-x-2'>
@@ -322,7 +322,7 @@ export const SingleEntityManagementComponent: React.FC<
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
-          className='flex h-full w-full flex-col overflow-hidden'
+          className='flex h-full w-full flex-col'
         >
           <TabsList className='flex w-full justify-start'>
             <TabsTrigger value='details'>Details</TabsTrigger>

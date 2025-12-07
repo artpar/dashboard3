@@ -125,7 +125,7 @@ const AppSidebar = () => {
   return (
     <div
       className={cn(
-        'bg-background flex h-screen flex-col overflow-hidden border-r transition-all duration-300 ease-in-out',
+        'shrink-0 bg-background flex h-screen flex-col overflow-hidden border-r transition-all duration-300 ease-in-out',
         isExpanded ? 'w-64' : 'w-14'
       )}
     >
