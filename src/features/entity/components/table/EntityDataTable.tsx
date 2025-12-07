@@ -96,7 +96,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
         <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>
-              <TableHead className='bg-background'>
+              <TableHead className='bg-background sticky left-0 top-0 z-20 w-10'>
                 <Checkbox
                   checked={
                     selectedItems.length === data.length && data.length > 0
@@ -105,7 +105,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
                   aria-label='Select all rows'
                 />
               </TableHead>
-              <TableHead className='bg-background sticky top-0 min-w-12'></TableHead>
+              <TableHead className='bg-background sticky left-10 top-0 z-20 min-w-12'></TableHead>
               {filteredColumns.map((column) => {
                 const isSorted = column.ColumnName in sortColumns
                 const sortDirection = sortColumns[column.ColumnName]

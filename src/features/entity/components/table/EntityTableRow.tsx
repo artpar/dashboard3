@@ -74,7 +74,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
     >
       <td
         onClick={handleToggleSelect}
-        className='w-4 cursor-pointer p-2 align-middle hover:bg-gray-200'
+        className='sticky left-0 z-10 w-10 cursor-pointer bg-background p-2 align-middle hover:bg-gray-200'
       >
         <Checkbox
           checked={isSelected}
@@ -83,7 +83,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
       </td>
       <td
         title={item.reference_id}
-        className='w-12 pl-3 align-middle'
+        className='sticky left-10 z-10 w-12 bg-background pl-3 align-middle'
       >
         <Link
           to={detailUrl}
