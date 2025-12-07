@@ -8,10 +8,10 @@ interface EntityTableBodyProps {
   filteredColumns: ColumnDefinition[]
   auditColumns: ColumnDefinition[]
   relations: any[]
+  entityName: string
   className: string
   onEdit: (item: any) => void
   onDelete: (item: any) => void
-  onViewDetails: (item: any) => void
   isItemSelected: (item: any) => boolean
   toggleItemSelection: (item: any) => void
 }
@@ -24,10 +24,10 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
   filteredColumns,
   auditColumns,
   relations,
+  entityName,
   className,
   onEdit,
   onDelete,
-  onViewDetails,
   isItemSelected,
   toggleItemSelection,
 }) {
@@ -64,15 +64,15 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
           columns={filteredColumns}
           auditColumns={auditColumns}
           relations={relations}
+          entityName={entityName}
           onEdit={onEdit}
           onDelete={onDelete}
-          onViewDetails={onViewDetails}
           isSelected={isSelected}
           onToggleSelect={handleToggle}
         />
       );
     });
-  }, [data, filteredColumns, auditColumns, relations, onEdit, onDelete, onViewDetails, isItemSelected, toggleItemSelection]);
+  }, [data, filteredColumns, auditColumns, relations, entityName, onEdit, onDelete, isItemSelected, toggleItemSelection]);
 
   // Render the memoized rows
   return (

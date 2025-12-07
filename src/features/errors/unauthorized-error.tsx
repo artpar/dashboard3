@@ -1,8 +1,7 @@
-import { useNavigate, useRouter } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 
 export default function UnauthorisedError() {
-  const navigate = useNavigate()
   const { history } = useRouter()
   return (
     <div className='h-svh'>
@@ -17,7 +16,9 @@ export default function UnauthorisedError() {
           <Button variant='outline' onClick={() => history.go(-1)}>
             Go Back
           </Button>
-          <Button onClick={() => navigate({ to: '/' })}>Back to Home</Button>
+          <Button asChild>
+            <Link to="/">Back to Home</Link>
+          </Button>
         </div>
       </div>
     </div>

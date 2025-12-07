@@ -1,6 +1,6 @@
 // src/features/entity/relations/RelationActionsMenu.tsx
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
   AlertTriangleIcon,
   CopyIcon,
@@ -55,18 +55,9 @@ export function RelationActionsMenu({
   direction,
   onRelationDeleted,
 }: RelationActionsMenuProps) {
-  const navigate = useNavigate()
   const { toast } = useToast()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleViewEntity = () => {
-    navigate({ to: `/${relatedEntityName}/${record.reference_id}` })
-  }
-
-  const handleEditEntity = () => {
-    navigate({ to: `/${relatedEntityName}/${record.reference_id}/edit` })
-  }
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(record.reference_id)
@@ -137,13 +128,17 @@ export function RelationActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-[180px]'>
-          <DropdownMenuItem onClick={handleViewEntity}>
-            <ExternalLinkIcon className='mr-2 h-4 w-4' />
-            View Details
+          <DropdownMenuItem asChild>
+            <Link to={`/${relatedEntityName}/${record.reference_id}`}>
+              <ExternalLinkIcon className='mr-2 h-4 w-4' />
+              View Details
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleEditEntity}>
-            <PencilIcon className='mr-2 h-4 w-4' />
-            Edit Record
+          <DropdownMenuItem asChild>
+            <Link to={`/${relatedEntityName}/${record.reference_id}/edit`}>
+              <PencilIcon className='mr-2 h-4 w-4' />
+              Edit Record
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleCopyId}>
             <CopyIcon className='mr-2 h-4 w-4' />

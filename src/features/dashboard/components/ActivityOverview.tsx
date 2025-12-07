@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -21,7 +21,6 @@ export const ActivityOverview: React.FC<ActivityOverviewProps> = ({
   items,
   icon,
 }) => {
-  const navigate = useNavigate()
 
   // Function to get the most appropriate display name for an item
   const getItemDisplayName = (item: any): string => {
@@ -81,14 +80,10 @@ export const ActivityOverview: React.FC<ActivityOverviewProps> = ({
                   <span className="font-medium truncate max-w-[180px]">
                     {getItemDisplayName(item)}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate({
-                      to: `/${entityName}/${item.reference_id}`
-                    })}
-                  >
-                    View
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to={`/${entityName}/${item.reference_id}`}>
+                      View
+                    </Link>
                   </Button>
                 </div>
                 {getItemDate(item) && (
@@ -102,12 +97,8 @@ export const ActivityOverview: React.FC<ActivityOverviewProps> = ({
         )}
       </CardContent>
       <CardFooter>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => navigate({ to: `/${entityName}` })}
-        >
-          View All
+        <Button variant="outline" className="w-full" asChild>
+          <Link to={`/${entityName}`}>View All</Link>
         </Button>
       </CardFooter>
     </Card>

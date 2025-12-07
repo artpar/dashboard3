@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { ArrowDown, ArrowUp, Copy, Clipboard } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import EntityPasteDialog from '@/features/entity/components/dialogs/EntityPasteDialog';
@@ -35,7 +34,6 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
     copySelectedItems,
     setClipboardData,
   } = useEntityCollectionData()
-  const navigate = useNavigate()
   // Get column visibility state from context
   const { visibleColumns } = useEntityCollectionData()
 
@@ -79,28 +77,6 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
   const handleEdit = (item: any) => {
     setSelectedItem(item)
     setShowEditDialog(true)
-  }
-
-  const handleViewDetails = (item: any) => {
-    setSelectedItem(item)
-    const itemId = item.reference_id || item.id
-
-    // Use custom routes for entities with specialized detail pages
-    const CUSTOM_DETAIL_ROUTES: Record<string, string> = {
-      'site': '/storage/sites',
-      'cloud_store': '/storage/cloud-stores',
-      'integration': '/data/integrations',
-      'smd': '/admin/state-machines',
-      'mail_server': '/communication/email',
-      'action': '/admin/actions',
-    }
-
-    const customRoute = CUSTOM_DETAIL_ROUTES[entityName]
-    if (customRoute) {
-      navigate({ to: `${customRoute}/${itemId}` })
-    } else {
-      navigate({ to: `/${entityName}/${itemId}` })
-    }
   }
 
   // If columns are not yet loaded or we're loading data, show a loading state
@@ -188,9 +164,9 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
             filteredColumns={filteredColumns}
             auditColumns={auditColumnsToShow}
             relations={relations}
+            entityName={entityName}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onViewDetails={handleViewDetails}
             isItemSelected={isItemSelected}
             toggleItemSelection={toggleItemSelection}
           />

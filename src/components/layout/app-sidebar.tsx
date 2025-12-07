@@ -33,12 +33,8 @@ const AppSidebar = () => {
   const sidebarData = useSidebarData()
   const navigate = useNavigate()
 
-  // Fetch sidebar data
-
-  const handleNavigate = (e, href) => {
-    e.preventDefault()
-    navigate({ to: href })
-    // Close mobile sidebar after navigation
+  // Close mobile sidebar on navigation
+  const handleMobileNavClick = () => {
     if (isMobile) {
       setOpenMobile(false)
     }
@@ -107,7 +103,7 @@ const AppSidebar = () => {
                 </div>
                 <Link
                   to='/settings/account'
-                  onClick={(e) => handleNavigate(e, '/settings/account')}
+                  onClick={handleMobileNavClick}
                 >
                   <Button variant='ghost' size='icon'>
                     <Settings size={16} />

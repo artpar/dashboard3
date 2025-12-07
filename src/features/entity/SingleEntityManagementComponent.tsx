@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin.ts'
 import {
   ArrowLeft,
@@ -170,11 +170,6 @@ export const SingleEntityManagementComponent: React.FC<
     setSelectedItem(entityItem)
   }
 
-  // Handle back navigation
-  const handleBack = () => {
-    navigate({ to: `/${entityName}` })
-  }
-
   // Find a display name for the entity
   const getEntityDisplayName = () => {
     if (!entityItem) return 'Loading...'
@@ -219,24 +214,21 @@ export const SingleEntityManagementComponent: React.FC<
         <div className='flex-shrink-0'>
           <div className='flex items-start justify-between space-y-4'>
             <div className='flex items-center space-x-2'>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={handleBack}
-                className='h-8 w-8'
-              >
-                <ArrowLeft className='h-4 w-4' />
-                <span className='sr-only'>Back</span>
+              <Button variant='ghost' size='icon' className='h-8 w-8' asChild>
+                <Link to={`/${entityName}`}>
+                  <ArrowLeft className='h-4 w-4' />
+                  <span className='sr-only'>Back</span>
+                </Link>
               </Button>
 
               <div className='flex items-center'>
                 <div className='breadcrumbs text-muted-foreground text-sm'>
-                  <span
-                    className='cursor-pointer hover:underline'
-                    onClick={handleBack}
+                  <Link
+                    to={`/${entityName}`}
+                    className='hover:underline'
                   >
                     {entityName}
-                  </span>
+                  </Link>
                   <ChevronRight className='mx-1 inline h-4 w-4' />
                   <span className='text-foreground font-medium'>Details</span>
                 </div>

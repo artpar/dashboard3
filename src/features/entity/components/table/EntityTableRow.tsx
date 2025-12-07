@@ -7,15 +7,35 @@ import EntityAuditCell from './EntityAuditCell'
 import EntityTableCell from './EntityTableCell'
 import { Link } from '@tanstack/react-router'
 
+// Custom routes for entities with specialized detail pages
+const CUSTOM_DETAIL_ROUTES: Record<string, string> = {
+  'site': '/storage/sites',
+  'cloud_store': '/storage/cloud-stores',
+  'integration': '/data/integrations',
+  'smd': '/admin/state-machines',
+  'mail_server': '/communication/email',
+  'action': '/admin/actions',
+}
+
+// Generate detail URL for an entity item
+function getDetailUrl(entityName: string, item: any): string {
+  const itemId = item.reference_id || item.id
+  const customRoute = CUSTOM_DETAIL_ROUTES[entityName]
+  if (customRoute) {
+    return `${customRoute}/${itemId}`
+  }
+  return `/${entityName}/${itemId}`
+}
+
 interface EntityTableRowProps {
   item: any
   index: number
   columns: ColumnDefinition[]
   auditColumns: ColumnDefinition[]
   relations: any[]
+  entityName: string
   onEdit: (item: any) => void
   onDelete: (item: any) => void
-  onViewDetails: (item: any) => void
   isSelected: boolean
   onToggleSelect: () => void
 }
@@ -29,9 +49,9 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
   columns,
   auditColumns,
   relations,
+  entityName,
   onEdit,
   onDelete,
-  onViewDetails,
   isSelected,
   onToggleSelect,
 }) {
@@ -41,18 +61,16 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
     onToggleSelect();
   }, [onToggleSelect]);
 
-  const handleViewDetails = useCallback(() => {
-    onViewDetails(item);
-  }, [onViewDetails, item]);
-
   // Get a stable key for the row
   const rowKey = item.id || item.reference_id || index;
+
+  // Generate the detail URL
+  const detailUrl = getDetailUrl(entityName, item);
 
   return (
     <TableRow
       key={rowKey}
-      className={`cursor-pointer hover:bg-muted/60 ${isSelected ? 'bg-muted/40' : ''}`}
-      onClick={handleViewDetails}
+      className={`hover:bg-muted/60 ${isSelected ? 'bg-muted/40' : ''}`}
     >
       <td
         onClick={handleToggleSelect}
@@ -64,11 +82,16 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
         />
       </td>
       <td
-        onClick={handleViewDetails}
         title={item.reference_id}
-        className='w-12 pl-3 align-middle hover:cursor-pointer hover:bg-gray-200'
+        className='w-12 pl-3 align-middle'
       >
-        <EyeIcon className='h-5 w-5' />
+        <Link
+          to={detailUrl}
+          className='flex items-center justify-center hover:text-primary'
+          onClick={(e) => e.stopPropagation()}
+        >
+          <EyeIcon className='h-5 w-5' />
+        </Link>
       </td>
       {columns.map((column) => (
         <EntityTableCell key={column.ColumnName} item={item} column={column} />
@@ -85,7 +108,8 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
     prevProps.item === nextProps.item &&
     prevProps.index === nextProps.index &&
     prevProps.columns === nextProps.columns &&
-    prevProps.auditColumns === nextProps.auditColumns
+    prevProps.auditColumns === nextProps.auditColumns &&
+    prevProps.entityName === nextProps.entityName
   );
 })
 

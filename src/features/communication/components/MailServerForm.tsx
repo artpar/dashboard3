@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -444,12 +444,8 @@ export function MailServerForm() {
 
         <div className="flex-1" />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate({ to: '/communication/email' })}
-        >
-          Cancel
+        <Button type="button" variant="outline" asChild>
+          <Link to="/communication/email">Cancel</Link>
         </Button>
 
         <Button type="submit" disabled={isSubmitting}>

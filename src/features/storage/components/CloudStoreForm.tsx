@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -206,14 +206,7 @@ export const CloudStoreForm: React.FC<CloudStoreFormProps> = ({
     }
   }
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel()
-    } else {
-      navigate({ to: '/storage/cloud-stores' })
-    }
-  }
-
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -477,9 +470,15 @@ export const CloudStoreForm: React.FC<CloudStoreFormProps> = ({
 
         {/* Form Actions */}
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
+          {onCancel ? (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" asChild>
+              <Link to="/storage/cloud-stores">Cancel</Link>
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

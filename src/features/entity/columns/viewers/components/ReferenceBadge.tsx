@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -23,25 +23,14 @@ export const UuidReferenceBadge: React.FC<ReferenceBadgeProps> = ({
   className,
   withTooltip = true
 }) => {
-  const navigate = useNavigate()
-
-  const handleClick = () => {
-    if (namespace) {
-      navigate({
-        to: `/${namespace}/${value}`,
-        params: { entityId: value },
-      })
-    }
-  }
-
-  const badgeContent = (
+  const badgeElement = (
     <Badge
       variant='outline'
       className={cn(
-        'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+        'flex items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+        namespace && 'cursor-pointer',
         className
       )}
-      onClick={handleClick}
     >
       {withTooltip ? (
         <pre className='mr-1 max-w-[300px]'>{`${namespace}\n${value}`}</pre>
@@ -51,6 +40,12 @@ export const UuidReferenceBadge: React.FC<ReferenceBadgeProps> = ({
       <ExternalLink className={cn('h-3 w-3', withTooltip ? '' : 'ml-1')} />
     </Badge>
   )
+
+  const badgeContent = namespace ? (
+    <Link to={`/${namespace}/${value}`}>
+      {badgeElement}
+    </Link>
+  ) : badgeElement
 
   if (!withTooltip) {
     return badgeContent
@@ -86,25 +81,14 @@ export const ObjectReferenceBadge: React.FC<ObjectReferenceBadgeProps> = ({
   className,
   withTooltip = true
 }) => {
-  const navigate = useNavigate()
-
-  const handleClick = () => {
-    if (namespace) {
-      navigate({
-        to: `/${namespace}/${value.reference_id}`,
-        params: { entityId: value.reference_id },
-      })
-    }
-  }
-
-  const badgeContent = (
+  const badgeElement = (
     <Badge
       variant='outline'
       className={cn(
-        'flex cursor-pointer items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+        'flex items-center bg-blue-50 text-blue-800 hover:bg-blue-100',
+        namespace && 'cursor-pointer',
         className
       )}
-      onClick={handleClick}
     >
       {withTooltip ? (
         <pre className='mr-1 max-w-[300px]'>{`${namespace}\n${value.reference_id}`}</pre>
@@ -114,6 +98,12 @@ export const ObjectReferenceBadge: React.FC<ObjectReferenceBadgeProps> = ({
       <ExternalLink className={cn('h-3 w-3', withTooltip ? '' : 'ml-1')} />
     </Badge>
   )
+
+  const badgeContent = namespace ? (
+    <Link to={`/${namespace}/${value.reference_id}`}>
+      {badgeElement}
+    </Link>
+  ) : badgeElement
 
   if (!withTooltip) {
     return badgeContent

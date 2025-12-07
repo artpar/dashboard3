@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -382,12 +382,8 @@ export function IntegrationForm({ onSuccess }: IntegrationFormProps) {
 
       {/* Actions */}
       <div className="flex justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate({ to: '/data/integrations' })}
-        >
-          Cancel
+        <Button type="button" variant="outline" asChild>
+          <Link to="/data/integrations">Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? (

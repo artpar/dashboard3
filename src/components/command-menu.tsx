@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
   IconArrowRightDashed,
   IconDeviceLaptop,
@@ -21,7 +21,6 @@ import { useSidebarData } from './layout/data/sidebar-data.tsx'
 import { ScrollArea } from './ui/scroll-area'
 
 export function CommandMenu() {
-  const navigate = useNavigate()
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
   const sidebarData = useSidebarData();
@@ -33,6 +32,10 @@ export function CommandMenu() {
     },
     [setOpen]
   )
+
+  const closeMenu = React.useCallback(() => {
+    setOpen(false)
+  }, [setOpen])
 
   return (
     <CommandDialog modal open={open} onOpenChange={setOpen}>
@@ -48,14 +51,14 @@ export function CommandMenu() {
                     <CommandItem
                       key={`${navItem.url}-${i}`}
                       value={navItem.title}
-                      onSelect={() => {
-                        runCommand(() => navigate({ to: navItem.url }))
-                      }}
+                      asChild
                     >
-                      <div className='mr-2 flex h-4 w-4 items-center justify-center'>
-                        <IconArrowRightDashed className='text-muted-foreground/80 size-2' />
-                      </div>
-                      {navItem.title}
+                      <Link to={navItem.url} onClick={closeMenu}>
+                        <div className='mr-2 flex h-4 w-4 items-center justify-center'>
+                          <IconArrowRightDashed className='text-muted-foreground/80 size-2' />
+                        </div>
+                        {navItem.title}
+                      </Link>
                     </CommandItem>
                   )
 
@@ -63,14 +66,14 @@ export function CommandMenu() {
                   <CommandItem
                     key={`${subItem.url}-${i}`}
                     value={subItem.title}
-                    onSelect={() => {
-                      runCommand(() => navigate({ to: subItem.url }))
-                    }}
+                    asChild
                   >
-                    <div className='mr-2 flex h-4 w-4 items-center justify-center'>
-                      <IconArrowRightDashed className='text-muted-foreground/80 size-2' />
-                    </div>
-                    {subItem.title}
+                    <Link to={subItem.url} onClick={closeMenu}>
+                      <div className='mr-2 flex h-4 w-4 items-center justify-center'>
+                        <IconArrowRightDashed className='text-muted-foreground/80 size-2' />
+                      </div>
+                      {subItem.title}
+                    </Link>
                   </CommandItem>
                 ))
               })}
