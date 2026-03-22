@@ -214,7 +214,7 @@ function ConfigPage() {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="flex-1 overflow-auto p-6">
         <div className="text-center text-destructive">
           <p>Failed to load configuration: {(error as Error).message}</p>
           <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['system-config'] })} className="mt-4">
@@ -226,7 +226,7 @@ function ConfigPage() {
   }
 
   return (
-    <div className="p-6 w-full">
+    <div className="flex-1 overflow-auto w-full p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Settings className="h-6 w-6" />
