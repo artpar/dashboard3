@@ -91,8 +91,8 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
   }
 
   return (
-    <div className='flex h-full w-full flex-col overflow-hidden'>
-      <div className='relative flex-1 overflow-auto'>
+    <>
+      <div className='h-full w-full overflow-auto'>
         <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>
@@ -206,7 +206,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
         open={showPasteDialog}
         onClose={() => setShowPasteDialog(false)}
       />
-    </div>
+    </>
   )
 }
 

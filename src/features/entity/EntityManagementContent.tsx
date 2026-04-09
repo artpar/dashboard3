@@ -84,7 +84,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Main className='flex h-full w-full flex-col overflow-hidden'>
+      <Main className='flex flex-col'>
         <div className='flex-shrink-0'>
           <EntityHeader
             title={
@@ -97,17 +97,19 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
           />
         </div>
         {/* Main content with data table */}
-        {isLoading ? (
-          <div className='space-y-4 p-6'>
-            <Skeleton className='h-10 w-full' />
-            <Skeleton className='h-64 w-full' />
-          </div>
-        ) : (
-          <EntityDataTable
-            handleBulkDelete={handleBulkDelete}
-            handleDelete={handleDelete}
-          />
-        )}
+        <div className='flex-1 min-h-0'>
+          {isLoading ? (
+            <div className='space-y-4 p-6'>
+              <Skeleton className='h-10 w-full' />
+              <Skeleton className='h-64 w-full' />
+            </div>
+          ) : (
+            <EntityDataTable
+              handleBulkDelete={handleBulkDelete}
+              handleDelete={handleDelete}
+            />
+          )}
+        </div>
 
         {/* Fixed pagination at the bottom */}
         <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-2'>

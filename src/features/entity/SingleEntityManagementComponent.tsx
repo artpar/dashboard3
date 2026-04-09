@@ -314,7 +314,7 @@ export const SingleEntityManagementComponent: React.FC<
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
-          className='flex h-full w-full flex-col'
+          className='flex flex-1 min-h-0 w-full flex-col'
         >
           <TabsList className='flex w-full justify-start'>
             <TabsTrigger value='details'>Details</TabsTrigger>

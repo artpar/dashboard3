@@ -23,13 +23,10 @@ function RouteComponent() {
           <div
             id='content'
             className={cn(
-              'ml-auto w-full max-w-full',
-              'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
-              'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
+              'flex-1 min-w-0',
               'transition-[width] duration-200 ease-linear',
-              'flex h-svh flex-col',
-              'h-full',
-              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh p-2'
+              'flex h-full flex-col',
+              'p-2'
             )}
           >
             <Outlet />
