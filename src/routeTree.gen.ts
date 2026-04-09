@@ -129,6 +129,9 @@ const AuthenticatedStorageSitesSiteIdLazyImport = createFileRoute(
 const AuthenticatedStorageCloudStoresStoreIdLazyImport = createFileRoute(
   '/_authenticated/storage/cloud-stores/$storeId',
 )()
+const AuthenticatedStorageCertificatesCertIdLazyImport = createFileRoute(
+  '/_authenticated/storage/certificates/$certId',
+)()
 const AuthenticatedDataIntegrationsIntegrationIdLazyImport = createFileRoute(
   '/_authenticated/data/integrations/$integrationId',
 )()
@@ -562,6 +565,17 @@ const AuthenticatedStorageCloudStoresStoreIdLazyRoute =
     ),
   )
 
+const AuthenticatedStorageCertificatesCertIdLazyRoute =
+  AuthenticatedStorageCertificatesCertIdLazyImport.update({
+    id: '/$certId',
+    path: '/$certId',
+    getParentRoute: () => AuthenticatedStorageCertificatesLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/storage/certificates.$certId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedDataIntegrationsIntegrationIdLazyRoute =
   AuthenticatedDataIntegrationsIntegrationIdLazyImport.update({
     id: '/$integrationId',
@@ -950,6 +964,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDataIntegrationsIntegrationIdLazyImport
       parentRoute: typeof AuthenticatedDataIntegrationsLazyImport
     }
+    '/_authenticated/storage/certificates/$certId': {
+      id: '/_authenticated/storage/certificates/$certId'
+      path: '/$certId'
+      fullPath: '/storage/certificates/$certId'
+      preLoaderRoute: typeof AuthenticatedStorageCertificatesCertIdLazyImport
+      parentRoute: typeof AuthenticatedStorageCertificatesLazyImport
+    }
     '/_authenticated/storage/cloud-stores/$storeId': {
       id: '/_authenticated/storage/cloud-stores/$storeId'
       path: '/$storeId'
@@ -1062,6 +1083,21 @@ const AuthenticatedDataIntegrationsLazyRouteWithChildren =
     AuthenticatedDataIntegrationsLazyRouteChildren,
   )
 
+interface AuthenticatedStorageCertificatesLazyRouteChildren {
+  AuthenticatedStorageCertificatesCertIdLazyRoute: typeof AuthenticatedStorageCertificatesCertIdLazyRoute
+}
+
+const AuthenticatedStorageCertificatesLazyRouteChildren: AuthenticatedStorageCertificatesLazyRouteChildren =
+  {
+    AuthenticatedStorageCertificatesCertIdLazyRoute:
+      AuthenticatedStorageCertificatesCertIdLazyRoute,
+  }
+
+const AuthenticatedStorageCertificatesLazyRouteWithChildren =
+  AuthenticatedStorageCertificatesLazyRoute._addFileChildren(
+    AuthenticatedStorageCertificatesLazyRouteChildren,
+  )
+
 interface AuthenticatedStorageCloudStoresLazyRouteChildren {
   AuthenticatedStorageCloudStoresStoreIdLazyRoute: typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
 }
@@ -1110,7 +1146,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDataImportLazyRoute: typeof AuthenticatedDataImportLazyRoute
   AuthenticatedDataIntegrationsLazyRoute: typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   AuthenticatedDataStreamsLazyRoute: typeof AuthenticatedDataStreamsLazyRoute
-  AuthenticatedStorageCertificatesLazyRoute: typeof AuthenticatedStorageCertificatesLazyRoute
+  AuthenticatedStorageCertificatesLazyRoute: typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   AuthenticatedStorageCloudStoresLazyRoute: typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   AuthenticatedStorageSitesLazyRoute: typeof AuthenticatedStorageSitesLazyRouteWithChildren
   AuthenticatedToolsAuditLazyRoute: typeof AuthenticatedToolsAuditLazyRoute
@@ -1150,7 +1186,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDataIntegrationsLazyRouteWithChildren,
   AuthenticatedDataStreamsLazyRoute: AuthenticatedDataStreamsLazyRoute,
   AuthenticatedStorageCertificatesLazyRoute:
-    AuthenticatedStorageCertificatesLazyRoute,
+    AuthenticatedStorageCertificatesLazyRouteWithChildren,
   AuthenticatedStorageCloudStoresLazyRoute:
     AuthenticatedStorageCloudStoresLazyRouteWithChildren,
   AuthenticatedStorageSitesLazyRoute:
@@ -1202,7 +1238,7 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
-  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
   '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
@@ -1217,6 +1253,7 @@ export interface FileRoutesByFullPath {
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1252,7 +1289,7 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
-  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
   '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
@@ -1267,6 +1304,7 @@ export interface FileRoutesByTo {
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/$entity/$referenceId': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1306,7 +1344,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
-  '/_authenticated/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRoute
+  '/_authenticated/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/_authenticated/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/_authenticated/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
   '/_authenticated/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
@@ -1321,6 +1359,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/_authenticated/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/_authenticated/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/_authenticated/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/_authenticated/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/_authenticated/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
   '/_authenticated/$entity/$referenceId/': typeof AuthenticatedEntityReferenceIdIndexLazyRoute
@@ -1375,6 +1414,7 @@ export interface FileRouteTypes {
     | '/admin/state-machines/$smdId'
     | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
+    | '/storage/certificates/$certId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
     | '/$entity/$referenceId'
@@ -1424,6 +1464,7 @@ export interface FileRouteTypes {
     | '/admin/state-machines/$smdId'
     | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
+    | '/storage/certificates/$certId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
     | '/$entity/$referenceId'
@@ -1476,6 +1517,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/state-machines/$smdId'
     | '/_authenticated/communication/email/$serverId'
     | '/_authenticated/data/integrations/$integrationId'
+    | '/_authenticated/storage/certificates/$certId'
     | '/_authenticated/storage/cloud-stores/$storeId'
     | '/_authenticated/storage/sites/$siteId'
     | '/_authenticated/$entity/$referenceId/'
@@ -1701,7 +1743,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/storage/certificates": {
       "filePath": "_authenticated/storage/certificates.lazy.tsx",
-      "parent": "/_authenticated"
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/storage/certificates/$certId"
+      ]
     },
     "/_authenticated/storage/cloud-stores": {
       "filePath": "_authenticated/storage/cloud-stores.lazy.tsx",
@@ -1764,6 +1809,10 @@ export const routeTree = rootRoute
     "/_authenticated/data/integrations/$integrationId": {
       "filePath": "_authenticated/data/integrations.$integrationId.lazy.tsx",
       "parent": "/_authenticated/data/integrations"
+    },
+    "/_authenticated/storage/certificates/$certId": {
+      "filePath": "_authenticated/storage/certificates.$certId.lazy.tsx",
+      "parent": "/_authenticated/storage/certificates"
     },
     "/_authenticated/storage/cloud-stores/$storeId": {
       "filePath": "_authenticated/storage/cloud-stores.$storeId.lazy.tsx",

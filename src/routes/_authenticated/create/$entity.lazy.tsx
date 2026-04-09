@@ -14,6 +14,12 @@ const CloudStoreForm = lazy(() =>
   }))
 )
 
+const CertificateForm = lazy(() =>
+  import('@/features/certificates/components/CertificateForm').then((mod) => ({
+    default: mod.CertificateForm,
+  }))
+)
+
 const IntegrationForm = lazy(() =>
   import('@/features/integrations/components/IntegrationForm').then((mod) => ({
     default: mod.IntegrationForm,
@@ -41,6 +47,12 @@ const SPECIALIZED_CREATE_FORMS: Record<
     title: 'New Cloud Store',
     description: 'Connect a new cloud storage provider',
     backLink: '/storage/cloud-stores',
+  },
+  certificate: {
+    component: CertificateForm,
+    title: 'New Certificate',
+    description: 'Create an SSL/TLS certificate for HTTPS and email signing',
+    backLink: '/storage/certificates',
   },
   integration: {
     component: IntegrationForm,

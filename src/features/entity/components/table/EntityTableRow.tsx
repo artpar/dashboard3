@@ -11,6 +11,7 @@ import { Link } from '@tanstack/react-router'
 const CUSTOM_DETAIL_ROUTES: Record<string, string> = {
   'site': '/storage/sites',
   'cloud_store': '/storage/cloud-stores',
+  'certificate': '/storage/certificates',
   'integration': '/data/integrations',
   'smd': '/admin/state-machines',
   'mail_server': '/communication/email',

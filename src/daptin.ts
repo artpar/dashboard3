@@ -1,6 +1,6 @@
 import { DaptinClient } from 'daptin-client'
 
-export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
+export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_ENDPOINT || import.meta.env.VITE_DAPTIN_URL
 let TOKEN = localStorage.getItem('token')
 
 // eslint-disable-next-line
