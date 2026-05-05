@@ -113,7 +113,7 @@ export async function sendMessageToBackgroundScript(request) {
           localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
           localStorage.setItem('token', newUserToken1)
           // frontAgent.init()
-          await initializeDaptinClient()
+          await initializeDaptinClient(true)
           setTokenExpiryTimeout()
           // TODO: this decision has to be made in FE code
           // window.location = '/'
@@ -211,7 +211,7 @@ export async function sendMessageToBackgroundScript(request) {
             localStorage.setItem('DAPTIN', JSON.stringify(daptinUserAuth))
             localStorage.setItem('token', newUserToken2)
             console.log('Token stored in localStorage:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED')
-            await initializeDaptinClient()
+            await initializeDaptinClient(true)
             resolve(signinResponseElement1)
           } catch (error) {
             console.error('Sign in error:', error)
@@ -361,10 +361,10 @@ export async function sendMessageToBackgroundScript(request) {
 }
 
 // Initialize function that can be awaited before app renders
-export async function initializeDaptinClient() {
+export async function initializeDaptinClient(force = false) {
   try {
     console.log('Initializing daptinClient and loading models...')
-    await daptinClient.reloadToken()
+    await daptinClient.reloadToken(force)
     console.log('Daptin client and models loaded successfully')
     return true
   } catch (error) {
