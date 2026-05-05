@@ -6,7 +6,7 @@ function UsersPage() {
     <CollectionEntityManagementComponent
       entityName="user_account"
       title="Users"
-      description="Manage user accounts"
+      description="User accounts with JWT authentication, group membership, and optional OTP two-factor auth"
       displayName="User"
     />
   )

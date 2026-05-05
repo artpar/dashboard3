@@ -18,7 +18,7 @@ function EmailLayout() {
     <CollectionEntityManagementComponent
       entityName="mail_server"
       title="Email Servers"
-      description="Manage SMTP/IMAP mail servers"
+      description="SMTP and IMAP server configurations for sending notifications, processing inbound mail, or syncing mailboxes"
       displayName="Mail Server"
     />
   )

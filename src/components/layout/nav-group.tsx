@@ -62,7 +62,11 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
   const { setOpenMobile, state } = useSidebar()
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={checkIsActive(href, item)}>
+      <SidebarMenuButton
+        asChild
+        isActive={checkIsActive(href, item)}
+        tooltip={item.description || item.title}
+      >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
           <DynamicIcon icon={item.icon && item.icon.length > 0 ? item.icon : "table"} />
           {state === 'expanded' && <span>{item.title}</span>}

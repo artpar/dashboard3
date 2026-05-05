@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import { DAPTIN_ENDPOINT } from '@/daptin'
 import { useWorldEntities } from '@/hooks/use-world-entities'
 import { EntityReferenceEditor } from './EntityReference'
 import { FileReferenceEditor } from './FileReference'
 import { ForeignKeyColumnEditorProps } from './types.js'
-
-export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
 
 /**
  * Component for editing foreign key values

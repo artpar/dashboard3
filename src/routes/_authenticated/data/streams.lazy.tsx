@@ -6,7 +6,7 @@ function StreamsPage() {
     <CollectionEntityManagementComponent
       entityName="stream"
       title="Streams"
-      description="Manage data transformation streams"
+      description="Data transformation pipelines that process, filter, or route records between entities and external systems"
     />
   )
 }

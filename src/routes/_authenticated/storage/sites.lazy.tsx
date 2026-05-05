@@ -18,7 +18,7 @@ function SitesLayout() {
     <CollectionEntityManagementComponent
       entityName="site"
       title="Sites"
-      description="Manage static site hosting"
+      description="Static websites served from cloud storage with domain-based routing and automatic syncing"
     />
   )
 }

@@ -18,7 +18,7 @@ function CloudStoresLayout() {
     <CollectionEntityManagementComponent
       entityName="cloud_store"
       title="Cloud Stores"
-      description="Manage cloud storage connections"
+      description="Storage backends configured via rclone — S3, GCS, Azure, Dropbox, local filesystem, and more. Used to back sites and handle file uploads."
       displayName="Cloud Store"
     />
   )

@@ -3,9 +3,9 @@ import { FileIcon, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { DAPTIN_ENDPOINT } from '@/daptin'
 import { FileDisplayProps } from '../types'
 import { formatFileSize } from '../utils/formatters'
-export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
 
 export const FileDisplay: React.FC<FileDisplayProps> = ({
   files,

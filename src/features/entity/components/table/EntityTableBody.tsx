@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react'
 import { TableBody, TableCell, TableRow } from '@/components/ui/table'
 import EntityTableRow from './EntityTableRow'
+import { EntityEmptyState } from './EntityEmptyState'
 import { ColumnDefinition } from '@/features/entity/columns'
 
 interface EntityTableBodyProps {
@@ -31,19 +32,14 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
   isItemSelected,
   toggleItemSelection,
 }) {
-  // If no data, show empty state
+  // If no data, show contextual empty state
   if (data.length === 0) {
     return (
-      <TableBody className={className}>
-        <TableRow>
-          <TableCell
-            colSpan={filteredColumns.length + 3} // +3 for checkbox, actions, and audit columns
-            className='text-muted-foreground py-6 text-center'
-          >
-            No data found
-          </TableCell>
-        </TableRow>
-      </TableBody>
+      <EntityEmptyState
+        entityName={entityName}
+        colSpan={filteredColumns.length + 3}
+        className={className}
+      />
     )
   }
 

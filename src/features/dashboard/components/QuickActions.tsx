@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/card'
 import { daptinClient } from '@/daptin'
 import { useToast } from '@/components/ui/use-toast'
-import { Badge } from '@/components/ui/badge'
 
 interface QuickAction {
   name: string
@@ -78,7 +77,7 @@ export const QuickActions: React.FC = () => {
   const toolActions: QuickAction[] = [
     {
       name: 'GraphQL',
-      description: 'Query API interactively',
+      description: 'Auto-generated query API',
       icon: <Braces className="h-5 w-5" />,
       path: '/tools/graphql',
       color: 'text-pink-500',
@@ -86,7 +85,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Audit Logs',
-      description: 'Track all changes',
+      description: 'Change history with diffs',
       icon: <History className="h-5 w-5" />,
       path: '/tools/audit',
       color: 'text-amber-500',
@@ -94,7 +93,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'WebSocket',
-      description: 'Real-time events',
+      description: 'Real-time event streams',
       icon: <Radio className="h-5 w-5" />,
       path: '/communication/websocket',
       color: 'text-green-500',
@@ -113,7 +112,7 @@ export const QuickActions: React.FC = () => {
   const dataActions: QuickAction[] = [
     {
       name: 'Import',
-      description: 'Upload CSV/JSON data',
+      description: 'CSV, JSON, Excel, YAML',
       icon: <Upload className="h-5 w-5" />,
       path: '/data/import',
       color: 'text-blue-500',
@@ -121,7 +120,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Export',
-      description: 'Download data',
+      description: 'CSV, JSON, Excel, PDF',
       icon: <Download className="h-5 w-5" />,
       path: '/data/export',
       color: 'text-orange-500',
@@ -129,7 +128,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Exchanges',
-      description: 'Data sync config',
+      description: 'Sync with external systems',
       icon: <RefreshCw className="h-5 w-5" />,
       path: '/data/exchanges',
       color: 'text-purple-500',
@@ -137,7 +136,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Streams',
-      description: 'Data pipelines',
+      description: 'Transform pipelines',
       icon: <Layers className="h-5 w-5" />,
       path: '/data/streams',
       color: 'text-cyan-500',
@@ -148,7 +147,7 @@ export const QuickActions: React.FC = () => {
   const adminActions: QuickAction[] = [
     {
       name: 'Actions',
-      description: 'Manage workflows',
+      description: 'Server-side workflows',
       icon: <Zap className="h-5 w-5" />,
       path: '/admin/actions',
       color: 'text-yellow-500',
@@ -156,7 +155,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Permissions',
-      description: 'Access control',
+      description: 'Table + row-level ACL',
       icon: <Shield className="h-5 w-5" />,
       path: '/admin/permissions',
       color: 'text-red-500',
@@ -164,7 +163,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Users',
-      description: 'Manage accounts',
+      description: 'Accounts & groups',
       icon: <Users className="h-5 w-5" />,
       path: '/admin/users',
       color: 'text-blue-500',
@@ -172,7 +171,7 @@ export const QuickActions: React.FC = () => {
     },
     {
       name: 'Cloud Stores',
-      description: 'File storage',
+      description: 'S3, GCS, local, etc.',
       icon: <Cloud className="h-5 w-5" />,
       path: '/storage/cloud-stores',
       color: 'text-sky-500',
@@ -183,24 +182,28 @@ export const QuickActions: React.FC = () => {
   const quickActions: QuickAction[] = [
     {
       name: 'New User',
+      description: 'Create account',
       icon: <Users className="h-6 w-6" />,
       path: '/create/user_account',
       color: 'text-blue-500',
     },
     {
       name: 'Entities',
+      description: 'All tables',
       icon: <Database className="h-6 w-6" />,
       path: '/world',
       color: 'text-indigo-500',
     },
     {
       name: 'Mail',
+      description: 'SMTP/IMAP servers',
       icon: <Mail className="h-6 w-6" />,
       path: '/communication/email',
       color: 'text-cyan-500',
     },
     {
       name: 'Sites',
+      description: 'Static hosting',
       icon: <Globe className="h-6 w-6" />,
       path: '/storage/sites',
       color: 'text-green-500',
@@ -242,9 +245,8 @@ export const QuickActions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base">Developer Tools</CardTitle>
-              <CardDescription>API tools and monitoring</CardDescription>
+              <CardDescription>Query APIs, inspect changes, and monitor real-time events</CardDescription>
             </div>
-            <Badge variant="secondary">New</Badge>
           </div>
         </CardHeader>
         <CardContent>
@@ -260,7 +262,7 @@ export const QuickActions: React.FC = () => {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Data Management</CardTitle>
-          <CardDescription>Import, export, and sync data</CardDescription>
+          <CardDescription>Import/export data and configure bidirectional sync with external systems</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -276,7 +278,7 @@ export const QuickActions: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Administration</CardTitle>
-            <CardDescription>Users, permissions, storage</CardDescription>
+            <CardDescription>Manage users, access control, workflows, and storage backends</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
@@ -290,7 +292,7 @@ export const QuickActions: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Quick Access</CardTitle>
-            <CardDescription>Common operations</CardDescription>
+            <CardDescription>Jump to frequently used features</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">

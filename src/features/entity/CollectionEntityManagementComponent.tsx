@@ -2,6 +2,7 @@ import React from 'react'
 import { EntityManagementContent, EntityManagementProps } from '@/features/entity/EntityManagementContent.tsx'
 import { CollectionEntityDataProvider } from '@/features/entity/providers/CollectionEntityDataProvider.tsx'
 import { useToast } from '@/components/ui/use-toast'
+import { ENTITY_CONCEPTS } from '@/features/entity/components/table/EntityEmptyState'
 
 /**
  * Container component that wraps the data provider
@@ -57,6 +58,11 @@ export const CollectionEntityManagementComponent: React.FC<
     }
   }, [toast])
 
+  const concept = ENTITY_CONCEPTS[entityName]
+  const fallbackDescription = concept
+    ? concept.what
+    : `Manage ${entityName.replace(/_/g, ' ')} records`
+
   return (
     <CollectionEntityDataProvider entityName={entityName}>
       <EntityManagementContent
@@ -65,7 +71,7 @@ export const CollectionEntityManagementComponent: React.FC<
           title ||
           `${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`
         }
-        description={description || `Manage ${entityName} records`}
+        description={description || fallbackDescription}
         displayName={displayName}
       />
     </CollectionEntityDataProvider>

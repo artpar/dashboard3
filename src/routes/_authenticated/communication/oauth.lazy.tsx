@@ -6,7 +6,7 @@ function OAuthPage() {
     <CollectionEntityManagementComponent
       entityName="oauth_connect"
       title="OAuth Connections"
-      description="Manage OAuth providers and connections"
+      description="Configure external identity providers (Google, GitHub, Microsoft) for social login or accessing external APIs on behalf of users"
       displayName="OAuth Connection"
     />
   )

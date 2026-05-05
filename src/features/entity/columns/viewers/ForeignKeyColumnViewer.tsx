@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from 'react'
 import { ColumnViewerProps } from '../types'
 import { useToast } from '@/components/ui/use-toast'
+import { DAPTIN_ENDPOINT } from '@/daptin'
 import { processFileInfo, downloadFile } from './utils/fileUtils'
 import { FileStackedCards } from './components/FileStackedCards'
 import { FilePreviewDialog } from './components/FilePreviewDialog'
 import { UuidReferenceBadge, ObjectReferenceBadge, GenericBadge } from './components/ReferenceBadge'
 
-
-export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_URL
 
 /**
  * Component for displaying foreign key values with reference data
@@ -96,7 +95,7 @@ export const ForeignKeyColumnViewer: React.FC<ColumnViewerProps> = ({
         <span className={className}>No files</span>
       )
     }
-    
+
     const tokenString = '?token=' + localStorage.getItem('token')
 
     // Generate asset URLs for all files

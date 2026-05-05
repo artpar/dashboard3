@@ -6,7 +6,7 @@ function ExchangesPage() {
     <CollectionEntityManagementComponent
       entityName="data_exchange"
       title="Data Exchanges"
-      description="Manage external data synchronization"
+      description="Bidirectional sync between entities and external systems — push changes to REST APIs, Google Sheets, or trigger actions on data mutations"
       displayName="Data Exchange"
     />
   )

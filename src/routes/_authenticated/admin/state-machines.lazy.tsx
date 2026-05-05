@@ -18,7 +18,7 @@ function StateMachinesLayout() {
     <CollectionEntityManagementComponent
       entityName="smd"
       title="State Machines"
-      description="Manage state machine definitions"
+      description="Define valid state transitions for record lifecycles — order workflows, approval processes, or any entity with strict stage progression"
       displayName="State Machine"
     />
   )

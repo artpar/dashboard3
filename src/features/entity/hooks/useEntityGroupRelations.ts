@@ -15,12 +15,19 @@ import {
  */
 export function useEntityGroupRelations(entityName: string, entityId: string) {
   const [isUpdating, setIsUpdating] = useState(false)
+  const [groupSearchQuery, setGroupSearchQuery] = useState('')
 
-  // Fetch all available groups
-  const { data: allGroups } = useQuery({
-    queryKey: ['usergroups'],
+  // Fetch available groups with optional search
+  const { data: allGroups, isLoading: isLoadingAllGroups } = useQuery({
+    queryKey: ['usergroups', groupSearchQuery],
     queryFn: async () => {
-      const response = await daptinClient.jsonApi.findAll('usergroup')
+      const params: Record<string, any> = {}
+      if (groupSearchQuery.trim()) {
+        params.query = JSON.stringify([
+          { column: 'name', operator: 'contains', value: `%${groupSearchQuery.trim()}%` },
+        ])
+      }
+      const response = await daptinClient.jsonApi.findAll('usergroup', params)
       return response.data || []
     },
   })
@@ -208,8 +215,11 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
     allGroups,
     entityGroups,
     isLoadingGroups,
+    isLoadingAllGroups,
     isUpdating,
     entityGroupsError,
+    groupSearchQuery,
+    setGroupSearchQuery,
     addEntityToGroup,
     removeEntityFromGroup,
     toggleGroupPermission,

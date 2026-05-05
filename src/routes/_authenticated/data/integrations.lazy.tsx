@@ -18,7 +18,7 @@ function IntegrationsLayout() {
     <CollectionEntityManagementComponent
       entityName="integration"
       title="Integrations"
-      description="Manage API integrations using OpenAPI, GraphQL, or custom specifications"
+      description="Connect external APIs by uploading OpenAPI specs — each API operation becomes a callable Daptin action"
       displayName="Integration"
     />
   )

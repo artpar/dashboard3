@@ -15,7 +15,7 @@ function ActionsPage() {
     <CollectionEntityManagementComponent
       entityName="action"
       title="Actions"
-      description="Manage workflow actions and automations"
+      description="Server-side operations invoked via API — send emails, manage files, call external APIs, or run custom business logic beyond CRUD"
     />
   )
 }

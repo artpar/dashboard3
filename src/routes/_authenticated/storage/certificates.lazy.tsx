@@ -18,7 +18,7 @@ function CertificatesLayout() {
     <CollectionEntityManagementComponent
       entityName="certificate"
       title="Certificates"
-      description="Manage SSL/TLS certificates"
+      description="SSL/TLS certificates for HTTPS connections and DKIM email signing"
     />
   )
 }

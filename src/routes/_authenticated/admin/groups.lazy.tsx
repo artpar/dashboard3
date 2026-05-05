@@ -6,7 +6,7 @@ function GroupsPage() {
     <CollectionEntityManagementComponent
       entityName="usergroup"
       title="Groups"
-      description="Manage user groups"
+      description="User groups for bulk permission assignment — define access tiers like editors, viewers, or admins"
       displayName="Group"
     />
   )

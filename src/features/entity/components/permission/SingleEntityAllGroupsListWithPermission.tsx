@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Plus } from 'lucide-react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Plus, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,19 +12,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -63,32 +56,41 @@ export function SingleEntityAllGroupsListWithPermission({
     entityId,
   })
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<string>('')
+  const [searchInput, setSearchInput] = useState('')
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
 
   const {
     entityGroups,
     isLoadingGroups,
+    isLoadingAllGroups,
     isUpdating,
     addEntityToGroup,
     removeEntityFromGroup,
     toggleGroupPermission,
     getAvailableGroups,
+    setGroupSearchQuery,
   } = useEntityGroupRelations(entityName, entityId)
 
-  console.log('useEntityGroupRelations hook results:', {
-    entityGroups,
-    isLoadingGroups,
-    availableGroups: getAvailableGroups()?.length,
-  })
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setGroupSearchQuery(value)
+    }, 300)
+  }, [setGroupSearchQuery])
 
-  // Handle adding entity to a group
-  const handleAddToGroup = async () => {
-    if (!selectedGroupToAdd) return
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
 
-    const success = await addEntityToGroup(selectedGroupToAdd)
+  const handleAddToGroup = async (groupId: string) => {
+    const success = await addEntityToGroup(groupId)
     if (success) {
       setAddDialogOpen(false)
-      setSelectedGroupToAdd('')
+      setSearchInput('')
+      setGroupSearchQuery('')
     }
   }
 
@@ -115,15 +117,19 @@ export function SingleEntityAllGroupsListWithPermission({
               Groups this {entityName} belongs to and their permissions
             </CardDescription>
           </div>
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+          <Dialog open={addDialogOpen} onOpenChange={(open) => {
+            setAddDialogOpen(open)
+            if (!open) {
+              setSearchInput('')
+              setGroupSearchQuery('')
+            }
+          }}>
             <DialogTrigger asChild>
               <Button
                 size='sm'
                 variant='outline'
                 className='gap-1'
-                disabled={
-                  disabled || isUpdating || availableGroups.length === 0
-                }
+                disabled={disabled || isUpdating}
               >
                 <Plus className='h-4 w-4' />
                 Add to Group
@@ -137,41 +143,41 @@ export function SingleEntityAllGroupsListWithPermission({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className='py-4'>
-                <Select
-                  value={selectedGroupToAdd}
-                  onValueChange={setSelectedGroupToAdd}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a group' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableGroups.map((group: any) => (
-                      <SelectItem
-                        key={group.reference_id}
-                        value={group.reference_id}
-                      >
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className='relative'>
+                <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                <Input
+                  placeholder='Search groups...'
+                  value={searchInput}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className='pl-9'
+                  autoFocus
+                />
               </div>
 
-              <DialogFooter>
-                <Button
-                  variant='outline'
-                  onClick={() => setAddDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddToGroup}
-                  disabled={!selectedGroupToAdd || isUpdating}
-                >
-                  Add
-                </Button>
-              </DialogFooter>
+              <ScrollArea className='max-h-[240px]'>
+                {isLoadingAllGroups ? (
+                  <div className='flex items-center justify-center py-6'>
+                    <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
+                  </div>
+                ) : availableGroups.length > 0 ? (
+                  <div className='space-y-1'>
+                    {availableGroups.map((group: any) => (
+                      <button
+                        key={group.reference_id}
+                        className='w-full text-left px-3 py-2 rounded-md hover:bg-accent text-sm transition-colors disabled:opacity-50'
+                        onClick={() => handleAddToGroup(group.reference_id)}
+                        disabled={isUpdating}
+                      >
+                        {group.name}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='text-center py-6 text-sm text-muted-foreground'>
+                    {searchInput ? 'No groups found' : 'No available groups'}
+                  </div>
+                )}
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
