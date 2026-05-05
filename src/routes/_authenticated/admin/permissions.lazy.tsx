@@ -111,7 +111,7 @@ function PermissionsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Shield className="h-6 w-6" />

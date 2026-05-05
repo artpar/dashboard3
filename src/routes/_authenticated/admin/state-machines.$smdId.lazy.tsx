@@ -737,9 +737,9 @@ function StateMachineDetailPage() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="text-muted-foreground px-2 py-1.5 text-sm">
                             No entities use this state machine
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
