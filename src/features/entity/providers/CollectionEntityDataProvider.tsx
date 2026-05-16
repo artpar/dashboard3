@@ -8,18 +8,25 @@ import { SYSTEM_COLUMNS } from '@/features/entity/types.ts'
 import { useMutationWithToast } from '../hooks/useMutationWithToast'
 import { useEntitySelection } from '../hooks/useEntitySelection'
 import { useDialogStates } from '../hooks/useDialogStates'
+import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
+
+type SortDirection = 'asc' | 'desc'
+type EntityItem = EntityRecord & Record<string, unknown>
+type EntityFilters = Record<string, unknown>
 
 // Define the collection entity context type
 export interface CollectionEntityContextType extends BaseEntityContextType {
-  data: any[]
-  selectedItem: any
-  setSelectedItem: (item: any) => void
-  selectedItems: any[]
-  setSelectedItems: (items: any[]) => void
-  toggleItemSelection: (item: any) => void
+  data: EntityItem[]
+  selectedItem: EntityItem | null
+  setSelectedItem: (item: EntityItem | null) => void
+  selectedItems: EntityItem[]
+  setSelectedItems: (items: EntityItem[]) => void
+  toggleItemSelection: (item: EntityItem) => void
   selectAllItems: () => void
+  toggleAllVisibleItems: () => void
+  areAllVisibleItemsSelected: boolean
   clearSelectedItems: () => void
-  isItemSelected: (item: any) => boolean
+  isItemSelected: (item: EntityItem) => boolean
   currentPage: number
   setCurrentPage: (page: number) => void
   pageSize: number
@@ -33,10 +40,13 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
     to: number
     total: number
   } | null
-  filters: Record<string, any>
-  setFilters: (filters: Record<string, any>) => void
-  sortColumns: Record<string, 'asc' | 'desc'>
-  setSortColumn: (column: string, direction: 'asc' | 'desc') => void
+  filters: EntityFilters
+  setFilters: (filters: EntityFilters) => void
+  sortColumns: Record<string, SortDirection>
+  setSortColumns: (columns: Record<string, SortDirection>) => void
+  setSortColumn: (column: string, direction: SortDirection) => void
+  toggleSortColumn: (column: string) => void
+  removeSortColumn: (column: string) => void
   clearSorting: () => void
   showCreateDialog: boolean
   setShowCreateDialog: (show: boolean) => void
@@ -50,15 +60,15 @@ export interface CollectionEntityContextType extends BaseEntityContextType {
   setShowFilterDialog: (show: boolean) => void
   showPasteDialog: boolean
   setShowPasteDialog: (show: boolean) => void
-  clipboardData: any[] | null
-  setClipboardData: (data: any[] | null) => void
+  clipboardData: EntityItem[] | null
+  setClipboardData: (data: EntityItem[] | null) => void
   copySelectedItems: () => void
-  pasteItems: () => Promise<void>
+  pasteItems: (clipboardData?: EntityItem[] | null) => Promise<void>
   fetchData: () => void
-  createItem: (item: any) => Promise<any>
-  updateItem: (id: string, item: any) => Promise<any>
-  deleteItem: (id: string) => Promise<any>
-  bulkDeleteItems: (ids: string[]) => Promise<any>
+  createItem: (item: EntityItem) => Promise<unknown>
+  updateItem: (id: string, item: EntityItem) => Promise<unknown>
+  deleteItem: (id: string) => Promise<unknown>
+  bulkDeleteItems: (ids: string[]) => Promise<unknown>
 }
 
 // Create the collection entity context
@@ -79,11 +89,18 @@ export const CollectionEntityDataProvider: React.FC<{
     filters?: string
   }
 
-  const [data, setData] = useState<any[]>([])
-  const [selectedItem, setSelectedItem] = useState<any>(null)
-  const [selectedItems, setSelectedItems] = useState<any[]>([])
-  // Use a Map for faster lookups of selected items
-  const [selectedItemsMap, setSelectedItemsMap] = useState<Map<string, any>>(new Map())
+  const [data, setData] = useState<EntityItem[]>([])
+  const [selectedItem, setSelectedItem] = useState<EntityItem | null>(null)
+  const {
+    selectedItems,
+    setSelectedItems,
+    toggleItemSelection,
+    selectAllItems,
+    toggleAllItems,
+    areAllItemsSelected,
+    clearSelectedItems,
+    isItemSelected,
+  } = useEntitySelection<EntityItem>(data)
   
   // Parse number parameters from URL (they come as strings)
   const parsePageNumber = (page: string | number | undefined): number => {
@@ -148,10 +165,10 @@ export const CollectionEntityDataProvider: React.FC<{
     return {}
   }, [searchParams?.sort])
   
-  const [filters, setFiltersInternal] = useState<Record<string, any>>(parseFiltersFromUrl())
-  const [sortColumns, setSortColumnsInternal] = useState<Record<string, 'asc' | 'desc'>>(parseSortFromUrl())
+  const [filters, setFiltersInternal] = useState<EntityFilters>(parseFiltersFromUrl())
+  const [sortColumns, setSortColumnsInternal] = useState<Record<string, SortDirection>>(parseSortFromUrl())
   
-  const [clipboardData, setClipboardData] = useState<any[] | null>(null)
+  const [clipboardData, setClipboardData] = useState<EntityItem[] | null>(null)
 
   // Use extracted hooks for dialog states
   const dialogs = useDialogStates()
@@ -171,7 +188,7 @@ export const CollectionEntityDataProvider: React.FC<{
   const updateUrlParams = useCallback((updates: {
     page?: number
     pageSize?: number
-    filters?: Record<string, any>
+    filters?: EntityFilters
     sort?: string
   }) => {
     navigate({
@@ -196,13 +213,13 @@ export const CollectionEntityDataProvider: React.FC<{
     updateUrlParams({ pageSize: size, page: 1 })
   }, [updateUrlParams])
   
-  const setFilters = useCallback((newFilters: Record<string, any>) => {
+  const setFilters = useCallback((newFilters: EntityFilters) => {
     setFiltersInternal(newFilters)
     setCurrentPageInternal(1) // Reset to first page when filtering
     updateUrlParams({ filters: newFilters, page: 1 })
   }, [updateUrlParams])
   
-  const setSortColumns = useCallback((newSort: Record<string, 'asc' | 'desc'>) => {
+  const setSortColumns = useCallback((newSort: Record<string, SortDirection>) => {
     setSortColumnsInternal(newSort)
     const sortString = Object.entries(newSort)
       .map(([column, direction]) => `${direction === 'desc' ? '-' : '+'}${column}`)
@@ -300,7 +317,7 @@ export const CollectionEntityDataProvider: React.FC<{
 
   // Create mutation - using useMutationWithToast for cleaner code
   const createMutation = useMutationWithToast({
-    mutationFn: (newItem: any) => EntityApiService.createEntity(entityName, newItem),
+    mutationFn: (newItem: EntityItem) => EntityApiService.createEntity(entityName, newItem),
     invalidateKey: [`entity-${entityName}-collection`],
     successMessage: 'Item created successfully',
     errorMessage: 'Failed to create item',
@@ -309,7 +326,7 @@ export const CollectionEntityDataProvider: React.FC<{
 
   // Update mutation
   const updateMutation = useMutationWithToast({
-    mutationFn: ({ id, item }: { id: string; item: any }) =>
+    mutationFn: ({ id, item }: { id: string; item: EntityItem }) =>
       EntityApiService.updateEntity(entityName, id, item),
     invalidateKey: [`entity-${entityName}-collection`],
     successMessage: 'Item updated successfully',
@@ -369,21 +386,21 @@ export const CollectionEntityDataProvider: React.FC<{
       setShowBulkDeleteDialog(false)
       setSelectedItems([])
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         variant: 'destructive',
         title: 'Failed to delete items',
-        description: error.message || 'An error occurred',
+        description: error instanceof Error ? error.message : 'An error occurred',
       })
     },
   })
 
   // Exposed functions
-  const createItem = async (item: any) => {
+  const createItem = async (item: EntityItem) => {
     return createMutation.mutateAsync(item)
   }
 
-  const updateItem = async (id: string, item: any) => {
+  const updateItem = async (id: string, item: EntityItem) => {
     return updateMutation.mutateAsync({ id, item })
   }
 
@@ -395,83 +412,61 @@ export const CollectionEntityDataProvider: React.FC<{
     return bulkDeleteMutation.mutateAsync(ids)
   }
 
-  // Keep selectedItems array and selectedItemsMap in sync
-  useEffect(() => {
-    const newMap = new Map();
-    selectedItems.forEach(item => {
-      const itemId = item.id || item.reference_id;
-      newMap.set(itemId, item);
-    });
-    setSelectedItemsMap(newMap);
-  }, [selectedItems]);
+  const areAllVisibleItemsSelected = areAllItemsSelected(data)
 
-  // Item selection helpers - optimized for performance
-  const toggleItemSelection = useCallback((item: any) => {
-    const itemId = item.id || item.reference_id;
-
-    setSelectedItemsMap(prevMap => {
-      const newMap = new Map(prevMap);
-      if (newMap.has(itemId)) {
-        newMap.delete(itemId);
-      } else {
-        newMap.set(itemId, item);
-      }
-
-      // Update the selectedItems array based on the map
-      const newSelectedItems = Array.from(newMap.values());
-      setSelectedItems(newSelectedItems);
-
-      return newMap;
-    });
-  }, []);
-
-  const selectAllItems = useCallback(() => {
-    if (selectedItems.length === data.length) {
-      // If all items are already selected, clear the selection
-      setSelectedItems([]);
-      setSelectedItemsMap(new Map());
-    } else {
-      // Otherwise, select all items - create a new map for faster lookups
-      const newMap = new Map();
-      data.forEach(item => {
-        const itemId = item.id || item.reference_id;
-        newMap.set(itemId, item);
-      });
-      setSelectedItemsMap(newMap);
-      setSelectedItems(data.slice()); // Use slice to create a new array
-    }
-  }, [data, selectedItems.length]);
-
-  const clearSelectedItems = useCallback(() => {
-    setSelectedItems([]);
-    setSelectedItemsMap(new Map());
-  }, []);
-
-  // Memoized isItemSelected function for better performance
-  const isItemSelected = useCallback((item: any) => {
-    const itemId = item.id || item.reference_id;
-    return selectedItemsMap.has(itemId);
-  }, [selectedItemsMap])
+  const toggleAllVisibleItems = useCallback(() => {
+    toggleAllItems(data)
+  }, [data, toggleAllItems])
 
   // Set sort column
-  const setSortColumn = useCallback((column: string, direction: 'asc' | 'desc') => {
+  const setSortColumn = useCallback((column: string, direction: SortDirection) => {
     setSortColumnsInternal(prev => {
-      // Create a new object with the updated sort column
-      const newSortColumns = { ...prev };
+      const newSortColumns = { ...prev, [column]: direction }
 
-      // If the column is already in the sort columns, update its direction
-      // If it's not, add it to the sort columns
-      newSortColumns[column] = direction;
-      
-      // Update URL with new sort
       const sortString = Object.entries(newSortColumns)
         .map(([col, dir]) => `${dir === 'desc' ? '-' : '+'}${col}`)
         .join(',')
       updateUrlParams({ sort: sortString })
 
-      return newSortColumns;
-    });
-  }, [updateUrlParams]);
+      return newSortColumns
+    })
+  }, [updateUrlParams])
+
+  const removeSortColumn = useCallback((column: string) => {
+    setSortColumnsInternal(prev => {
+      const newSortColumns = { ...prev }
+      delete newSortColumns[column]
+
+      const sortString = Object.entries(newSortColumns)
+        .map(([col, dir]) => `${dir === 'desc' ? '-' : '+'}${col}`)
+        .join(',')
+      updateUrlParams({ sort: sortString })
+
+      return newSortColumns
+    })
+  }, [updateUrlParams])
+
+  const toggleSortColumn = useCallback((column: string) => {
+    setSortColumnsInternal(prev => {
+      const currentDirection = prev[column]
+      const newSortColumns = { ...prev }
+
+      if (!currentDirection) {
+        newSortColumns[column] = 'asc'
+      } else if (currentDirection === 'asc') {
+        newSortColumns[column] = 'desc'
+      } else {
+        delete newSortColumns[column]
+      }
+
+      const sortString = Object.entries(newSortColumns)
+        .map(([col, dir]) => `${dir === 'desc' ? '-' : '+'}${col}`)
+        .join(',')
+      updateUrlParams({ sort: sortString })
+
+      return newSortColumns
+    })
+  }, [updateUrlParams])
 
   // Clear all sorting
   const clearSorting = useCallback(() => {
@@ -480,7 +475,6 @@ export const CollectionEntityDataProvider: React.FC<{
   }, [updateUrlParams]);
 
   const fetchData = useCallback(() => {
-    console.log("CEDP.fetchData")
     refetch()
   }, [refetch])
 
@@ -498,9 +492,8 @@ export const CollectionEntityDataProvider: React.FC<{
     // Fetch each selected item with all relations included
     const deepCopyPromises = selectedItems.map(item => {
       // Get the ID of the item
-      const itemId = item.id || item.reference_id
+      const itemId = getEntityId(item)
       if (!itemId) {
-        console.error('Item has no ID:', item)
         return Promise.resolve(null)
       }
       // Fetch the item with all relations included
@@ -510,12 +503,11 @@ export const CollectionEntityDataProvider: React.FC<{
     // Wait for all fetches to complete
     const deepCopiedItems = await Promise.all(deepCopyPromises)
 
-    console.log("CEDP.copySelectedItems", deepCopiedItems)
     // Filter out any null items and format them
     const formattedItems = deepCopiedItems
       .filter(item => item !== null)
       .map(item => {
-        const formattedItem: Record<string, any> = {}
+        const formattedItem: EntityItem = {}
         // Add all properties from the item
         Object.keys(item).forEach(key => {
           // Skip internal properties that start with underscore
@@ -547,16 +539,14 @@ export const CollectionEntityDataProvider: React.FC<{
           title: 'Copied to clipboard',
           description: `${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''} copied`,
         })
-      }).catch(err => {
-        console.error('Failed to copy to clipboard:', err)
+      }).catch(() => {
         toast({
           variant: 'destructive',
           title: 'Copy failed',
           description: 'Could not copy to system clipboard. Data is still available for internal paste.',
         })
       })
-    } catch (err) {
-      console.error('Error stringifying data:', err)
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Copy failed',
@@ -567,7 +557,6 @@ export const CollectionEntityDataProvider: React.FC<{
 
   // Paste items from clipboard
   const pasteItems = useCallback(async (clipboardData) => {
-    console.log("CEDP.pasteItems", clipboardData)
     if (!clipboardData || clipboardData.length === 0) {
       toast({
         variant: 'destructive',
@@ -650,6 +639,8 @@ export const CollectionEntityDataProvider: React.FC<{
     setSelectedItems,
     toggleItemSelection,
     selectAllItems,
+    toggleAllVisibleItems,
+    areAllVisibleItemsSelected,
     clearSelectedItems,
     isItemSelected,
     currentPage,
@@ -661,7 +652,10 @@ export const CollectionEntityDataProvider: React.FC<{
     filters,
     setFilters,
     sortColumns,
+    setSortColumns,
     setSortColumn,
+    toggleSortColumn,
+    removeSortColumn,
     clearSorting,
     showCreateDialog,
     setShowCreateDialog,

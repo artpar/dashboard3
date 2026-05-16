@@ -24,8 +24,8 @@ import { useToast } from '@/components/ui/use-toast'
 interface CellContextMenuProps {
   children: React.ReactNode
   columnName: string
-  value: any
-  onAddFilter: (columnName: string, operator: string, value: any) => void
+  value: unknown
+  onAddFilter: (columnName: string, operator: string, value: unknown) => void
 }
 
 export const CellContextMenu: React.FC<CellContextMenuProps> = ({
@@ -37,7 +37,7 @@ export const CellContextMenu: React.FC<CellContextMenuProps> = ({
   const { toast } = useToast()
 
   // Helper function to truncate long values for display
-  const truncateValue = (val: any, maxLength: number = 30) => {
+  const truncateValue = (val: unknown, maxLength: number = 30) => {
     if (val === null || val === undefined) return 'NULL'
     const strValue = String(val)
     if (strValue.length <= maxLength) return strValue
@@ -49,13 +49,13 @@ export const CellContextMenu: React.FC<CellContextMenuProps> = ({
 
   const handleCopyValue = async () => {
     try {
-      const textValue = value?.toString() || ''
+      const textValue = value == null ? '' : String(value)
       await navigator.clipboard.writeText(textValue)
       toast({
         title: 'Copied',
         description: `Copied ${textValue.length > 50 ? textValue.substring(0, 50) + '...' : textValue}`,
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to copy value',
@@ -72,7 +72,7 @@ export const CellContextMenu: React.FC<CellContextMenuProps> = ({
         title: 'Copied',
         description: 'Filter expression copied to clipboard',
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to copy filter expression',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown, ArrowUp, Copy, Clipboard } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import EntityPasteDialog from '@/features/entity/components/dialogs/EntityPasteDialog';
 import { Button } from '@/components/ui/button';
@@ -7,40 +7,69 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx';
 import EntityTableBody from './EntityTableBody';
+import { ColumnDefinition } from '@/features/entity/columns';
+import { EntityRecord } from '@/features/entity/utils/entityIdentity';
 
+type EntityTableItem = EntityRecord & Record<string, unknown>
+type SortDirection = 'asc' | 'desc'
+
+interface EntityDataTableProps {
+  handleDelete: (item: EntityTableItem) => void
+  handleBulkDelete: () => void | Promise<void>
+}
+
+interface EntityDataTableViewProps {
+  data: EntityTableItem[]
+  filteredColumns: ColumnDefinition[]
+  auditColumns: ColumnDefinition[]
+  entityName: string
+  sortColumns: Record<string, SortDirection>
+  selectedItemsCount: number
+  showBulkDeleteDialog: boolean
+  showPasteDialog: boolean
+  areAllVisibleItemsSelected: boolean
+  onToggleAllVisibleItems: () => void
+  onToggleSortColumn: (columnName: string) => void
+  onBulkDeleteDialogChange: (open: boolean) => void
+  onBulkDelete: () => void | Promise<void>
+  onPasteDialogClose: () => void
+  onDelete: (item: EntityTableItem) => void
+  isItemSelected: (item: EntityTableItem) => boolean
+  toggleItemSelection: (item: EntityTableItem) => void
+}
 
 /**
  * Main data table component that displays entity records
  */
-export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
+export const EntityDataTable: React.FC<EntityDataTableProps> = ({
+  handleDelete,
+  handleBulkDelete,
+}) => {
   const {
-    data,
+    data: rawData,
     columns,
     isLoading,
-    setSelectedItem,
-    setShowEditDialog,
     setShowBulkDeleteDialog,
     showBulkDeleteDialog,
     showPasteDialog,
     setShowPasteDialog,
-    relations,
     entityName,
     sortColumns,
-    setSortColumn,
+    toggleSortColumn,
     selectedItems,
     toggleItemSelection,
-    selectAllItems,
+    toggleAllVisibleItems,
+    areAllVisibleItemsSelected,
     isItemSelected,
-    copySelectedItems,
     setClipboardData,
+    visibleColumns,
   } = useEntityCollectionData()
-  // Get column visibility state from context
-  const { visibleColumns } = useEntityCollectionData()
+
+  const data = rawData as EntityTableItem[]
 
   // Listen for custom paste event
   React.useEffect(() => {
     const handlePasteEvent = (event: CustomEvent) => {
-      console.log('Paste event:', event)
       const { data } = event.detail;
       if (Array.isArray(data) && data.length > 0) {
         // Set the clipboard data and show the paste dialog
@@ -73,12 +102,6 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
     )
   }, [columns])
 
-  // Handle row actions
-  const handleEdit = (item: any) => {
-    setSelectedItem(item)
-    setShowEditDialog(true)
-  }
-
   // If columns are not yet loaded or we're loading data, show a loading state
   if (isLoading || columns.length === 0) {
     return (
@@ -91,6 +114,48 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
   }
 
   return (
+    <EntityDataTableView
+      data={data}
+      filteredColumns={filteredColumns}
+      auditColumns={auditColumnsToShow}
+      entityName={entityName}
+      sortColumns={sortColumns}
+      selectedItemsCount={selectedItems.length}
+      showBulkDeleteDialog={showBulkDeleteDialog}
+      showPasteDialog={showPasteDialog}
+      areAllVisibleItemsSelected={areAllVisibleItemsSelected}
+      onToggleAllVisibleItems={toggleAllVisibleItems}
+      onToggleSortColumn={toggleSortColumn}
+      onBulkDeleteDialogChange={setShowBulkDeleteDialog}
+      onBulkDelete={handleBulkDelete}
+      onPasteDialogClose={() => setShowPasteDialog(false)}
+      onDelete={handleDelete}
+      isItemSelected={isItemSelected}
+      toggleItemSelection={toggleItemSelection}
+    />
+  )
+}
+
+const EntityDataTableView: React.FC<EntityDataTableViewProps> = ({
+  data,
+  filteredColumns,
+  auditColumns,
+  entityName,
+  sortColumns,
+  selectedItemsCount,
+  showBulkDeleteDialog,
+  showPasteDialog,
+  areAllVisibleItemsSelected,
+  onToggleAllVisibleItems,
+  onToggleSortColumn,
+  onBulkDeleteDialogChange,
+  onBulkDelete,
+  onPasteDialogClose,
+  onDelete,
+  isItemSelected,
+  toggleItemSelection,
+}) => {
+  return (
     <>
       <div className='h-full w-full overflow-auto'>
         <Table className='sticky-header-table'>
@@ -98,10 +163,8 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
             <TableRow>
               <TableHead className='bg-background sticky left-0 top-0 z-[110] w-10'>
                 <Checkbox
-                  checked={
-                    selectedItems.length === data.length && data.length > 0
-                  }
-                  onCheckedChange={selectAllItems}
+                  checked={areAllVisibleItemsSelected}
+                  onCheckedChange={() => onToggleAllVisibleItems()}
                   aria-label='Select all rows'
                 />
               </TableHead>
@@ -118,25 +181,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
                     <Button
                       variant='ghost'
                       className='hover:bg-muted flex h-8 w-full items-center justify-between px-2 py-0 text-left font-medium'
-                      onClick={() => {
-                        // Toggle sort direction or set to asc if not sorted
-                        if (!isSorted) {
-                          setSortColumn(column.ColumnName, 'asc')
-                        } else if (sortDirection === 'asc') {
-                          setSortColumn(column.ColumnName, 'desc')
-                        } else {
-                          // Remove this column from sorting
-                          const newSortColumns = { ...sortColumns }
-                          delete newSortColumns[column.ColumnName]
-                          // We can't directly call clearSorting for a single column,
-                          // so we update all remaining sort columns
-                          Object.entries(newSortColumns).forEach(
-                            ([col, dir]) => {
-                              setSortColumn(col, dir)
-                            }
-                          )
-                        }
-                      }}
+                      onClick={() => onToggleSortColumn(column.ColumnName)}
                     >
                       <span>{column.ColumnName}</span>
                       {isSorted && (
@@ -155,6 +200,7 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
               <TableHead className='text-muted-foreground bg-background sticky top-0 text-xs'>
                 Audit Info
               </TableHead>
+              <TableHead className='bg-background sticky top-0 w-10'></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -162,49 +208,45 @@ export const EntityDataTable: React.FC = ({handleDelete, handleBulkDelete}) => {
             data={data}
             className='overflow-y-auto'
             filteredColumns={filteredColumns}
-            auditColumns={auditColumnsToShow}
-            relations={relations}
+            auditColumns={auditColumns}
             entityName={entityName}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={onDelete}
             isItemSelected={isItemSelected}
             toggleItemSelection={toggleItemSelection}
           />
         </Table>
       </div>
 
-      {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog
         open={showBulkDeleteDialog}
-        onOpenChange={setShowBulkDeleteDialog}
+        onOpenChange={onBulkDeleteDialogChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will permanently delete {selectedItems.length}{' '}
+              This action will permanently delete {selectedItemsCount}{' '}
               selected {entityName}{' '}
-              {selectedItems.length === 1 ? 'record' : 'records'} and cannot be
+              {selectedItemsCount === 1 ? 'record' : 'records'} and cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className={'cursor-pointer'}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleBulkDelete}
+              onClick={onBulkDelete}
               className='bg-destructive cursor-pointer text-destructive-foreground hover:bg-destructive/90'
             >
-              Delete {selectedItems.length}{' '}
-              {selectedItems.length === 1 ? 'item' : 'items'}
+              Delete {selectedItemsCount}{' '}
+              {selectedItemsCount === 1 ? 'item' : 'items'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Paste Dialog */}
       <EntityPasteDialog
         open={showPasteDialog}
-        onClose={() => setShowPasteDialog(false)}
+        onClose={onPasteDialogClose}
       />
     </>
   )

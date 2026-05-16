@@ -8,7 +8,8 @@ import EntityFilterDialog from '@/features/entity/components/dialogs/EntityFilte
 import EntityPagination from '@/features/entity/components/pagination/EntityPagination.tsx'
 import EntityDataTable from '@/features/entity/components/table/EntityDataTable.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { EntityAggregateViewComponent } from '@/features/dashboard/components/EntityAggregateViewComponent.tsx'
+import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
+import EntityDeleteDialog from '@/features/entity/components/dialogs/EntityDeleteDialog'
 
 export interface EntityManagementProps {
   entityName: string
@@ -27,21 +28,20 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   displayName,
 }) => {
   const {
-    data,
     isLoading,
     error,
     currentPage,
     totalPages,
     pageSize,
     selectedItems,
+    setSelectedItem,
     setCurrentPage,
     setPageSize,
     bulkDeleteItems,
-    selectAllItems,
     pagination,
     showFilterDialog,
     setShowFilterDialog,
-    clearSelectedItems,
+    setShowDeleteDialog,
     filters,
     setFilters,
   } = useEntityCollectionData()
@@ -69,7 +69,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
     )
   }
 
-  const handleDelete = (item: any) => {
+  const handleDelete = (item: EntityRecord) => {
     setSelectedItem(item)
     setShowDeleteDialog(true)
   }
@@ -77,7 +77,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   // Handle bulk delete action
   const handleBulkDelete = async () => {
     if (selectedItems.length > 0) {
-      const itemIds = selectedItems.map((item) => item.id || item.reference_id)
+      const itemIds = selectedItems.map(getEntityId).filter(Boolean)
       await bulkDeleteItems(itemIds)
     }
   }
@@ -131,6 +131,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
           filters={filters}
           onApplyFilters={setFilters}
         />
+        <EntityDeleteDialog />
       </Main>
     </>
   )

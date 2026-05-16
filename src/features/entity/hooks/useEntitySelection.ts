@@ -1,72 +1,99 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
 
 /**
  * Hook for managing entity selection state with optimized performance.
  * Uses a Map internally for O(1) lookups while exposing an array for convenience.
  */
-export function useEntitySelection<T extends { id?: string; reference_id?: string }>(
+export function useEntitySelection<T extends EntityRecord>(
   data: T[]
 ) {
   const [selectedItems, setSelectedItems] = useState<T[]>([])
-  const [selectedItemsMap, setSelectedItemsMap] = useState<Map<string, T>>(new Map())
 
-  // Keep selectedItems array and selectedItemsMap in sync
-  useEffect(() => {
+  const selectedItemsMap = useMemo(() => {
     const newMap = new Map<string, T>()
     selectedItems.forEach(item => {
-      const itemId = item.id || item.reference_id || ''
-      newMap.set(itemId, item)
+      const itemId = getEntityId(item)
+      if (itemId) {
+        newMap.set(itemId, item)
+      }
     })
-    setSelectedItemsMap(newMap)
+    return newMap
   }, [selectedItems])
 
-  const getItemId = useCallback((item: T): string => {
-    return item.id || item.reference_id || ''
-  }, [])
-
   const toggleItemSelection = useCallback((item: T) => {
-    const itemId = getItemId(item)
+    const itemId = getEntityId(item)
+    if (!itemId) {
+      return
+    }
 
-    setSelectedItemsMap(prevMap => {
-      const newMap = new Map(prevMap)
+    setSelectedItems(prevItems => {
+      const newMap = new Map<string, T>()
+      prevItems.forEach(selectedItem => {
+        const selectedItemId = getEntityId(selectedItem)
+        if (selectedItemId) {
+          newMap.set(selectedItemId, selectedItem)
+        }
+      })
+
       if (newMap.has(itemId)) {
         newMap.delete(itemId)
       } else {
         newMap.set(itemId, item)
       }
 
-      // Update the selectedItems array based on the map
-      setSelectedItems(Array.from(newMap.values()))
-      return newMap
+      return Array.from(newMap.values())
     })
-  }, [getItemId])
+  }, [])
+
+  const areAllItemsSelected = useCallback((items: T[] = data): boolean => {
+    return (
+      items.length > 0 &&
+      items.every(item => {
+        const itemId = getEntityId(item)
+        return itemId ? selectedItemsMap.has(itemId) : false
+      })
+    )
+  }, [data, selectedItemsMap])
+
+  const toggleAllItems = useCallback((items: T[] = data) => {
+    if (areAllItemsSelected(items)) {
+      const itemIds = new Set(items.map(getEntityId).filter(Boolean))
+      setSelectedItems(prevItems =>
+        prevItems.filter(item => !itemIds.has(getEntityId(item)))
+      )
+    } else {
+      setSelectedItems(prevItems => {
+        const newMap = new Map<string, T>()
+        prevItems.forEach(item => {
+          const itemId = getEntityId(item)
+          if (itemId) {
+            newMap.set(itemId, item)
+          }
+        })
+        items.forEach(item => {
+          const itemId = getEntityId(item)
+          if (itemId) {
+            newMap.set(itemId, item)
+          }
+        })
+        return Array.from(newMap.values())
+      })
+    }
+  }, [areAllItemsSelected, data])
 
   const selectAllItems = useCallback(() => {
-    if (selectedItems.length === data.length) {
-      // If all items are already selected, clear the selection
-      setSelectedItems([])
-      setSelectedItemsMap(new Map())
-    } else {
-      // Otherwise, select all items
-      const newMap = new Map<string, T>()
-      data.forEach(item => {
-        const itemId = getItemId(item)
-        newMap.set(itemId, item)
-      })
-      setSelectedItemsMap(newMap)
-      setSelectedItems(data.slice())
-    }
-  }, [data, selectedItems.length, getItemId])
+    toggleAllItems(data)
+  }, [data, toggleAllItems])
 
   const clearSelectedItems = useCallback(() => {
     setSelectedItems([])
-    setSelectedItemsMap(new Map())
   }, [])
 
   const isItemSelected = useCallback((item: T): boolean => {
-    const itemId = getItemId(item)
+    const itemId = getEntityId(item)
     return selectedItemsMap.has(itemId)
-  }, [selectedItemsMap, getItemId])
+  }, [selectedItemsMap])
 
   return {
     selectedItems,
@@ -74,6 +101,8 @@ export function useEntitySelection<T extends { id?: string; reference_id?: strin
     selectedItemsMap,
     toggleItemSelection,
     selectAllItems,
+    toggleAllItems,
+    areAllItemsSelected,
     clearSelectedItems,
     isItemSelected,
   }

@@ -12,15 +12,17 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { TableCell } from '@/components/ui/table'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
+import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
+
+type EntityTableItem = EntityRecord & Record<string, unknown>
 
 interface EntityTableActionsProps {
-  item: any
-  onEdit: (item: any) => void
-  onDelete: (item: any) => void
-  onViewDetails: (item: any) => void
-  relations: any[]
+  item: EntityTableItem
+  onEdit: (item: EntityTableItem) => void
+  onDelete: (item: EntityTableItem) => void
+  onViewDetails: (item: EntityTableItem) => void
+  relations: unknown[]
 }
 
 /**
@@ -37,14 +39,14 @@ export const EntityTableActions: React.FC<EntityTableActionsProps> = ({
   const { entityName } = useEntityCollectionData()
 
   const handleViewDetails = () => {
-    const itemId = item.id || item.reference_id
+    const itemId = getEntityId(item)
     navigate({ to: `/${entityName}/$entityId`, params: { entityId: itemId } })
     // Also call the original handler for any additional logic
     onViewDetails(item)
   }
 
   const handleEditDetails = () => {
-    const itemId = item.id || item.reference_id
+    const itemId = getEntityId(item)
     navigate({ to: `/${entityName}/$entityId/edit`, params: { entityId: itemId } })
     // Also call the original handler for any additional logic
     onEdit(item)

@@ -1,42 +1,23 @@
 import React, { useCallback, memo } from 'react'
-import { EyeIcon } from 'lucide-react'
+import { EyeIcon, Trash2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { ColumnDefinition } from '@/features/entity/columns'
 import EntityAuditCell from './EntityAuditCell'
 import EntityTableCell from './EntityTableCell'
 import { Link } from '@tanstack/react-router'
+import { EntityRecord, getEntityDetailPath, getEntityId } from '@/features/entity/utils/entityIdentity'
 
-// Custom routes for entities with specialized detail pages
-const CUSTOM_DETAIL_ROUTES: Record<string, string> = {
-  'site': '/storage/sites',
-  'cloud_store': '/storage/cloud-stores',
-  'certificate': '/storage/certificates',
-  'integration': '/data/integrations',
-  'smd': '/admin/state-machines',
-  'mail_server': '/communication/email',
-  'action': '/admin/actions',
-}
-
-// Generate detail URL for an entity item
-function getDetailUrl(entityName: string, item: any): string {
-  const itemId = item.reference_id || item.id
-  const customRoute = CUSTOM_DETAIL_ROUTES[entityName]
-  if (customRoute) {
-    return `${customRoute}/${itemId}`
-  }
-  return `/${entityName}/${itemId}`
-}
+type EntityTableItem = EntityRecord & Record<string, unknown>
 
 interface EntityTableRowProps {
-  item: any
+  item: EntityTableItem
   index: number
   columns: ColumnDefinition[]
   auditColumns: ColumnDefinition[]
-  relations: any[]
   entityName: string
-  onEdit: (item: any) => void
-  onDelete: (item: any) => void
+  onDelete: (item: EntityTableItem) => void
   isSelected: boolean
   onToggleSelect: () => void
 }
@@ -49,9 +30,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
   index,
   columns,
   auditColumns,
-  relations,
   entityName,
-  onEdit,
   onDelete,
   isSelected,
   onToggleSelect,
@@ -62,11 +41,16 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
     onToggleSelect();
   }, [onToggleSelect]);
 
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDelete(item)
+  }, [item, onDelete])
+
   // Get a stable key for the row
-  const rowKey = item.id || item.reference_id || index;
+  const rowKey = getEntityId(item) || index;
 
   // Generate the detail URL
-  const detailUrl = getDetailUrl(entityName, item);
+  const detailUrl = getEntityDetailPath(entityName, item);
 
   return (
     <TableRow
@@ -83,7 +67,7 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
         />
       </td>
       <td
-        title={item.reference_id}
+        title={getEntityId(item)}
         className='sticky left-10 z-10 w-12 bg-background pl-3 align-middle'
       >
         <Link
@@ -99,6 +83,17 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
       ))}
 
       <EntityAuditCell item={item} auditColumns={auditColumns} />
+      <td className='w-10 p-2 align-middle'>
+        <Button
+          variant='ghost'
+          size='icon'
+          className='h-8 w-8 text-destructive hover:text-destructive'
+          onClick={handleDelete}
+          aria-label={`Delete row ${index + 1}`}
+        >
+          <Trash2 className='h-4 w-4' />
+        </Button>
+      </td>
     </TableRow>
   )
 }, (prevProps, nextProps) => {
@@ -110,7 +105,9 @@ export const EntityTableRow: React.FC<EntityTableRowProps> = memo(function Entit
     prevProps.index === nextProps.index &&
     prevProps.columns === nextProps.columns &&
     prevProps.auditColumns === nextProps.auditColumns &&
-    prevProps.entityName === nextProps.entityName
+    prevProps.entityName === nextProps.entityName &&
+    prevProps.onToggleSelect === nextProps.onToggleSelect &&
+    prevProps.onDelete === nextProps.onDelete
   );
 })
 

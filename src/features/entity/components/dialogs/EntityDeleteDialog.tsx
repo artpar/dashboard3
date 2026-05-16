@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx';
+import { getEntityId } from '@/features/entity/utils/entityIdentity'
 
 
 /**
@@ -17,17 +18,17 @@ const EntityDeleteDialog: React.FC = () => {
 
   // Handle the deletion confirmation
   const handleDelete = async () => {
-    if (!selectedItem?.reference_id) {
-      console.error('Cannot delete: Missing item reference ID')
+    const itemId = selectedItem ? getEntityId(selectedItem) : ''
+    if (!itemId) {
       setShowDeleteDialog(false)
       return
     }
 
     try {
-      await deleteItem(selectedItem.reference_id)
+      await deleteItem(itemId)
       setShowDeleteDialog(false)
-    } catch (error) {
-      console.error('Delete error:', error)
+    } catch {
+      setShowDeleteDialog(false)
     }
   }
 
@@ -40,12 +41,12 @@ const EntityDeleteDialog: React.FC = () => {
 
     for (const field of nameFields) {
       if (selectedItem[field]) {
-        return selectedItem[field]
+        return String(selectedItem[field])
       }
     }
 
     // Fall back to ID if no descriptive field is found
-    return selectedItem.reference_id || selectedItem.id || 'this item'
+    return getEntityId(selectedItem) || 'this item'
   }
 
   return (

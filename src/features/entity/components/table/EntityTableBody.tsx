@@ -1,20 +1,21 @@
 import React, { memo, useMemo } from 'react'
-import { TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { TableBody } from '@/components/ui/table'
 import EntityTableRow from './EntityTableRow'
 import { EntityEmptyState } from './EntityEmptyState'
 import { ColumnDefinition } from '@/features/entity/columns'
+import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
+
+type EntityTableItem = EntityRecord & Record<string, unknown>
 
 interface EntityTableBodyProps {
-  data: any[]
+  data: EntityTableItem[]
   filteredColumns: ColumnDefinition[]
   auditColumns: ColumnDefinition[]
-  relations: any[]
   entityName: string
   className: string
-  onEdit: (item: any) => void
-  onDelete: (item: any) => void
-  isItemSelected: (item: any) => boolean
-  toggleItemSelection: (item: any) => void
+  onDelete: (item: EntityTableItem) => void
+  isItemSelected: (item: EntityTableItem) => boolean
+  toggleItemSelection: (item: EntityTableItem) => void
 }
 
 /**
@@ -24,29 +25,16 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
   data,
   filteredColumns,
   auditColumns,
-  relations,
   entityName,
   className,
-  onEdit,
   onDelete,
   isItemSelected,
   toggleItemSelection,
 }) {
-  // If no data, show contextual empty state
-  if (data.length === 0) {
-    return (
-      <EntityEmptyState
-        entityName={entityName}
-        colSpan={filteredColumns.length + 3}
-        className={className}
-      />
-    )
-  }
-
   // Memoize the row generation to prevent unnecessary re-renders
   const tableRows = useMemo(() => {
     return data.map((item, index) => {
-      const itemId = item.id || item.reference_id || index;
+      const itemId = getEntityId(item) || index;
       const isSelected = isItemSelected(item);
       
       // Create a memoized toggle handler for this specific item
@@ -59,16 +47,25 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
           index={index}
           columns={filteredColumns}
           auditColumns={auditColumns}
-          relations={relations}
           entityName={entityName}
-          onEdit={onEdit}
           onDelete={onDelete}
           isSelected={isSelected}
           onToggleSelect={handleToggle}
         />
       );
     });
-  }, [data, filteredColumns, auditColumns, relations, entityName, onEdit, onDelete, isItemSelected, toggleItemSelection]);
+  }, [data, filteredColumns, auditColumns, entityName, onDelete, isItemSelected, toggleItemSelection]);
+
+  // If no data, show contextual empty state
+  if (data.length === 0) {
+    return (
+      <EntityEmptyState
+        entityName={entityName}
+        colSpan={filteredColumns.length + 4}
+        className={className}
+      />
+    )
+  }
 
   // Render the memoized rows
   return (
@@ -83,6 +80,8 @@ export const EntityTableBody: React.FC<EntityTableBodyProps> = memo(function Ent
     prevProps.data === nextProps.data &&
     prevProps.filteredColumns === nextProps.filteredColumns &&
     prevProps.auditColumns === nextProps.auditColumns &&
+    prevProps.entityName === nextProps.entityName &&
+    prevProps.onDelete === nextProps.onDelete &&
     prevProps.isItemSelected === nextProps.isItemSelected &&
     prevProps.toggleItemSelection === nextProps.toggleItemSelection
   );
