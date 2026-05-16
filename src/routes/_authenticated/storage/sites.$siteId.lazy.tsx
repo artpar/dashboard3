@@ -218,7 +218,7 @@ function SiteDetailPage() {
           </div>
 
           <TabsContent value="files" className="flex-1 overflow-hidden m-0">
-            <FileBrowser siteId={siteId} rootPath={site?.path || '/'} />
+            <FileBrowser siteId={siteId} rootPath="/" />
           </TabsContent>
 
           <TabsContent value="info" className="p-6 overflow-auto">
