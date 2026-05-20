@@ -1,24 +1,11 @@
 import { DaptinClient } from 'daptin-client'
 
-export const DAPTIN_ENDPOINT = import.meta.env.VITE_DAPTIN_ENDPOINT || import.meta.env.VITE_DAPTIN_URL
-let TOKEN = localStorage.getItem('token')
-
-// eslint-disable-next-line
-let CUSTOMER: any = null
-// eslint-disable-next-line
-let USER: any = null
-
-let daptinClient: DaptinClient
+export const DAPTIN_ENDPOINT =
+  import.meta.env.VITE_DAPTIN_ENDPOINT || import.meta.env.VITE_DAPTIN_URL
 
 async function reloadToken(force = false) {
   if (daptinClient) {
     await daptinClient.worldManager.init()
-    await daptinClient.worldManager.loadModel('user_account', force)
-    await daptinClient.worldManager.loadModel('usergroup', force)
-    await daptinClient.worldManager.loadModel('world', force)
-    await daptinClient.worldManager.loadModel('action', force)
-    await daptinClient.worldManager.loadModel('memory', force)
-    await daptinClient.worldManager.loadModel('workgroup', force)
     await daptinClient.worldManager.loadModels(force)
   }
   // const result = await daptinClient.aggregateClient
@@ -59,7 +46,6 @@ export async function signIn(
         ) {
           // Store token in localStorage
           localStorage.setItem('token', item.Attributes.value)
-          TOKEN = item.Attributes.value
         }
         // We don't need to handle the cookie.set here as the browser will do that automatically
       }
@@ -69,11 +55,11 @@ export async function signIn(
     } else if (response.responseType === 'success') {
       // Handle legacy response format for backward compatibility
       localStorage.setItem('token', response.token)
-      TOKEN = response.token
       return true
     }
     return false
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Sign in error:', error)
     return false
   }
@@ -101,6 +87,7 @@ export async function signUp(
     }
     return false
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Sign up error:', error)
     return false
   }
@@ -108,8 +95,6 @@ export async function signUp(
 
 export function logout(): void {
   localStorage.removeItem('token')
-  TOKEN = null
-  USER = null
   // Optionally reload the page or redirect to login
   window.location.href = '/'
 }
@@ -121,7 +106,7 @@ export function isAuthenticated(): boolean {
 // Configure Axios with backward compatibility for paramsSerializer
 const axiosConfig = {}
 
-daptinClient = new DaptinClient(
+const daptinClient = new DaptinClient(
   DAPTIN_ENDPOINT,
   false,
   {
