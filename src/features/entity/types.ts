@@ -14,6 +14,8 @@ export const SYSTEM_COLUMNS = [
   'permission',
 ]
 
+export type EntityCollectionViewMode = 'table' | 'cards'
+
 /**
  * Represents a group of fields in an entity
  */

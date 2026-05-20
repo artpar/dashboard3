@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
-import { TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { TableBody, TableCell, TableRow } from '@/components/ui/table'
 
 /**
  * Concept descriptions sourced from the Daptin wiki.
@@ -61,18 +61,30 @@ const ENTITY_CONCEPTS: Record<string, { what: string; when: string }> = {
 
 interface EntityEmptyStateProps {
   entityName: string
-  colSpan: number
+  colSpan?: number
   className?: string
+  variant?: 'table' | 'block'
 }
 
 export const EntityEmptyState: React.FC<EntityEmptyStateProps> = ({
   entityName,
-  colSpan,
+  colSpan = 1,
   className,
+  variant = 'table',
 }) => {
   const concept = ENTITY_CONCEPTS[entityName]
 
   if (!concept) {
+    if (variant === 'block') {
+      return (
+        <div
+          className={`text-muted-foreground py-8 text-center ${className || ''}`}
+        >
+          No records yet
+        </div>
+      )
+    }
+
     return (
       <TableBody className={className}>
         <TableRow>
@@ -87,24 +99,28 @@ export const EntityEmptyState: React.FC<EntityEmptyStateProps> = ({
     )
   }
 
+  const content = (
+    <div className='mx-auto max-w-md text-center'>
+      <p className='text-muted-foreground text-sm'>{concept.what}</p>
+      <p className='text-muted-foreground mt-2 text-xs'>{concept.when}</p>
+      <Button asChild size='sm' className='mt-4'>
+        <Link to={`/create/${entityName}`}>
+          <Plus className='mr-1 h-4 w-4' />
+          Create first {entityName.replace(/_/g, ' ')}
+        </Link>
+      </Button>
+    </div>
+  )
+
+  if (variant === 'block') {
+    return <div className={`py-10 ${className || ''}`}>{content}</div>
+  }
+
   return (
     <TableBody className={className}>
       <TableRow>
         <TableCell colSpan={colSpan} className='py-10'>
-          <div className='mx-auto max-w-md text-center'>
-            <p className='text-muted-foreground text-sm'>
-              {concept.what}
-            </p>
-            <p className='text-muted-foreground mt-2 text-xs'>
-              {concept.when}
-            </p>
-            <Button asChild size='sm' className='mt-4'>
-              <Link to={`/create/${entityName}`}>
-                <Plus className='mr-1 h-4 w-4' />
-                Create first {entityName.replace(/_/g, ' ')}
-              </Link>
-            </Button>
-          </div>
+          {content}
         </TableCell>
       </TableRow>
     </TableBody>

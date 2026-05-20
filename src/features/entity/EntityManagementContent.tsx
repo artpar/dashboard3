@@ -4,12 +4,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import EntityHeader from '@/features/entity/components/EntityHeader.tsx'
+import EntityDeleteDialog from '@/features/entity/components/dialogs/EntityDeleteDialog'
 import EntityFilterDialog from '@/features/entity/components/dialogs/EntityFilterDialog.tsx'
 import EntityPagination from '@/features/entity/components/pagination/EntityPagination.tsx'
+import EntityCardList from '@/features/entity/components/table/EntityCardList'
+import EntityCollectionDialogs from '@/features/entity/components/table/EntityCollectionDialogs'
 import EntityDataTable from '@/features/entity/components/table/EntityDataTable.tsx'
 import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { EntityRecord, getEntityId } from '@/features/entity/utils/entityIdentity'
-import EntityDeleteDialog from '@/features/entity/components/dialogs/EntityDeleteDialog'
+import { EntityCollectionViewMode } from '@/features/entity/types'
+import {
+  EntityRecord,
+  getEntityId,
+} from '@/features/entity/utils/entityIdentity'
 
 export interface EntityManagementProps {
   entityName: string
@@ -27,6 +33,8 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
   description,
   displayName,
 }) => {
+  const [viewMode, setViewMode] =
+    React.useState<EntityCollectionViewMode>('table')
   const {
     isLoading,
     error,
@@ -94,20 +102,21 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
             description={description || `Manage your ${entityName} records`}
             entityName={entityName}
             displayName={displayName}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         </div>
-        {/* Main content with data table */}
-        <div className='flex-1 min-h-0'>
+        {/* Main content with collection views */}
+        <div className='min-h-0 flex-1'>
           {isLoading ? (
             <div className='space-y-4 p-6'>
               <Skeleton className='h-10 w-full' />
               <Skeleton className='h-64 w-full' />
             </div>
+          ) : viewMode === 'cards' ? (
+            <EntityCardList onDelete={handleDelete} />
           ) : (
-            <EntityDataTable
-              handleBulkDelete={handleBulkDelete}
-              handleDelete={handleDelete}
-            />
+            <EntityDataTable handleDelete={handleDelete} />
           )}
         </div>
 
@@ -131,6 +140,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
           filters={filters}
           onApplyFilters={setFilters}
         />
+        <EntityCollectionDialogs onBulkDelete={handleBulkDelete} />
         <EntityDeleteDialog />
       </Main>
     </>

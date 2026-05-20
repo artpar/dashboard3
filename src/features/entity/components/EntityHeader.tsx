@@ -1,24 +1,71 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowDown, ArrowDownToLine, ArrowUp, Braces, Clipboard, Columns, Copy, Download, Eye, EyeOff, History, MoreHorizontal, Plus, RefreshCw, Settings, Share2, Trash2, Upload, X } from 'lucide-react';
-import { useWorldEntities } from '@/hooks/use-world-entities';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import {
+  ArrowDown,
+  ArrowDownToLine,
+  ArrowUp,
+  Braces,
+  Clipboard,
+  Columns,
+  Copy,
+  Download,
+  Eye,
+  EyeOff,
+  History,
+  LayoutList,
+  MoreHorizontal,
+  Plus,
+  RefreshCw,
+  Table2,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react'
+import { useWorldEntities } from '@/hooks/use-world-entities'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 // Dialog is now handled internally by ActionExecuteComponent
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import ActionExecuteComponent from '@/features/entity/components/actions/ActionExecuteComponent.tsx';
-import { useEntityActions } from '@/features/entity/hooks/useEntityActions.tsx';
-import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData';
-import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters';
-import EntityFilters from './filter/EntityFilters';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import ActionExecuteComponent, {
+  ActionSchema,
+} from '@/features/entity/components/actions/ActionExecuteComponent.tsx'
+import { useEntityActions } from '@/features/entity/hooks/useEntityActions.tsx'
+import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData'
+import { EntityCollectionViewMode } from '@/features/entity/types'
+import { AUDIT_COLUMNS } from '@/features/entity/utils/entityFormatters'
+import EntityFilters from './filter/EntityFilters'
 
+interface WorldEntity {
+  table_name: string
+  reference_id?: string
+}
 
 interface EntityHeaderProps {
   title: string
   description?: string
   entityName: string
   displayName?: string // Human-readable name for "New X" button
+  viewMode: EntityCollectionViewMode
+  onViewModeChange: (viewMode: EntityCollectionViewMode) => void
 }
 
 /**
@@ -29,121 +76,110 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   description,
   entityName,
   displayName,
+  viewMode,
+  onViewModeChange,
 }) => {
   const navigate = useNavigate()
   // Use displayName if provided, otherwise format entityName
   const buttonLabel = displayName || entityName.replace(/_/g, ' ')
-  const [viewMode, setViewMode] = useState<'table' | 'grid' | 'list'>('table')
   const [showColumnMenu, setShowColumnMenu] = useState(false)
 
   // Get entity data from context
   const {
     columns,
     availableActions,
-    relations,
     refresh,
     visibleColumns,
     toggleColumnVisibility,
     resetColumnVisibility,
     showAllColumns,
     selectedItems,
-    data,
     fetchData,
-    selectAllItems,
     setShowBulkDeleteDialog,
-    clearSelectedItems,
     sortColumns,
     setShowPasteDialog,
     copySelectedItems,
-    setClipboardData,
     setSortColumn,
     clearSorting,
   } = useEntityCollectionData()
-  const { executeAction, getActionSchema } = useEntityActions({entityName, entityId: null})
+  const { executeAction, getActionSchema } = useEntityActions({
+    entityName,
+    entityId: null,
+  })
 
   // Get world entities for related navigation
   const { entities } = useWorldEntities()
 
   // Find current entity in world entities
-  const currentEntity = entities.find((e: any) => e.table_name === entityName)
+  const currentEntity = (entities as WorldEntity[]).find(
+    (e) => e.table_name === entityName
+  )
 
-  const [actionSchema, setActionSchema] = useState<any>()
+  const [actionSchema, setActionSchema] = useState<ActionSchema | null>(null)
   const [showActionExecute, setShowActionExecute] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
-  const [importActionSchema, setImportActionSchema] = useState<any>({
-    "Name": "import_data",
-    "Label": "Import data from dump",
-    "OnType": "world",
-    "InstanceOptional": false,
-    "InFields": [
+  const [importActionSchema] = useState<ActionSchema>({
+    Name: 'import_data',
+    Label: 'Import data from dump',
+    OnType: 'world',
+    InstanceOptional: false,
+    ReferenceId: 'import_data',
+    InFields: [
       {
-        "Name": "JSON Dump file",
-        "ColumnName": "dump_file",
-        "ColumnType": "file.json|yaml|toml|hcl|csv|docx|xlsx|pdf|html",
-        "IsNullable": false
+        Name: 'JSON Dump file',
+        ColumnName: 'dump_file',
+        ColumnType: 'file.json|yaml|toml|hcl|csv|docx|xlsx|pdf|html',
+        IsNullable: false,
       },
       {
-        "Name": "truncate_before_insert",
-        "ColumnName": "truncate_before_insert",
-        "ColumnType": "truefalse"
+        Name: 'truncate_before_insert',
+        ColumnName: 'truncate_before_insert',
+        ColumnType: 'truefalse',
       },
       {
-        "Name": "batch_size",
-        "ColumnName": "batch_size",
-        "ColumnType": "measurement"
-      }
+        Name: 'batch_size',
+        ColumnName: 'batch_size',
+        ColumnType: 'measurement',
+      },
     ],
-    "OutFields": [
+    OutFields: [
       {
-        "Type": "__data_import",
-        "Method": "EXECUTE",
-        "Attributes": {
-          "world_reference_id": "$.reference_id",
-          "truncate_before_insert": "~truncate_before_insert",
-          "dump_file": "~dump_file",
-          "table_name": "$.table_name",
-          "batch_size": "~batch_size",
-          "user": "~user"
-        }
-      }
-    ]
+        Type: '__data_import',
+        Method: 'EXECUTE',
+        Attributes: {
+          world_reference_id: '$.reference_id',
+          truncate_before_insert: '~truncate_before_insert',
+          dump_file: '~dump_file',
+          table_name: '$.table_name',
+          batch_size: '~batch_size',
+          user: '~user',
+        },
+      },
+    ],
   })
   const handleExecuteAction = async (actionId: string) => {
     const actionSchema = await getActionSchema(actionId)
-    setActionSchema(actionSchema)
+    setActionSchema(actionSchema as ActionSchema)
     setShowActionExecute(true)
   }
 
   // Handle import data
   const handleImport = async () => {
-    try {
-      // Get the import_data action schema
-      console.log("Importing data for entity:", entityName)
-      setShowImportDialog(true)
-    } catch (error) {
-      console.error('Failed to get import schema:', error)
-    }
+    setShowImportDialog(true)
   }
 
   // Handle export
-  const handleExport = async (format: 'csv' | 'json' | 'xlsx' | 'pdf' | 'html') => {
-    try {
-      // Get visible columns as a comma-separated string
-      const columnsToExport = visibleColumns.join(',');
+  const handleExport = async (
+    format: 'csv' | 'json' | 'xlsx' | 'pdf' | 'html'
+  ) => {
+    const columnsToExport = visibleColumns.join(',')
 
-      // Execute the export_data action
-      await executeAction('world', 'export_data', {
-        table_name: entityName,
-        format: format,
-        columns: columnsToExport,
-        include_headers: true
-      })
-
-      // Note: No need to handle the download manually as the executeAction
-      // function in useEntityActions already handles the file download response
-    } catch (error) {
-      console.error('Export failed:', error)
-    }
+    await executeAction('world', 'export_data', {
+      table_name: entityName,
+      format: format,
+      columns: columnsToExport,
+      include_headers: true,
+    })
   }
 
   // Get column groups for the dropdown menu
@@ -159,22 +195,23 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
 
   return (
     <div className='flex flex-col space-y-4'>
-      <ActionExecuteComponent
-        actionSchema={actionSchema}
-        viewType="dialog"
-        open={showActionExecute}
-        onOpenChange={setShowActionExecute}
-        onCancel={() => setShowActionExecute(false)}
-        onExecute={async (payload) => {
-          const actionResponse = await executeAction(actionSchema.OnType, actionSchema.Name, payload)
-          console.log("actionResponse", actionResponse)
-        }}
-      />
+      {actionSchema && (
+        <ActionExecuteComponent
+          actionSchema={actionSchema}
+          viewType='dialog'
+          open={showActionExecute}
+          onOpenChange={setShowActionExecute}
+          onCancel={() => setShowActionExecute(false)}
+          onExecute={async (payload) => {
+            await executeAction(actionSchema.OnType, actionSchema.Name, payload)
+          }}
+        />
+      )}
 
       {/* Import Data Dialog */}
       <ActionExecuteComponent
         actionSchema={importActionSchema}
-        viewType="dialog"
+        viewType='dialog'
         open={showImportDialog}
         onOpenChange={setShowImportDialog}
         onCancel={() => setShowImportDialog(false)}
@@ -183,14 +220,9 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           const importPayload = {
             ...payload,
             table_name: entityName,
-            world_id: currentEntity.reference_id
+            world_id: currentEntity?.reference_id,
           }
-          const actionResponse = await executeAction(
-            'world',
-            'import_data',
-            importPayload
-          )
-          console.log("Import response:", actionResponse)
+          await executeAction('world', 'import_data', importPayload)
           // Refresh the data after import
           refresh()
         }}
@@ -200,7 +232,9 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
           {description && (
-            <p className='text-muted-foreground mt-1 max-w-2xl text-sm'>{description}</p>
+            <p className='text-muted-foreground mt-1 max-w-2xl text-sm'>
+              {description}
+            </p>
           )}
         </div>
       </div>
@@ -219,7 +253,6 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
                   size='icon'
                   className='h-8 w-8 p-0'
                   onClick={() => {
-                    console.log('refreshing data')
                     fetchData()
                   }}
                 >
@@ -245,7 +278,31 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             New {buttonLabel}
           </Button>
 
-          {/* Refresh button with tooltip */}
+          <div className='flex rounded-md border'>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size='icon'
+              className='h-8 w-8 rounded-r-none border-r'
+              onClick={() => onViewModeChange('table')}
+              aria-pressed={viewMode === 'table'}
+              title='Table view'
+            >
+              <Table2 className='h-4 w-4' />
+              <span className='sr-only'>Table view</span>
+            </Button>
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size='icon'
+              className='h-8 w-8 rounded-l-none'
+              onClick={() => onViewModeChange('cards')}
+              aria-pressed={viewMode === 'cards'}
+              title='Card view'
+            >
+              <LayoutList className='h-4 w-4' />
+              <span className='sr-only'>Card view</span>
+            </Button>
+          </div>
+
           {/* Column visibility dropdown */}
           <DropdownMenu open={showColumnMenu} onOpenChange={setShowColumnMenu}>
             <DropdownMenuTrigger asChild>
@@ -412,6 +469,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
               {/* Available columns for sorting */}
               <DropdownMenuLabel>Available Columns</DropdownMenuLabel>
               {columns
+                .slice()
                 .sort((a, b) => a.ColumnName.localeCompare(b.ColumnName))
                 .map((column) => {
                   const columnName = column.ColumnName
@@ -507,39 +565,41 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Tools</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link to="/tools/audit" search={{ entity: entityName }}>
+                <Link to='/tools/audit' search={{ entity: entityName }}>
                   <History className='mr-2 h-4 w-4' />
                   <span>View Audit Logs</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/tools/graphql" search={{ entity: entityName }}>
+                <Link to='/tools/graphql' search={{ entity: entityName }}>
                   <Braces className='mr-2 h-4 w-4' />
                   <span>Query with GraphQL</span>
                 </Link>
               </DropdownMenuItem>
 
               {/* Custom actions */}
-              {availableActions && availableActions.filter((e) => e.InstanceOptional).length > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Custom Actions</DropdownMenuLabel>
-                    {availableActions
-                      .filter((e) => e.InstanceOptional)
-                      .map((action: any) => (
-                        <DropdownMenuItem
-                          key={action.ReferenceId}
-                          onClick={() =>
-                            handleExecuteAction(action.ReferenceId)
-                          }
-                        >
-                          <span>{action.Label}</span>
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuGroup>
-                </>
-              )}
+              {availableActions &&
+                availableActions.filter((e) => e.InstanceOptional).length >
+                  0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Custom Actions</DropdownMenuLabel>
+                      {availableActions
+                        .filter((e) => e.InstanceOptional)
+                        .map((action) => (
+                          <DropdownMenuItem
+                            key={action.ReferenceId}
+                            onClick={() =>
+                              handleExecuteAction(action.ReferenceId)
+                            }
+                          >
+                            <span>{action.Label}</span>
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuGroup>
+                  </>
+                )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
