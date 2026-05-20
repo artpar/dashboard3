@@ -74,15 +74,18 @@ cd dashboard3
 pnpm install
 ```
 
-3. Configure environment variables:
+3. Configure environment variables for local development:
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set your Daptin backend URL:
+Edit `.env` if your local Daptin backend is not on the default URL:
 ```env
 VITE_DAPTIN_URL=http://localhost:6336
 ```
+
+Production builds should not define a Daptin endpoint. When no endpoint
+environment variable is set, the dashboard uses the same origin that served it.
 
 4. Start the development server:
 ```bash
@@ -97,7 +100,7 @@ The application will be available at `http://localhost:5173`
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_DAPTIN_URL` | Daptin backend URL | `http://localhost:6336` |
+| `VITE_DAPTIN_URL` | Optional local Daptin backend override | current browser origin |
 
 ### Daptin Backend Setup
 
@@ -252,7 +255,7 @@ Contributions are welcome! Please follow these guidelines:
 
 **Connection to Daptin fails:**
 - Verify Daptin is running and accessible
-- Check VITE_DAPTIN_URL in .env
+- Check `VITE_DAPTIN_URL` in `.env` for local development
 - Ensure CORS is configured in Daptin
 
 **Authentication errors:**

@@ -127,10 +127,13 @@ export const Route = createFileRoute('/_authenticated/entities/$entityName')({
 
 ## Environment Variables
 
-Required environment variables (in `.env`):
+Optional local development environment variables (in `.env`):
 ```
-VITE_DAPTIN_URL=http://localhost:6336  # Daptin backend URL
+VITE_DAPTIN_URL=http://localhost:6336  # local Daptin backend override
 ```
+
+Production builds should not define a Daptin endpoint; the dashboard defaults to
+the current browser origin.
 
 ## Testing Approach
 
