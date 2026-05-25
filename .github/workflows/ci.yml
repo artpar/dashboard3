@@ -3,11 +3,11 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - main3
+      - main4
 
   pull_request:
     branches:
-      - main3
+      - main4
 
 jobs:
   install-lint-build:
