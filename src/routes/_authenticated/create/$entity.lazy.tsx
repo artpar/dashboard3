@@ -36,7 +36,7 @@ const MailServerForm = lazy(() =>
 const SPECIALIZED_CREATE_FORMS: Record<
   string,
   {
-    component: React.LazyExoticComponent<React.FC<any>>
+    component: React.LazyExoticComponent<React.FC<Record<string, never>>>
     title: string
     description: string
     backLink: string
@@ -63,8 +63,8 @@ const SPECIALIZED_CREATE_FORMS: Record<
   mail_server: {
     component: MailServerForm,
     title: 'New Mail Server',
-    description: 'Configure SMTP or IMAP mail server connection',
-    backLink: '/communication/email',
+    description: 'Configure a native Daptin SMTP listener row',
+    backLink: '/mail/servers',
   },
 }
 

@@ -16,6 +16,7 @@ import {
   Mail,
   Plug,
   Radio,
+  Send,
   Settings,
   Shield,
   ShieldCheck,
@@ -107,10 +108,28 @@ const fileSiteItems: NavItem[] = [
 
 const mailItems: NavItem[] = [
   {
-    title: 'Mail Servers',
-    url: '/communication/email',
+    title: 'Overview',
+    url: '/mail',
     icon: Mail,
-    description: 'SMTP and IMAP server configuration for Daptin mail',
+    description: 'Native SMTP and IMAP readiness for this Daptin server',
+  },
+  {
+    title: 'Servers',
+    url: '/mail/servers',
+    icon: Mail,
+    description: 'Native Daptin SMTP listener rows',
+  },
+  {
+    title: 'Accounts',
+    url: '/mail/accounts',
+    icon: Mail,
+    description: 'Mail accounts linked to native Daptin mail servers',
+  },
+  {
+    title: 'Outbox',
+    url: '/mail/outbox',
+    icon: Send,
+    description: 'Queued and failed Daptin outbox messages',
   },
 ]
 

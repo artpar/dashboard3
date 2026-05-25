@@ -24,6 +24,7 @@ import { Route as auth500Import } from './routes/(auth)/500'
 const AuthenticatedTemplatesLazyImport = createFileRoute(
   '/_authenticated/templates',
 )()
+const AuthenticatedMailLazyImport = createFileRoute('/_authenticated/mail')()
 const AuthenticatedConfigLazyImport = createFileRoute(
   '/_authenticated/config',
 )()
@@ -87,6 +88,15 @@ const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
 const AuthenticatedSettingsAccountLazyImport = createFileRoute(
   '/_authenticated/settings/account',
 )()
+const AuthenticatedMailServersLazyImport = createFileRoute(
+  '/_authenticated/mail/servers',
+)()
+const AuthenticatedMailOutboxLazyImport = createFileRoute(
+  '/_authenticated/mail/outbox',
+)()
+const AuthenticatedMailAccountsLazyImport = createFileRoute(
+  '/_authenticated/mail/accounts',
+)()
 const AuthenticatedDataStreamsLazyImport = createFileRoute(
   '/_authenticated/data/streams',
 )()
@@ -141,6 +151,12 @@ const AuthenticatedStorageCloudStoresStoreIdLazyImport = createFileRoute(
 const AuthenticatedStorageCertificatesCertIdLazyImport = createFileRoute(
   '/_authenticated/storage/certificates/$certId',
 )()
+const AuthenticatedMailServersServerIdLazyImport = createFileRoute(
+  '/_authenticated/mail/servers/$serverId',
+)()
+const AuthenticatedMailAccountsAccountIdLazyImport = createFileRoute(
+  '/_authenticated/mail/accounts/$accountId',
+)()
 const AuthenticatedDataIntegrationsIntegrationIdLazyImport = createFileRoute(
   '/_authenticated/data/integrations/$integrationId',
 )()
@@ -178,6 +194,14 @@ const AuthenticatedTemplatesLazyRoute = AuthenticatedTemplatesLazyImport.update(
   } as any,
 ).lazy(() =>
   import('./routes/_authenticated/templates.lazy').then((d) => d.Route),
+)
+
+const AuthenticatedMailLazyRoute = AuthenticatedMailLazyImport.update({
+  id: '/mail',
+  path: '/mail',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any).lazy(() =>
+  import('./routes/_authenticated/mail.lazy').then((d) => d.Route),
 )
 
 const AuthenticatedConfigLazyRoute = AuthenticatedConfigLazyImport.update({
@@ -434,6 +458,33 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
+const AuthenticatedMailServersLazyRoute =
+  AuthenticatedMailServersLazyImport.update({
+    id: '/servers',
+    path: '/servers',
+    getParentRoute: () => AuthenticatedMailLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/mail/servers.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedMailOutboxLazyRoute =
+  AuthenticatedMailOutboxLazyImport.update({
+    id: '/outbox',
+    path: '/outbox',
+    getParentRoute: () => AuthenticatedMailLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/mail/outbox.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedMailAccountsLazyRoute =
+  AuthenticatedMailAccountsLazyImport.update({
+    id: '/accounts',
+    path: '/accounts',
+    getParentRoute: () => AuthenticatedMailLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/mail/accounts.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedDataStreamsLazyRoute =
   AuthenticatedDataStreamsLazyImport.update({
     id: '/data/streams',
@@ -616,6 +667,28 @@ const AuthenticatedStorageCertificatesCertIdLazyRoute =
     ),
   )
 
+const AuthenticatedMailServersServerIdLazyRoute =
+  AuthenticatedMailServersServerIdLazyImport.update({
+    id: '/$serverId',
+    path: '/$serverId',
+    getParentRoute: () => AuthenticatedMailServersLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/mail/servers.$serverId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedMailAccountsAccountIdLazyRoute =
+  AuthenticatedMailAccountsAccountIdLazyImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => AuthenticatedMailAccountsLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/mail/accounts.$accountId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedDataIntegrationsIntegrationIdLazyRoute =
   AuthenticatedDataIntegrationsIntegrationIdLazyImport.update({
     id: '/$integrationId',
@@ -766,6 +839,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfigLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/mail': {
+      id: '/_authenticated/mail'
+      path: '/mail'
+      fullPath: '/mail'
+      preLoaderRoute: typeof AuthenticatedMailLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/templates': {
       id: '/_authenticated/templates'
       path: '/templates'
@@ -877,6 +957,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/data/streams'
       preLoaderRoute: typeof AuthenticatedDataStreamsLazyImport
       parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/mail/accounts': {
+      id: '/_authenticated/mail/accounts'
+      path: '/accounts'
+      fullPath: '/mail/accounts'
+      preLoaderRoute: typeof AuthenticatedMailAccountsLazyImport
+      parentRoute: typeof AuthenticatedMailLazyImport
+    }
+    '/_authenticated/mail/outbox': {
+      id: '/_authenticated/mail/outbox'
+      path: '/outbox'
+      fullPath: '/mail/outbox'
+      preLoaderRoute: typeof AuthenticatedMailOutboxLazyImport
+      parentRoute: typeof AuthenticatedMailLazyImport
+    }
+    '/_authenticated/mail/servers': {
+      id: '/_authenticated/mail/servers'
+      path: '/servers'
+      fullPath: '/mail/servers'
+      preLoaderRoute: typeof AuthenticatedMailServersLazyImport
+      parentRoute: typeof AuthenticatedMailLazyImport
     }
     '/_authenticated/settings/account': {
       id: '/_authenticated/settings/account'
@@ -1025,6 +1126,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDataIntegrationsIntegrationIdLazyImport
       parentRoute: typeof AuthenticatedDataIntegrationsLazyImport
     }
+    '/_authenticated/mail/accounts/$accountId': {
+      id: '/_authenticated/mail/accounts/$accountId'
+      path: '/$accountId'
+      fullPath: '/mail/accounts/$accountId'
+      preLoaderRoute: typeof AuthenticatedMailAccountsAccountIdLazyImport
+      parentRoute: typeof AuthenticatedMailAccountsLazyImport
+    }
+    '/_authenticated/mail/servers/$serverId': {
+      id: '/_authenticated/mail/servers/$serverId'
+      path: '/$serverId'
+      fullPath: '/mail/servers/$serverId'
+      preLoaderRoute: typeof AuthenticatedMailServersServerIdLazyImport
+      parentRoute: typeof AuthenticatedMailServersLazyImport
+    }
     '/_authenticated/storage/certificates/$certId': {
       id: '/_authenticated/storage/certificates/$certId'
       path: '/$certId'
@@ -1082,6 +1197,55 @@ const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLaz
 const AuthenticatedSettingsRouteLazyRouteWithChildren =
   AuthenticatedSettingsRouteLazyRoute._addFileChildren(
     AuthenticatedSettingsRouteLazyRouteChildren,
+  )
+
+interface AuthenticatedMailAccountsLazyRouteChildren {
+  AuthenticatedMailAccountsAccountIdLazyRoute: typeof AuthenticatedMailAccountsAccountIdLazyRoute
+}
+
+const AuthenticatedMailAccountsLazyRouteChildren: AuthenticatedMailAccountsLazyRouteChildren =
+  {
+    AuthenticatedMailAccountsAccountIdLazyRoute:
+      AuthenticatedMailAccountsAccountIdLazyRoute,
+  }
+
+const AuthenticatedMailAccountsLazyRouteWithChildren =
+  AuthenticatedMailAccountsLazyRoute._addFileChildren(
+    AuthenticatedMailAccountsLazyRouteChildren,
+  )
+
+interface AuthenticatedMailServersLazyRouteChildren {
+  AuthenticatedMailServersServerIdLazyRoute: typeof AuthenticatedMailServersServerIdLazyRoute
+}
+
+const AuthenticatedMailServersLazyRouteChildren: AuthenticatedMailServersLazyRouteChildren =
+  {
+    AuthenticatedMailServersServerIdLazyRoute:
+      AuthenticatedMailServersServerIdLazyRoute,
+  }
+
+const AuthenticatedMailServersLazyRouteWithChildren =
+  AuthenticatedMailServersLazyRoute._addFileChildren(
+    AuthenticatedMailServersLazyRouteChildren,
+  )
+
+interface AuthenticatedMailLazyRouteChildren {
+  AuthenticatedMailAccountsLazyRoute: typeof AuthenticatedMailAccountsLazyRouteWithChildren
+  AuthenticatedMailOutboxLazyRoute: typeof AuthenticatedMailOutboxLazyRoute
+  AuthenticatedMailServersLazyRoute: typeof AuthenticatedMailServersLazyRouteWithChildren
+}
+
+const AuthenticatedMailLazyRouteChildren: AuthenticatedMailLazyRouteChildren = {
+  AuthenticatedMailAccountsLazyRoute:
+    AuthenticatedMailAccountsLazyRouteWithChildren,
+  AuthenticatedMailOutboxLazyRoute: AuthenticatedMailOutboxLazyRoute,
+  AuthenticatedMailServersLazyRoute:
+    AuthenticatedMailServersLazyRouteWithChildren,
+}
+
+const AuthenticatedMailLazyRouteWithChildren =
+  AuthenticatedMailLazyRoute._addFileChildren(
+    AuthenticatedMailLazyRouteChildren,
   )
 
 interface AuthenticatedTemplatesLazyRouteChildren {
@@ -1207,6 +1371,7 @@ const AuthenticatedStorageSitesLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedConfigLazyRoute: typeof AuthenticatedConfigLazyRoute
+  AuthenticatedMailLazyRoute: typeof AuthenticatedMailLazyRouteWithChildren
   AuthenticatedTemplatesLazyRoute: typeof AuthenticatedTemplatesLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminActionsLazyRoute: typeof AuthenticatedAdminActionsLazyRouteWithChildren
@@ -1241,6 +1406,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedConfigLazyRoute: AuthenticatedConfigLazyRoute,
+  AuthenticatedMailLazyRoute: AuthenticatedMailLazyRouteWithChildren,
   AuthenticatedTemplatesLazyRoute: AuthenticatedTemplatesLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminActionsLazyRoute:
@@ -1299,6 +1465,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/config': typeof AuthenticatedConfigLazyRoute
+  '/mail': typeof AuthenticatedMailLazyRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
@@ -1315,6 +1482,9 @@ export interface FileRoutesByFullPath {
   '/data/import': typeof AuthenticatedDataImportLazyRoute
   '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
+  '/mail/accounts': typeof AuthenticatedMailAccountsLazyRouteWithChildren
+  '/mail/outbox': typeof AuthenticatedMailOutboxLazyRoute
+  '/mail/servers': typeof AuthenticatedMailServersLazyRouteWithChildren
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -1336,6 +1506,8 @@ export interface FileRoutesByFullPath {
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/mail/accounts/$accountId': typeof AuthenticatedMailAccountsAccountIdLazyRoute
+  '/mail/servers/$serverId': typeof AuthenticatedMailServersServerIdLazyRoute
   '/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1353,6 +1525,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/config': typeof AuthenticatedConfigLazyRoute
+  '/mail': typeof AuthenticatedMailLazyRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
@@ -1369,6 +1542,9 @@ export interface FileRoutesByTo {
   '/data/import': typeof AuthenticatedDataImportLazyRoute
   '/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/data/streams': typeof AuthenticatedDataStreamsLazyRoute
+  '/mail/accounts': typeof AuthenticatedMailAccountsLazyRouteWithChildren
+  '/mail/outbox': typeof AuthenticatedMailOutboxLazyRoute
+  '/mail/servers': typeof AuthenticatedMailServersLazyRouteWithChildren
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -1390,6 +1566,8 @@ export interface FileRoutesByTo {
   '/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/mail/accounts/$accountId': typeof AuthenticatedMailAccountsAccountIdLazyRoute
+  '/mail/servers/$serverId': typeof AuthenticatedMailServersServerIdLazyRoute
   '/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1411,6 +1589,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/config': typeof AuthenticatedConfigLazyRoute
+  '/_authenticated/mail': typeof AuthenticatedMailLazyRouteWithChildren
   '/_authenticated/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
@@ -1427,6 +1606,9 @@ export interface FileRoutesById {
   '/_authenticated/data/import': typeof AuthenticatedDataImportLazyRoute
   '/_authenticated/data/integrations': typeof AuthenticatedDataIntegrationsLazyRouteWithChildren
   '/_authenticated/data/streams': typeof AuthenticatedDataStreamsLazyRoute
+  '/_authenticated/mail/accounts': typeof AuthenticatedMailAccountsLazyRouteWithChildren
+  '/_authenticated/mail/outbox': typeof AuthenticatedMailOutboxLazyRoute
+  '/_authenticated/mail/servers': typeof AuthenticatedMailServersLazyRouteWithChildren
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -1448,6 +1630,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/state-machines/$smdId': typeof AuthenticatedAdminStateMachinesSmdIdLazyRoute
   '/_authenticated/communication/email/$serverId': typeof AuthenticatedCommunicationEmailServerIdLazyRoute
   '/_authenticated/data/integrations/$integrationId': typeof AuthenticatedDataIntegrationsIntegrationIdLazyRoute
+  '/_authenticated/mail/accounts/$accountId': typeof AuthenticatedMailAccountsAccountIdLazyRoute
+  '/_authenticated/mail/servers/$serverId': typeof AuthenticatedMailServersServerIdLazyRoute
   '/_authenticated/storage/certificates/$certId': typeof AuthenticatedStorageCertificatesCertIdLazyRoute
   '/_authenticated/storage/cloud-stores/$storeId': typeof AuthenticatedStorageCloudStoresStoreIdLazyRoute
   '/_authenticated/storage/sites/$siteId': typeof AuthenticatedStorageSitesSiteIdLazyRoute
@@ -1469,6 +1653,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/config'
+    | '/mail'
     | '/templates'
     | '/'
     | '/admin/actions'
@@ -1485,6 +1670,9 @@ export interface FileRouteTypes {
     | '/data/import'
     | '/data/integrations'
     | '/data/streams'
+    | '/mail/accounts'
+    | '/mail/outbox'
+    | '/mail/servers'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -1506,6 +1694,8 @@ export interface FileRouteTypes {
     | '/admin/state-machines/$smdId'
     | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
+    | '/mail/accounts/$accountId'
+    | '/mail/servers/$serverId'
     | '/storage/certificates/$certId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
@@ -1522,6 +1712,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/config'
+    | '/mail'
     | '/templates'
     | '/'
     | '/admin/actions'
@@ -1538,6 +1729,9 @@ export interface FileRouteTypes {
     | '/data/import'
     | '/data/integrations'
     | '/data/streams'
+    | '/mail/accounts'
+    | '/mail/outbox'
+    | '/mail/servers'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -1559,6 +1753,8 @@ export interface FileRouteTypes {
     | '/admin/state-machines/$smdId'
     | '/communication/email/$serverId'
     | '/data/integrations/$integrationId'
+    | '/mail/accounts/$accountId'
+    | '/mail/servers/$serverId'
     | '/storage/certificates/$certId'
     | '/storage/cloud-stores/$storeId'
     | '/storage/sites/$siteId'
@@ -1578,6 +1774,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/config'
+    | '/_authenticated/mail'
     | '/_authenticated/templates'
     | '/_authenticated/'
     | '/_authenticated/admin/actions'
@@ -1594,6 +1791,9 @@ export interface FileRouteTypes {
     | '/_authenticated/data/import'
     | '/_authenticated/data/integrations'
     | '/_authenticated/data/streams'
+    | '/_authenticated/mail/accounts'
+    | '/_authenticated/mail/outbox'
+    | '/_authenticated/mail/servers'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -1615,6 +1815,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/state-machines/$smdId'
     | '/_authenticated/communication/email/$serverId'
     | '/_authenticated/data/integrations/$integrationId'
+    | '/_authenticated/mail/accounts/$accountId'
+    | '/_authenticated/mail/servers/$serverId'
     | '/_authenticated/storage/certificates/$certId'
     | '/_authenticated/storage/cloud-stores/$storeId'
     | '/_authenticated/storage/sites/$siteId'
@@ -1678,6 +1880,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/config",
+        "/_authenticated/mail",
         "/_authenticated/templates",
         "/_authenticated/",
         "/_authenticated/admin/actions",
@@ -1752,6 +1955,15 @@ export const routeTree = rootRoute
     "/_authenticated/config": {
       "filePath": "_authenticated/config.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/_authenticated/mail": {
+      "filePath": "_authenticated/mail.lazy.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/mail/accounts",
+        "/_authenticated/mail/outbox",
+        "/_authenticated/mail/servers"
+      ]
     },
     "/_authenticated/templates": {
       "filePath": "_authenticated/templates.lazy.tsx",
@@ -1831,6 +2043,24 @@ export const routeTree = rootRoute
     "/_authenticated/data/streams": {
       "filePath": "_authenticated/data/streams.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/_authenticated/mail/accounts": {
+      "filePath": "_authenticated/mail/accounts.lazy.tsx",
+      "parent": "/_authenticated/mail",
+      "children": [
+        "/_authenticated/mail/accounts/$accountId"
+      ]
+    },
+    "/_authenticated/mail/outbox": {
+      "filePath": "_authenticated/mail/outbox.lazy.tsx",
+      "parent": "/_authenticated/mail"
+    },
+    "/_authenticated/mail/servers": {
+      "filePath": "_authenticated/mail/servers.lazy.tsx",
+      "parent": "/_authenticated/mail",
+      "children": [
+        "/_authenticated/mail/servers/$serverId"
+      ]
     },
     "/_authenticated/settings/account": {
       "filePath": "_authenticated/settings/account.lazy.tsx",
@@ -1924,6 +2154,14 @@ export const routeTree = rootRoute
     "/_authenticated/data/integrations/$integrationId": {
       "filePath": "_authenticated/data/integrations.$integrationId.lazy.tsx",
       "parent": "/_authenticated/data/integrations"
+    },
+    "/_authenticated/mail/accounts/$accountId": {
+      "filePath": "_authenticated/mail/accounts.$accountId.lazy.tsx",
+      "parent": "/_authenticated/mail/accounts"
+    },
+    "/_authenticated/mail/servers/$serverId": {
+      "filePath": "_authenticated/mail/servers.$serverId.lazy.tsx",
+      "parent": "/_authenticated/mail/servers"
     },
     "/_authenticated/storage/certificates/$certId": {
       "filePath": "_authenticated/storage/certificates.$certId.lazy.tsx",

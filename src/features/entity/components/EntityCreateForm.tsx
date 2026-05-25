@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useToast } from '@/components/ui/use-toast'
 import EntityForm from '@/features/entity/components/EntityForm'
+import { getEntityCollectionPath } from '@/features/entity/utils/entityIdentity'
 
 interface EntityCreateFormProps {
   entityName: string
@@ -27,7 +28,7 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
             description: `${entityName} created successfully`,
           })
           navigate({
-            to: `/${entityName}`
+            to: getEntityCollectionPath(entityName),
           })
         }}
       />

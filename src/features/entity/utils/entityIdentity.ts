@@ -11,9 +11,14 @@ const SPECIALIZED_DETAIL_ROUTES: Record<string, string> = {
   certificate: '/storage/certificates',
   integration: '/data/integrations',
   smd: '/admin/state-machines',
-  mail_server: '/communication/email',
+  mail_server: '/mail/servers',
+  mail_account: '/mail/accounts',
   action: '/admin/actions',
   template: '/templates',
+}
+
+export function getEntityCollectionPath(entityName: string): string {
+  return SPECIALIZED_DETAIL_ROUTES[entityName] ?? `/${entityName}`
 }
 
 export function getEntityId(item: EntityRecord): string {
