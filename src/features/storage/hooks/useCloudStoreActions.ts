@@ -1,7 +1,9 @@
+/* eslint-disable no-console */
 import { useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/components/ui/use-toast'
 import { daptinClient } from '@/daptin'
+import type { DaptinActionFileInput } from 'daptin-client'
+import { useToast } from '@/components/ui/use-toast'
 
 interface CloudStoreActionsResult {
   isLoading: boolean
@@ -11,7 +13,11 @@ interface CloudStoreActionsResult {
   deletePath: (path: string) => Promise<void>
   movePath: (source: string, destination: string) => Promise<void>
   uploadFile: (options: { path: string; file: File }) => Promise<void>
-  createSite: (options: { hostname: string; path?: string; siteType?: string }) => Promise<void>
+  createSite: (options: {
+    hostname: string
+    path?: string
+    siteType?: string
+  }) => Promise<void>
 }
 
 /**
@@ -34,24 +40,31 @@ export function useCloudStoreActions(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // Helper to execute cloud store actions
-  const executeAction = useCallback(
-    async (actionName: string, params: Record<string, any>) => {
+  const runCloudStoreAction = useCallback(
+    async <T>(actionName: string, action: () => Promise<T>): Promise<T> => {
       setIsLoading(true)
       setError(null)
+      console.info('[storage.cloudStore] action:start', {
+        actionName,
+        cloudStoreId,
+      })
 
       try {
-        const response = await daptinClient.actionManager.doAction(
-          'cloud_store',
+        const response = await action()
+        console.info('[storage.cloudStore] action:success', {
           actionName,
-          {
-            cloud_store_id: cloudStoreId,
-            ...params,
-          }
-        )
+          cloudStoreId,
+        })
         return response
-      } catch (err: any) {
-        const error = new Error(err.message || `Failed to execute ${actionName}`)
+      } catch (err: unknown) {
+        const error = new Error(
+          err instanceof Error ? err.message : `Failed to execute ${actionName}`
+        )
+        console.error('[storage.cloudStore] action:failed', {
+          actionName,
+          cloudStoreId,
+          error,
+        })
         setError(error)
         throw error
       } finally {
@@ -64,64 +77,74 @@ export function useCloudStoreActions(
   // Create folder
   const createFolder = useCallback(
     async (options: { path: string; name: string }): Promise<void> => {
-      await executeAction('create_folder', {
-        path: options.path,
-        name: options.name,
-      })
+      await runCloudStoreAction('create_folder', () =>
+        daptinClient.storageManager.cloudStore.createFolder(cloudStoreId, {
+          path: options.path,
+          name: options.name,
+        })
+      )
       toast({
         title: 'Folder Created',
         description: `Folder "${options.name}" has been created`,
       })
     },
-    [executeAction, toast]
+    [cloudStoreId, runCloudStoreAction, toast]
   )
 
   // Delete path (file or folder)
   const deletePath = useCallback(
     async (path: string): Promise<void> => {
-      await executeAction('delete_path', { path })
+      await runCloudStoreAction('delete_path', () =>
+        daptinClient.storageManager.cloudStore.deletePath(cloudStoreId, {
+          path,
+        })
+      )
       toast({
         title: 'Deleted',
         description: 'Path has been deleted successfully',
       })
     },
-    [executeAction, toast]
+    [cloudStoreId, runCloudStoreAction, toast]
   )
 
   // Move path (rename or relocate)
   const movePath = useCallback(
     async (source: string, destination: string): Promise<void> => {
-      await executeAction('move_path', {
-        source,
-        destination,
-      })
+      await runCloudStoreAction('move_path', () =>
+        daptinClient.storageManager.cloudStore.movePath(cloudStoreId, {
+          source,
+          destination,
+        })
+      )
       toast({
         title: 'Moved',
         description: 'Path has been moved successfully',
       })
     },
-    [executeAction, toast]
+    [cloudStoreId, runCloudStoreAction, toast]
   )
 
   // Upload file
   const uploadFile = useCallback(
     async (options: { path: string; file: File }): Promise<void> => {
-      // For file uploads, we need to handle the file content
-      // The API expects a base64 encoded file or multipart form data
       const reader = new FileReader()
 
       return new Promise((resolve, reject) => {
         reader.onload = async () => {
           try {
             const base64Content = reader.result?.toString().split(',')[1] || ''
-            await executeAction('upload_file', {
-              path: options.path,
-              file: {
-                name: options.file.name,
-                type: options.file.type,
-                contents: base64Content,
-              },
-            })
+            const fileInput: DaptinActionFileInput = {
+              name: options.file.name,
+              type: options.file.type,
+              file: base64Content,
+            }
+
+            await runCloudStoreAction('upload_file', () =>
+              daptinClient.storageManager.cloudStore.uploadFile(cloudStoreId, {
+                path: options.path,
+                file: fileInput,
+              })
+            )
             toast({
               title: 'File Uploaded',
               description: `"${options.file.name}" has been uploaded`,
@@ -135,17 +158,23 @@ export function useCloudStoreActions(
         reader.readAsDataURL(options.file)
       })
     },
-    [executeAction, toast]
+    [cloudStoreId, runCloudStoreAction, toast]
   )
 
   // Create site from this cloud store
   const createSite = useCallback(
-    async (options: { hostname: string; path?: string; siteType?: string }): Promise<void> => {
-      await executeAction('create_site', {
-        hostname: options.hostname,
-        path: options.path || '/',
-        site_type: options.siteType || 'static',
-      })
+    async (options: {
+      hostname: string
+      path?: string
+      siteType?: string
+    }): Promise<void> => {
+      await runCloudStoreAction('create_site', () =>
+        daptinClient.storageManager.cloudStore.createSite(cloudStoreId, {
+          hostname: options.hostname,
+          path: options.path || '/',
+          siteType: options.siteType || 'static',
+        })
+      )
       queryClient.invalidateQueries({
         queryKey: ['cloud-store-sites', cloudStoreId],
       })
@@ -154,7 +183,7 @@ export function useCloudStoreActions(
         description: `Site "${options.hostname}" has been created`,
       })
     },
-    [executeAction, queryClient, cloudStoreId, toast]
+    [runCloudStoreAction, queryClient, cloudStoreId, toast]
   )
 
   return {

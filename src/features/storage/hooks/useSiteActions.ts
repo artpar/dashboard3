@@ -1,8 +1,14 @@
+/* eslint-disable no-console */
 import { useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
+import type {
+  DaptinActionResponse,
+  DaptinSiteFileGetAttributes,
+  DaptinSiteFileListAttributes,
+} from 'daptin-client'
 
-interface FileInfo {
+export interface FileInfo {
   name: string
   path: string
   size: number
@@ -20,6 +26,68 @@ interface SiteActionsResult {
   syncStorage: () => Promise<void>
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function normalizeFileInfo(item: unknown, currentPath: string): FileInfo {
+  const record = asRecord(item)
+  const name = String(record.Name || record.name || '')
+  const filePath =
+    String(record.Path || record.path || '') ||
+    (currentPath === '/' || currentPath === ''
+      ? `/${name}`
+      : `${currentPath}/${name}`)
+
+  return {
+    name,
+    path: filePath,
+    size: Number(record.Size || record.size || 0),
+    isDir: Boolean(record.IsDir || record.isDir || record.is_dir || false),
+    modTime: String(record.ModTime || record.modTime || record.mod_time || ''),
+    mimeType:
+      typeof record.MimeType === 'string'
+        ? record.MimeType
+        : typeof record.mimeType === 'string'
+          ? record.mimeType
+          : typeof record.mime_type === 'string'
+            ? record.mime_type
+            : undefined,
+  }
+}
+
+function readSiteFileList(
+  response: DaptinActionResponse<DaptinSiteFileListAttributes>,
+  currentPath: string
+): FileInfo[] {
+  const firstAttributes = response[0]?.Attributes || {}
+  const rawFiles = firstAttributes.list || firstAttributes.files
+
+  if (!Array.isArray(rawFiles)) {
+    console.warn('[storage.site] list_files returned no file list', {
+      currentPath,
+      responseTypes: response.map((item) => item.ResponseType),
+    })
+    return []
+  }
+
+  return rawFiles.map((item) => normalizeFileInfo(item, currentPath))
+}
+
+function readSiteFileContent(
+  response: DaptinActionResponse<DaptinSiteFileGetAttributes>
+): { content: string; mimeType: string } {
+  const attributes = response[0]?.Attributes || {}
+  return {
+    content: String(attributes.content || attributes.data || ''),
+    mimeType: String(
+      attributes.mimeType || attributes.mime_type || 'application/octet-stream'
+    ),
+  }
+}
+
 /**
  * Hook for site entity actions
  *
@@ -34,24 +102,25 @@ export function useSiteActions(siteId: string): SiteActionsResult {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // Helper to execute site actions
-  const executeAction = useCallback(
-    async (actionName: string, params: Record<string, any>) => {
+  const runSiteAction = useCallback(
+    async <T>(actionName: string, action: () => Promise<T>): Promise<T> => {
       setIsLoading(true)
       setError(null)
+      console.info('[storage.site] action:start', { actionName, siteId })
 
       try {
-        const response = await daptinClient.actionManager.doAction(
-          'site',
-          actionName,
-          {
-            site_id: siteId,
-            ...params,
-          }
-        )
+        const response = await action()
+        console.info('[storage.site] action:success', { actionName, siteId })
         return response
-      } catch (err: any) {
-        const error = new Error(err.message || `Failed to execute ${actionName}`)
+      } catch (err: unknown) {
+        const error = new Error(
+          err instanceof Error ? err.message : `Failed to execute ${actionName}`
+        )
+        console.error('[storage.site] action:failed', {
+          actionName,
+          siteId,
+          error,
+        })
         setError(error)
         throw error
       } finally {
@@ -64,93 +133,47 @@ export function useSiteActions(siteId: string): SiteActionsResult {
   // List files at a path
   const listFiles = useCallback(
     async (path: string): Promise<FileInfo[]> => {
-      try {
-        const response = await executeAction('list_files', { path })
-
-        // Parse the response - adjust based on actual API response format
-        if (Array.isArray(response)) {
-          return response.map((item: any) => ({
-            name: item.Name || item.name,
-            path: item.Path || item.path,
-            size: item.Size || item.size || 0,
-            isDir: item.IsDir || item.isDir || item.is_dir || false,
-            modTime: item.ModTime || item.modTime || item.mod_time || '',
-            mimeType: item.MimeType || item.mimeType || item.mime_type,
-          }))
-        }
-
-        // Handle response wrapped in an object
-        if (response?.data && Array.isArray(response.data)) {
-          return response.data.map((item: any) => ({
-            name: item.Name || item.name,
-            path: item.Path || item.path,
-            size: item.Size || item.size || 0,
-            isDir: item.IsDir || item.isDir || item.is_dir || false,
-            modTime: item.ModTime || item.modTime || item.mod_time || '',
-            mimeType: item.MimeType || item.mimeType || item.mime_type,
-          }))
-        }
-
-        // Handle action response format
-        if (response?.[0]?.Attributes?.files) {
-          return response[0].Attributes.files.map((item: any) => ({
-            name: item.Name || item.name,
-            path: item.Path || item.path,
-            size: item.Size || item.size || 0,
-            isDir: item.IsDir || item.isDir || item.is_dir || false,
-            modTime: item.ModTime || item.modTime || item.mod_time || '',
-            mimeType: item.MimeType || item.mimeType || item.mime_type,
-          }))
-        }
-
-        return []
-      } catch (err) {
-        console.error('Failed to list files:', err)
-        return []
-      }
+      const response = await runSiteAction('list_files', () =>
+        daptinClient.storageManager.site.listFiles(siteId, { path })
+      )
+      return readSiteFileList(response, path)
     },
-    [executeAction]
+    [runSiteAction, siteId]
   )
 
   // Get file content
   const getFile = useCallback(
     async (path: string): Promise<{ content: string; mimeType: string }> => {
-      const response = await executeAction('get_file', { path })
-
-      // Parse response based on actual API format
-      if (response?.[0]?.Attributes) {
-        return {
-          content: response[0].Attributes.content || response[0].Attributes.data || '',
-          mimeType: response[0].Attributes.mimeType || response[0].Attributes.mime_type || 'application/octet-stream',
-        }
-      }
-
-      return {
-        content: response?.content || response?.data || '',
-        mimeType: response?.mimeType || response?.mime_type || 'application/octet-stream',
-      }
+      const response = await runSiteAction('get_file', () =>
+        daptinClient.storageManager.site.getFile(siteId, { path })
+      )
+      return readSiteFileContent(response)
     },
-    [executeAction]
+    [runSiteAction, siteId]
   )
 
   // Delete file
   const deleteFile = useCallback(
     async (path: string): Promise<void> => {
-      await executeAction('delete_file', { path })
+      await runSiteAction('delete_file', () =>
+        daptinClient.storageManager.site.deleteFile(siteId, { path })
+      )
       queryClient.invalidateQueries({
         queryKey: ['site-files', siteId],
       })
     },
-    [executeAction, queryClient, siteId]
+    [runSiteAction, queryClient, siteId]
   )
 
   // Sync site storage
   const syncStorage = useCallback(async (): Promise<void> => {
-    await executeAction('sync_site_storage', {})
+    await runSiteAction('sync_site_storage', () =>
+      daptinClient.storageManager.site.syncStorage(siteId)
+    )
     queryClient.invalidateQueries({
       queryKey: ['site-files', siteId],
     })
-  }, [executeAction, queryClient, siteId])
+  }, [runSiteAction, queryClient, siteId])
 
   return {
     isLoading,

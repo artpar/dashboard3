@@ -1,7 +1,10 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
+/* eslint-disable no-console */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { createLazyFileRoute } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
+import { daptinClient } from '@/daptin'
+import type { DaptinCloudStoreEntity, DaptinSiteEntity } from 'daptin-client'
 import {
   ArrowLeft,
   Cloud,
@@ -16,7 +19,8 @@ import {
   XCircle,
   Loader2,
 } from 'lucide-react'
-import { daptinClient } from '@/daptin'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,11 +29,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
   DialogContent,
@@ -47,30 +46,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FileBrowser } from '@/features/storage/components/FileBrowser'
-import { useCloudStoreActions } from '@/features/storage/hooks/useCloudStoreActions'
 import { getProviderById } from '@/features/storage/config/providers'
-
-interface CloudStoreEntity {
-  id: string
-  reference_id: string
-  name: string
-  store_provider: string
-  store_type: string
-  root_path: string
-  store_parameters: string
-  created_at: string
-  updated_at: string
-}
-
-interface SiteEntity {
-  id: string
-  reference_id: string
-  hostname: string
-  path: string
-  site_type: string
-  cloud_store_id: string
-}
+import { useCloudStoreActions } from '@/features/storage/hooks/useCloudStoreActions'
 
 // Get provider icon
 const getProviderIcon = (providerId: string) => {
@@ -108,33 +89,27 @@ function CloudStoreDetailPage() {
   const [newFolderPath, setNewFolderPath] = useState('/')
   const [newFolderName, setNewFolderName] = useState('')
 
-  const { createSite, createFolder, uploadFile, isLoading: isActionsLoading } =
-    useCloudStoreActions(storeId)
+  const {
+    createSite,
+    createFolder,
+    uploadFile,
+    isLoading: isActionsLoading,
+  } = useCloudStoreActions(storeId)
 
   // Fetch cloud store data
   const { data: cloudStore, isLoading } = useQuery({
     queryKey: ['cloud-store', storeId],
     queryFn: async () => {
-      const response = await daptinClient.jsonApi.findAll('cloud_store', {})
-      const stores = response.data as any[]
-      if (stores && stores.length > 0) {
-        const store = stores.find(s =>
-          s.id === storeId ||
-          s.reference_id === storeId ||
-          s.attributes?.reference_id === storeId
-        )
-        if (store) {
-          if (store.attributes) {
-            return {
-              id: store.id,
-              reference_id: store.attributes.reference_id || store.id,
-              ...store.attributes
-            } as CloudStoreEntity
-          }
-          return store as CloudStoreEntity
-        }
+      console.info('[storage.cloudStoreRoute] fetch-store:start', { storeId })
+      const response = await daptinClient.jsonApi.find<DaptinCloudStoreEntity>(
+        'cloud_store',
+        storeId
+      )
+      if (!response.data) {
+        throw new Error('Cloud store not found')
       }
-      throw new Error('Cloud store not found')
+      console.info('[storage.cloudStoreRoute] fetch-store:success', { storeId })
+      return response.data as DaptinCloudStoreEntity
     },
     enabled: !!storeId,
   })
@@ -144,25 +119,25 @@ function CloudStoreDetailPage() {
     queryKey: ['cloud-store-sites', storeId],
     queryFn: async () => {
       try {
-        const response = await daptinClient.jsonApi.findAll('site', {})
-        const sites = response.data as any[]
-        // Filter sites that belong to this cloud store
-        return sites
-          .filter(s => {
-            const cloudStoreRef = s.cloud_store_id || s.attributes?.cloud_store_id
-            return cloudStoreRef === storeId
-          })
-          .map(s => {
-            if (s.attributes) {
-              return {
-                id: s.id,
-                reference_id: s.attributes.reference_id || s.id,
-                ...s.attributes
-              } as SiteEntity
-            }
-            return s as SiteEntity
-          })
-      } catch {
+        console.info('[storage.cloudStoreRoute] fetch-sites:start', { storeId })
+        const response = await daptinClient.jsonApi.findAll<DaptinSiteEntity>(
+          'site',
+          {
+            query: `cloud_store_id eq ${storeId}`,
+            'page[size]': 25,
+            'page[number]': 1,
+          }
+        )
+        console.info('[storage.cloudStoreRoute] fetch-sites:success', {
+          storeId,
+          count: response.data.length,
+        })
+        return response.data as DaptinSiteEntity[]
+      } catch (error) {
+        console.error('[storage.cloudStoreRoute] fetch-sites:failed', {
+          storeId,
+          error,
+        })
         return []
       }
     },
@@ -210,19 +185,19 @@ function CloudStoreDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4 w-full">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
-        <Skeleton className="h-96 w-full" />
+      <div className='w-full space-y-4 p-6'>
+        <Skeleton className='h-8 w-64' />
+        <Skeleton className='h-4 w-96' />
+        <Skeleton className='h-96 w-full' />
       </div>
     )
   }
 
   if (!cloudStore) {
     return (
-      <div className="p-6 w-full">
-        <Alert variant="destructive">
-          <XCircle className="h-4 w-4" />
+      <div className='w-full p-6'>
+        <Alert variant='destructive'>
+          <XCircle className='h-4 w-4' />
           <AlertTitle>Not Found</AlertTitle>
           <AlertDescription>Cloud store not found</AlertDescription>
         </Alert>
@@ -233,65 +208,69 @@ function CloudStoreDetailPage() {
   const ProviderIcon = getProviderIcon(cloudStore.store_provider)
   const providerConfig = getProviderById(cloudStore.store_provider)
   const storeParameters = cloudStore.store_parameters
-    ? JSON.parse(cloudStore.store_parameters)
+    ? typeof cloudStore.store_parameters === 'string'
+      ? JSON.parse(cloudStore.store_parameters || '{}')
+      : cloudStore.store_parameters
     : {}
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className='flex h-full w-full flex-col'>
       {/* Header */}
-      <div className="p-6 border-b">
+      <div className='border-b p-6'>
         <Link
-          to="/storage/cloud-stores"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm mb-2"
+          to='/storage/cloud-stores'
+          className='text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 text-sm'
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className='h-4 w-4' />
           Back to Cloud Stores
         </Link>
-        <div className="flex items-start justify-between">
+        <div className='flex items-start justify-between'>
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <ProviderIcon className="h-6 w-6" />
+            <h1 className='flex items-center gap-2 text-2xl font-bold'>
+              <ProviderIcon className='h-6 w-6' />
               {cloudStore.name}
             </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline">
+            <div className='mt-1 flex items-center gap-2'>
+              <Badge variant='outline'>
                 {providerConfig?.label || cloudStore.store_provider}
               </Badge>
               <Badge
-                variant={cloudStore.store_type === 'cached' ? 'secondary' : 'outline'}
+                variant={
+                  cloudStore.store_type === 'cached' ? 'secondary' : 'outline'
+                }
               >
                 {cloudStore.store_type}
               </Badge>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => setShowCreateFolder(true)}
             >
-              <FolderPlus className="h-4 w-4 mr-1" />
+              <FolderPlus className='mr-1 h-4 w-4' />
               New Folder
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => setShowUpload(true)}
             >
-              <Upload className="h-4 w-4 mr-1" />
+              <Upload className='mr-1 h-4 w-4' />
               Upload
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => setShowCreateSite(true)}
             >
-              <Globe className="h-4 w-4 mr-1" />
+              <Globe className='mr-1 h-4 w-4' />
               Create Site
             </Button>
             <Link to={`/cloud_store/${storeId}`}>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-1" />
+              <Button variant='outline' size='sm'>
+                <Settings className='mr-1 h-4 w-4' />
                 Edit
               </Button>
             </Link>
@@ -300,53 +279,59 @@ function CloudStoreDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className='flex-1 overflow-hidden'>
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex flex-col h-full"
+          className='flex h-full flex-col'
         >
-          <div className="border-b px-6">
+          <div className='border-b px-6'>
             <TabsList>
-              <TabsTrigger value="sites">Sites & Files</TabsTrigger>
-              <TabsTrigger value="info">Information</TabsTrigger>
+              <TabsTrigger value='sites'>Sites & Files</TabsTrigger>
+              <TabsTrigger value='info'>Information</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="sites" className="flex-1 overflow-hidden m-0">
-            <div className="flex h-full">
+          <TabsContent value='sites' className='m-0 flex-1 overflow-hidden'>
+            <div className='flex h-full'>
               {/* Sites list sidebar */}
-              <div className="w-64 border-r overflow-auto">
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
+              <div className='w-64 overflow-auto border-r'>
+                <div className='p-4'>
+                  <h3 className='mb-2 flex items-center gap-2 font-semibold'>
+                    <Globe className='h-4 w-4' />
                     Sites
                   </h3>
                   {relatedSites && relatedSites.length > 0 ? (
-                    <div className="space-y-1">
+                    <div className='space-y-1'>
                       {relatedSites.map((site) => (
                         <button
                           key={site.reference_id || site.id}
-                          className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                          className={`w-full rounded-md px-3 py-2 text-left text-sm ${
                             selectedSiteId === (site.reference_id || site.id)
                               ? 'bg-primary text-primary-foreground'
                               : 'hover:bg-muted'
                           }`}
-                          onClick={() => setSelectedSiteId(site.reference_id || site.id)}
+                          onClick={() =>
+                            setSelectedSiteId(site.reference_id || site.id)
+                          }
                         >
-                          <div className="font-medium truncate">{site.hostname}</div>
-                          <div className="text-xs opacity-70">{site.path || '/'}</div>
+                          <div className='truncate font-medium'>
+                            {site.hostname}
+                          </div>
+                          <div className='text-xs opacity-70'>
+                            {site.path || '/'}
+                          </div>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Globe className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No sites yet</p>
+                    <div className='text-muted-foreground py-8 text-center'>
+                      <Globe className='mx-auto mb-2 h-8 w-8 opacity-50' />
+                      <p className='text-sm'>No sites yet</p>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
+                        variant='outline'
+                        size='sm'
+                        className='mt-2'
                         onClick={() => setShowCreateSite(true)}
                       >
                         Create Site
@@ -357,26 +342,30 @@ function CloudStoreDetailPage() {
               </div>
 
               {/* File browser for selected site */}
-              <div className="flex-1 overflow-hidden">
+              <div className='flex-1 overflow-hidden'>
                 {selectedSiteId ? (
                   <FileBrowser
                     siteId={selectedSiteId}
-                    rootPath="/"
+                    cloudStoreId={storeId}
+                    rootPath='/'
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                    <Folder className="h-16 w-16 mb-4 opacity-50" />
-                    <p className="text-lg font-medium">Select a site to browse files</p>
-                    <p className="text-sm mt-1">
-                      File browsing is available through sites linked to this cloud store
+                  <div className='text-muted-foreground flex h-full flex-col items-center justify-center'>
+                    <Folder className='mb-4 h-16 w-16 opacity-50' />
+                    <p className='text-lg font-medium'>
+                      Select a site to browse files
+                    </p>
+                    <p className='mt-1 text-sm'>
+                      File browsing is available through sites linked to this
+                      cloud store
                     </p>
                     {(!relatedSites || relatedSites.length === 0) && (
                       <Button
-                        variant="outline"
-                        className="mt-4"
+                        variant='outline'
+                        className='mt-4'
                         onClick={() => setShowCreateSite(true)}
                       >
-                        <Globe className="h-4 w-4 mr-2" />
+                        <Globe className='mr-2 h-4 w-4' />
                         Create Your First Site
                       </Button>
                     )}
@@ -386,30 +375,30 @@ function CloudStoreDetailPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="info" className="p-6 overflow-auto">
-            <div className="grid gap-6 md:grid-cols-2">
+          <TabsContent value='info' className='overflow-auto p-6'>
+            <div className='grid gap-6 md:grid-cols-2'>
               <Card>
                 <CardHeader>
                   <CardTitle>Storage Configuration</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Provider</span>
-                    <span className="font-medium">
+                <CardContent className='space-y-4'>
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Provider</span>
+                    <span className='font-medium'>
                       {providerConfig?.label || cloudStore.store_provider}
                     </span>
                   </div>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Store Type</span>
-                    <span className="font-medium capitalize">
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Store Type</span>
+                    <span className='font-medium capitalize'>
                       {cloudStore.store_type}
                     </span>
                   </div>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Root Path</span>
-                    <span className="font-mono text-sm break-all">
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Root Path</span>
+                    <span className='font-mono text-sm break-all'>
                       {cloudStore.root_path}
                     </span>
                   </div>
@@ -421,13 +410,13 @@ function CloudStoreDetailPage() {
                   <CardHeader>
                     <CardTitle>Provider Parameters</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className='space-y-4'>
                     {Object.entries(storeParameters).map(([key, value]) => (
-                      <div key={key} className="grid grid-cols-2 gap-2">
-                        <span className="text-muted-foreground capitalize">
+                      <div key={key} className='grid grid-cols-2 gap-2'>
+                        <span className='text-muted-foreground capitalize'>
                           {key.replace(/_/g, ' ')}
                         </span>
-                        <span className="font-medium">
+                        <span className='font-medium'>
                           {typeof value === 'boolean'
                             ? value
                               ? 'Yes'
@@ -444,24 +433,24 @@ function CloudStoreDetailPage() {
                 <CardHeader>
                   <CardTitle>Metadata</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Created</span>
-                    <span className="font-medium">
+                <CardContent className='space-y-4'>
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Created</span>
+                    <span className='font-medium'>
                       {new Date(cloudStore.created_at).toLocaleString()}
                     </span>
                   </div>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Updated</span>
-                    <span className="font-medium">
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Updated</span>
+                    <span className='font-medium'>
                       {new Date(cloudStore.updated_at).toLocaleString()}
                     </span>
                   </div>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-muted-foreground">Reference ID</span>
-                    <span className="font-mono text-xs">
+                  <div className='grid grid-cols-2 gap-2'>
+                    <span className='text-muted-foreground'>Reference ID</span>
+                    <span className='font-mono text-xs'>
                       {cloudStore.reference_id}
                     </span>
                   </div>
@@ -475,29 +464,29 @@ function CloudStoreDetailPage() {
                     Common operations for this cloud store
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className='space-y-2'>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
+                    variant='outline'
+                    className='w-full justify-start'
                     onClick={() => setShowCreateFolder(true)}
                   >
-                    <FolderPlus className="h-4 w-4 mr-2" />
+                    <FolderPlus className='mr-2 h-4 w-4' />
                     Create Folder
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
+                    variant='outline'
+                    className='w-full justify-start'
                     onClick={() => setShowUpload(true)}
                   >
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Upload className='mr-2 h-4 w-4' />
                     Upload File
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
+                    variant='outline'
+                    className='w-full justify-start'
                     onClick={() => setShowCreateSite(true)}
                   >
-                    <Globe className="h-4 w-4 mr-2" />
+                    <Globe className='mr-2 h-4 w-4' />
                     Create Static Site
                   </Button>
                 </CardContent>
@@ -516,47 +505,47 @@ function CloudStoreDetailPage() {
               Host a static website from this cloud store
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="hostname">Hostname</Label>
+          <div className='space-y-4 py-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='hostname'>Hostname</Label>
               <Input
-                id="hostname"
-                placeholder="example.com"
+                id='hostname'
+                placeholder='example.com'
                 value={siteHostname}
                 onChange={(e) => setSiteHostname(e.target.value)}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className='text-muted-foreground text-sm'>
                 The domain name that will serve files from this cloud store
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="path">Root Path</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='path'>Root Path</Label>
               <Input
-                id="path"
-                placeholder="/"
+                id='path'
+                placeholder='/'
                 value={sitePath}
                 onChange={(e) => setSitePath(e.target.value)}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className='text-muted-foreground text-sm'>
                 The path within the cloud store to serve
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="siteType">Site Type</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='siteType'>Site Type</Label>
               <Select value={siteType} onValueChange={setSiteType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="static">Static (HTML/CSS/JS)</SelectItem>
-                  <SelectItem value="hugo">Hugo</SelectItem>
-                  <SelectItem value="jekyll">Jekyll</SelectItem>
+                  <SelectItem value='static'>Static (HTML/CSS/JS)</SelectItem>
+                  <SelectItem value='hugo'>Hugo</SelectItem>
+                  <SelectItem value='jekyll'>Jekyll</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateSite(false)}>
+            <Button variant='outline' onClick={() => setShowCreateSite(false)}>
               Cancel
             </Button>
             <Button
@@ -564,7 +553,7 @@ function CloudStoreDetailPage() {
               disabled={!siteHostname.trim() || isActionsLoading}
             >
               {isActionsLoading && (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <Loader2 className='mr-1 h-4 w-4 animate-spin' />
               )}
               Create Site
             </Button>
@@ -581,28 +570,31 @@ function CloudStoreDetailPage() {
               Create a new folder in the cloud store
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="folderPath">Parent Path</Label>
+          <div className='space-y-4 py-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='folderPath'>Parent Path</Label>
               <Input
-                id="folderPath"
-                placeholder="/"
+                id='folderPath'
+                placeholder='/'
                 value={newFolderPath}
                 onChange={(e) => setNewFolderPath(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="folderName">Folder Name</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='folderName'>Folder Name</Label>
               <Input
-                id="folderName"
-                placeholder="my-folder"
+                id='folderName'
+                placeholder='my-folder'
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateFolder(false)}>
+            <Button
+              variant='outline'
+              onClick={() => setShowCreateFolder(false)}
+            >
               Cancel
             </Button>
             <Button
@@ -610,7 +602,7 @@ function CloudStoreDetailPage() {
               disabled={!newFolderName.trim() || isActionsLoading}
             >
               {isActionsLoading && (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <Loader2 className='mr-1 h-4 w-4 animate-spin' />
               )}
               Create
             </Button>
@@ -627,20 +619,20 @@ function CloudStoreDetailPage() {
               Upload files to the cloud store
             </DialogDescription>
           </DialogHeader>
-          <div className="border-2 border-dashed rounded-lg p-8 text-center">
-            <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
+          <div className='rounded-lg border-2 border-dashed p-8 text-center'>
+            <Upload className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+            <p className='text-muted-foreground'>
               Click to select files or drag and drop
             </p>
             <Input
-              type="file"
+              type='file'
               multiple
-              className="mt-4"
+              className='mt-4'
               onChange={(e) => handleFileUpload(e.target.files)}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUpload(false)}>
+            <Button variant='outline' onClick={() => setShowUpload(false)}>
               Cancel
             </Button>
           </DialogFooter>
