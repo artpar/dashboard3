@@ -68,7 +68,7 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
         tooltip={item.description || item.title}
       >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
-          <DynamicIcon icon={item.icon && item.icon.length > 0 ? item.icon : "table"} />
+          <NavItemIcon icon={item.icon} />
           {state === 'expanded' && <span>{item.title}</span>}
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>
@@ -94,7 +94,7 @@ const SidebarMenuCollapsible = ({
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title}>
-            {item.icon && <item.icon />}
+            <NavItemIcon icon={item.icon} />
             <span>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
             <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
@@ -109,7 +109,7 @@ const SidebarMenuCollapsible = ({
                   isActive={checkIsActive(href, subItem)}
                 >
                   <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
-                    {subItem.icon && <subItem.icon />}
+                    <NavItemIcon icon={subItem.icon} />
                     <span>{subItem.title}</span>
                     {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
                   </Link>
@@ -138,7 +138,7 @@ const SidebarMenuCollapsedDropdown = ({
             tooltip={item.title}
             isActive={checkIsActive(href, item)}
           >
-            {item.icon && <item.icon />}
+            <NavItemIcon icon={item.icon} />
             {/*<span>{item.title}</span>*/}
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
             <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
@@ -155,7 +155,7 @@ const SidebarMenuCollapsedDropdown = ({
                 to={sub.url}
                 className={`${checkIsActive(href, sub) ? 'bg-secondary' : ''}`}
               >
-                {sub.icon && <sub.icon />}
+                <NavItemIcon icon={sub.icon} />
                 {/*<span className='max-w-52 text-wrap'>{sub.title}</span>*/}
                 {sub.badge && (
                   <span className='ml-auto text-xs'>{sub.badge}</span>
@@ -169,13 +169,29 @@ const SidebarMenuCollapsedDropdown = ({
   )
 }
 
+function NavItemIcon({ icon }: { icon?: React.ElementType | string }) {
+  if (!icon) {
+    return <DynamicIcon icon='table' />
+  }
+
+  if (typeof icon === 'string') {
+    return <DynamicIcon icon={icon} />
+  }
+
+  const Icon = icon
+  return <Icon />
+}
+
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
+  const cleanHref = href.split('?')[0]
+  const itemUrl = item.url
+
   return (
-    href === item.url || // /endpint?search=param
-    href.split('?')[0] === item.url || // endpoint
-    !!item?.items?.filter((i) => i.url === href).length || // if child nav is active
+    href === itemUrl || // /endpint?search=param
+    cleanHref === itemUrl || // endpoint
+    !!item.items?.some((i) => checkIsActive(href, i)) || // if child nav is active
     (mainNav &&
-      href.split('/')[1] !== '' &&
-      href.split('/')[1] === item?.url?.split('/')[1])
+      cleanHref.split('/')[1] !== '' &&
+      cleanHref.split('/')[1] === itemUrl?.split('/')[1])
   )
 }

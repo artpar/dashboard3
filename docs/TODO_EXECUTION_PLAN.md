@@ -483,7 +483,7 @@ Manual checks for each changed section:
 ## Current SDK Baseline
 
 Full relationship editing is no longer blocked by the JS client. Dashboard3 now
-targets `daptin-client@0.7.11`, which includes typed entity/schema/action
+targets `daptin-client@0.7.12`, which includes typed entity/schema/action
 contracts, `relationshipManager`, `storageManager`, and expanded asset URL
 helpers. User-facing relation write controls should use the SDK relationship
 manager and relation keys from Daptin metadata.

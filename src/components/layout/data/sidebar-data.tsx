@@ -1,282 +1,260 @@
 import { useMemo } from 'react'
 import {
-  Command,
-  LayoutDashboard,
-  Zap,
+  Activity,
+  Boxes,
+  Cloud,
+  Code,
+  Database,
+  Download,
+  FileText,
+  Gauge,
+  GitBranch,
+  Globe,
+  KeyRound,
+  Layers,
+  LockKeyhole,
+  Mail,
+  Plug,
+  Radio,
+  Settings,
   Shield,
+  ShieldCheck,
+  Table2,
+  Upload,
   Users,
   UsersRound,
-  GitBranch,
-  FileText,
-  Cloud,
-  Globe,
-  ShieldCheck,
-  KeyRound,
-  Mail,
-  Radio,
-  Upload,
-  Download,
-  RefreshCw,
-  Layers,
-  Plug,
-  Code,
-  ClipboardList,
-  Settings,
+  Zap,
 } from 'lucide-react'
 import { useWorldEntities } from '@/hooks/use-world-entities.tsx'
-import { type SidebarData } from '../types'
+import { type NavItem, type SidebarData } from '../types'
 
-// Static user and team data
 const userData = {
-  name: 'satnaing',
-  email: 'satnaingdev@gmail.com',
+  name: 'Daptin user',
+  email: '',
   avatar: '/avatars/shadcn.jpg',
 }
 
 const teamsData = [
   {
     name: 'Daptin',
-    logo: Command,
+    logo: Database,
     plan: '',
   },
 ]
 
-// Admin section items
-const adminItems = [
+const dataItems: NavItem[] = [
   {
-    title: 'Permissions',
-    url: '/admin/permissions',
-    icon: Shield,
-    description:
-      'Table and row-level access control for guests, owners, and groups',
+    title: 'Tables',
+    url: '/data',
+    icon: Table2,
+    description: 'Browse app data tables without using raw entity routes',
   },
-  {
-    title: 'Users',
-    url: '/admin/users',
-    icon: Users,
-    description: 'User accounts with JWT authentication and group membership',
-  },
-  {
-    title: 'Groups',
-    url: '/admin/groups',
-    icon: UsersRound,
-    description: 'User groups for bulk permission assignment',
-  },
-]
-
-// Workflow section items
-const workflowItems = [
-  {
-    title: 'Actions',
-    url: '/admin/actions',
-    icon: Zap,
-    description:
-      'Server-side workflows beyond CRUD — send emails, call APIs, manage files',
-  },
-  {
-    title: 'State Machines',
-    url: '/admin/state-machines',
-    icon: GitBranch,
-    description: 'Define valid state transitions for record lifecycles',
-  },
-  {
-    title: 'Templates',
-    url: '/templates',
-    icon: FileText,
-    description: 'Reusable response and page templates stored in Daptin',
-  },
-]
-
-// Storage section items
-const storageItems = [
-  {
-    title: 'Cloud Stores',
-    url: '/storage/cloud-stores',
-    icon: Cloud,
-    description:
-      'Storage backends — S3, GCS, Azure, local filesystem, and more',
-  },
-  {
-    title: 'Sites',
-    url: '/storage/sites',
-    icon: Globe,
-    description: 'Static sites served from cloud storage with domain routing',
-  },
-  {
-    title: 'Certificates',
-    url: '/storage/certificates',
-    icon: ShieldCheck,
-    description: 'SSL/TLS certificates for HTTPS and DKIM signing',
-  },
-]
-
-// Communication section items
-const communicationItems = [
-  {
-    title: 'OAuth',
-    url: '/communication/oauth',
-    icon: KeyRound,
-    description: 'OAuth 2.0 provider configs for social login and API access',
-  },
-  {
-    title: 'Email',
-    url: '/communication/email',
-    icon: Mail,
-    description:
-      'SMTP/IMAP server configurations for sending and receiving mail',
-  },
-  {
-    title: 'WebSocket',
-    url: '/communication/websocket',
-    icon: Radio,
-    description: 'Real-time event streaming over WebSocket connections',
-  },
-]
-
-// Data section items
-const dataItems = [
   {
     title: 'Import',
     url: '/data/import',
     icon: Upload,
-    description: 'Import data from CSV, JSON, Excel, and other formats',
+    description: 'Import data into a selected Daptin entity',
   },
   {
     title: 'Export',
     url: '/data/export',
     icon: Download,
-    description: 'Export entity data to CSV, JSON, Excel, PDF, or HTML',
+    description: 'Export Daptin entity data with selected filters and format',
+  },
+]
+
+const accessItems: NavItem[] = [
+  {
+    title: 'Users',
+    url: '/admin/users',
+    icon: Users,
+    description: 'User accounts, authentication state, and group membership',
+  },
+  {
+    title: 'Groups',
+    url: '/admin/groups',
+    icon: UsersRound,
+    description: 'User groups used for Daptin permission assignment',
+  },
+  {
+    title: 'Permissions',
+    url: '/admin/permissions',
+    icon: Shield,
+    description: 'Entity permission matrix from Daptin world metadata',
+  },
+]
+
+const fileSiteItems: NavItem[] = [
+  {
+    title: 'Cloud Stores',
+    url: '/storage/cloud-stores',
+    icon: Cloud,
+    description: 'Storage backends used by files, documents, and sites',
+  },
+  {
+    title: 'Sites',
+    url: '/storage/sites',
+    icon: Globe,
+    description: 'Hosted sites backed by Daptin storage primitives',
+  },
+  {
+    title: 'Certificates',
+    url: '/storage/certificates',
+    icon: ShieldCheck,
+    description: 'TLS certificates and DKIM records for hosted services',
+  },
+]
+
+const mailItems: NavItem[] = [
+  {
+    title: 'Mail Servers',
+    url: '/communication/email',
+    icon: Mail,
+    description: 'SMTP and IMAP server configuration for Daptin mail',
+  },
+]
+
+const workflowItems: NavItem[] = [
+  {
+    title: 'Actions',
+    url: '/admin/actions',
+    icon: Zap,
+    description: 'Daptin server-side actions and operational workflows',
+  },
+  {
+    title: 'State Machines',
+    url: '/admin/state-machines',
+    icon: GitBranch,
+    description: 'State transition rules for records and workflows',
+  },
+  {
+    title: 'Templates',
+    url: '/templates',
+    icon: FileText,
+    description: 'Reusable response and site templates stored in Daptin',
   },
   {
     title: 'Exchanges',
     url: '/data/exchanges',
-    icon: RefreshCw,
-    description: 'Bidirectional sync between entities and external systems',
+    icon: Layers,
+    description: 'Bidirectional sync between Daptin entities and systems',
   },
   {
     title: 'Streams',
     url: '/data/streams',
-    icon: Layers,
-    description: 'Data transformation pipelines for processing records',
-  },
-  {
-    title: 'Integrations',
-    url: '/data/integrations',
-    icon: Plug,
-    description:
-      'Connect external APIs via OpenAPI specs — each operation becomes an action',
+    icon: Boxes,
+    description: 'Data transformation pipelines for Daptin records',
   },
 ]
 
-// Tools section items
-const toolsItems = [
+const advancedItems: NavItem[] = [
   {
     title: 'GraphQL',
     url: '/tools/graphql',
     icon: Code,
-    description:
-      'Query and mutate entities using the auto-generated GraphQL API',
+    description: 'Use the Daptin GraphQL endpoint for advanced querying',
   },
   {
-    title: 'Audit Logs',
-    url: '/tools/audit',
-    icon: ClipboardList,
-    description:
-      'Track all data changes with user, timestamp, and before/after values',
+    title: 'Realtime',
+    url: '/communication/websocket',
+    icon: Radio,
+    description: 'Inspect live and websocket behavior for this Daptin server',
   },
 ]
 
-// Entities that have dedicated pages in other sections - exclude from Entities list
-const excludedEntities = new Set([
-  // Admin section
-  'action',
-  'usergroup',
-  'user_account',
-  'user_otp_account',
-  'smd',
-  'template',
-  // Storage section
-  'cloud_store',
-  'site',
-  'certificate',
-  // Communication section
-  'oauth_connect',
-  'oauth_token',
-  'mail',
-  'mail_account',
-  'mail_box',
-  'mail_server',
-  'outbox',
-  // Data section
-  'data_exchange',
-  'stream',
-  'integration',
-])
-
-// Custom hook to generate sidebar data from world entities
 export function useSidebarData(): SidebarData {
   const { groupedEntities, isLoading } = useWorldEntities()
 
   return useMemo(() => {
-    // Default items that are always present
-    const defaultItems = [
-      {
-        title: 'Dashboard',
-        url: '/',
-        icon: LayoutDashboard,
-      },
-    ]
-
-    // Create nav items from top-level entities, excluding those with dedicated sections
-    const entityItems = isLoading
+    const rawEntityItems: NavItem[] = isLoading
       ? []
-      : groupedEntities.topLevel
-          .filter((entity) => !excludedEntities.has(entity.table_name))
-          .map((entity) => ({
-            title: entity.table_name,
-            url: `/${entity.table_name}`,
-            icon: entity.icon,
-          }))
+      : groupedEntities.topLevel.map((entity) => ({
+          title: entity.table_name,
+          url: `/${entity.table_name}`,
+          icon: entity.icon || 'table',
+          description: `Raw fallback browser for ${entity.table_name}`,
+        }))
 
     return {
       user: userData,
       teams: teamsData,
       navGroups: [
         {
-          title: 'General',
-          items: defaultItems,
-        },
-        {
-          title: 'Admin',
-          items: adminItems,
-        },
-        {
-          title: 'Workflows',
-          items: workflowItems,
-        },
-        {
-          title: 'Storage',
-          items: storageItems,
-        },
-        {
-          title: 'Communication',
-          items: communicationItems,
-        },
-        {
-          title: 'Data',
-          items: dataItems,
-        },
-        {
-          title: 'Tools',
-          items: toolsItems,
-        },
-        {
-          title: 'Settings',
-          items: [{ title: 'Config', url: '/config', icon: Settings }],
-        },
-        {
-          title: 'Entities',
-          items: entityItems,
+          title: 'Daptin Console',
+          items: [
+            {
+              title: 'Overview',
+              url: '/',
+              icon: Gauge,
+              description: 'Connection, setup, and operational status',
+            },
+            {
+              title: 'Data',
+              icon: Database,
+              description: 'App data browsing, import, and export workflows',
+              items: dataItems,
+            },
+            {
+              title: 'Users & Access',
+              icon: LockKeyhole,
+              description: 'Users, groups, and Daptin permissions',
+              items: accessItems,
+            },
+            {
+              title: 'Files & Sites',
+              icon: Cloud,
+              description: 'Storage backends, hosted sites, and certificates',
+              items: fileSiteItems,
+            },
+            {
+              title: 'Mail',
+              icon: Mail,
+              description: 'Mail servers and message delivery configuration',
+              items: mailItems,
+            },
+            {
+              title: 'Integrations',
+              url: '/data/integrations',
+              icon: Plug,
+              description: 'External APIs imported into Daptin actions',
+            },
+            {
+              title: 'OAuth',
+              url: '/communication/oauth',
+              icon: KeyRound,
+              description: 'OAuth provider configuration for Daptin auth',
+            },
+            {
+              title: 'Workflows',
+              icon: Zap,
+              description: 'Actions, state machines, templates, exchanges, and streams',
+              items: workflowItems,
+            },
+            {
+              title: 'Config',
+              url: '/config',
+              icon: Settings,
+              description: 'Daptin configuration values and runtime settings',
+            },
+            {
+              title: 'Activity',
+              url: '/tools/audit',
+              icon: Activity,
+              description: 'Audit trail and operational history',
+            },
+            {
+              title: 'Advanced',
+              icon: Code,
+              description: 'GraphQL and realtime diagnostic tools',
+              items: advancedItems,
+            },
+            {
+              title: 'Raw Entities',
+              icon: Table2,
+              description: 'Fallback generated entity browser',
+              items: rawEntityItems,
+            },
+          ],
         },
       ],
     }

@@ -89,7 +89,7 @@ const AppSidebar = () => {
               <ScrollArea className='flex-1 pb-16'>
                 <nav className='mb-4 space-y-1 p-2'>
                   {sidebarData.navGroups.map((props) => (
-                    <NavGroup key={props.table_name} {...props} />
+                    <NavGroup key={props.title} {...props} />
                   ))}
                 </nav>
               </ScrollArea>

@@ -48,6 +48,9 @@ const AuthenticatedSettingsIndexLazyImport = createFileRoute(
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
+const AuthenticatedDataIndexLazyImport = createFileRoute(
+  '/_authenticated/data/',
+)()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
 )()
@@ -298,6 +301,16 @@ const AuthenticatedHelpCenterIndexLazyRoute =
       (d) => d.Route,
     ),
   )
+
+const AuthenticatedDataIndexLazyRoute = AuthenticatedDataIndexLazyImport.update(
+  {
+    id: '/data/',
+    path: '/data/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/_authenticated/data/index.lazy').then((d) => d.Route),
+)
 
 const AuthenticatedChatsIndexLazyRoute =
   AuthenticatedChatsIndexLazyImport.update({
@@ -949,6 +962,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/data/': {
+      id: '/_authenticated/data/'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof AuthenticatedDataIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -1210,6 +1230,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedToolsGraphqlLazyRoute: typeof AuthenticatedToolsGraphqlLazyRoute
   AuthenticatedEntityIndexLazyRoute: typeof AuthenticatedEntityIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
+  AuthenticatedDataIndexLazyRoute: typeof AuthenticatedDataIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
   AuthenticatedEntityReferenceIdEditLazyRoute: typeof AuthenticatedEntityReferenceIdEditLazyRoute
@@ -1253,6 +1274,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedToolsGraphqlLazyRoute: AuthenticatedToolsGraphqlLazyRoute,
   AuthenticatedEntityIndexLazyRoute: AuthenticatedEntityIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
+  AuthenticatedDataIndexLazyRoute: AuthenticatedDataIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
   AuthenticatedEntityReferenceIdEditLazyRoute:
@@ -1305,6 +1327,7 @@ export interface FileRoutesByFullPath {
   '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/data': typeof AuthenticatedDataIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
@@ -1358,6 +1381,7 @@ export interface FileRoutesByTo {
   '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/data': typeof AuthenticatedDataIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
@@ -1415,6 +1439,7 @@ export interface FileRoutesById {
   '/_authenticated/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/_authenticated/$entity/': typeof AuthenticatedEntityIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
+  '/_authenticated/data/': typeof AuthenticatedDataIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
@@ -1472,6 +1497,7 @@ export interface FileRouteTypes {
     | '/tools/graphql'
     | '/$entity'
     | '/chats'
+    | '/data'
     | '/help-center'
     | '/settings/'
     | '/users'
@@ -1524,6 +1550,7 @@ export interface FileRouteTypes {
     | '/tools/graphql'
     | '/$entity'
     | '/chats'
+    | '/data'
     | '/help-center'
     | '/settings'
     | '/users'
@@ -1579,6 +1606,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tools/graphql'
     | '/_authenticated/$entity/'
     | '/_authenticated/chats/'
+    | '/_authenticated/data/'
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
     | '/_authenticated/users/'
@@ -1673,6 +1701,7 @@ export const routeTree = rootRoute
         "/_authenticated/tools/graphql",
         "/_authenticated/$entity/",
         "/_authenticated/chats/",
+        "/_authenticated/data/",
         "/_authenticated/help-center/",
         "/_authenticated/users/",
         "/_authenticated/$entity/$referenceId/edit",
@@ -1858,6 +1887,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/data/": {
+      "filePath": "_authenticated/data/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {
