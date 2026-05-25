@@ -3,7 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
+import type { DaptinWorldEntity } from 'daptin-client'
 import { Search, Shield, Users, User, Globe } from 'lucide-react'
+import {
+  daptinVisibleWorldEntityQuery,
+  isVisibleDaptinWorldEntity,
+} from '@/lib/daptin/world-entities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,11 +39,7 @@ import EntityPagination from '@/features/entity/components/pagination/EntityPagi
 
 const TABLE_PERMISSION_LOG_PREFIX = '[admin.permissions]'
 
-interface WorldEntity {
-  reference_id: string
-  table_name: string
-  permission: number
-}
+type WorldEntity = DaptinWorldEntity
 
 type PaginationLinks = {
   current_page?: number
@@ -119,16 +120,7 @@ function PermissionsPage() {
         'page[size]': pageSize,
         'page[number]': page,
         sort: 'table_name',
-      }
-
-      if (searchQuery.trim()) {
-        params.query = JSON.stringify([
-          {
-            column: 'table_name',
-            operator: 'contains',
-            value: `%${searchQuery.trim()}%`,
-          },
-        ])
+        query: JSON.stringify(daptinVisibleWorldEntityQuery(searchQuery)),
       }
 
       console.info(`${TABLE_PERMISSION_LOG_PREFIX} fetch:start`, { params })
@@ -141,7 +133,9 @@ function PermissionsPage() {
     },
   })
 
-  const entities = (worldResponse?.data || []) as WorldEntity[]
+  const entities = ((worldResponse?.data || []) as WorldEntity[]).filter(
+    isVisibleDaptinWorldEntity
+  )
   const links = readLinks(worldResponse?.links)
 
   const handleEditClick = (entity: WorldEntity) => {
@@ -190,7 +184,7 @@ function PermissionsPage() {
   })
 
   const handleSave = () => {
-    if (!selectedEntity) return
+    if (!selectedEntity?.reference_id) return
     updateMutation.mutate({
       id: selectedEntity.reference_id,
       permission: editedPermission,
@@ -293,7 +287,7 @@ function PermissionsPage() {
                 return (
                   <TableRow key={entity.reference_id}>
                     <TableCell className='font-medium'>
-                      {entity.table_name}
+                      {entity.table_name || entity.reference_id}
                     </TableCell>
                     <TableCell>
                       <Badge

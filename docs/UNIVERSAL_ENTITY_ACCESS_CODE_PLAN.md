@@ -39,8 +39,8 @@ later.
   Row permission updates should continue to be `jsonApi.update(entityName,
   { id, permission })` through this existing service.
 - Keep `src/features/entity/services/RelationsApiService.ts` as the single
-  relation API owner. Usergroup relation fetch/add/remove/update should move
-  here instead of living inside UI hooks.
+  relation API owner. Usergroup relation fetch/add/remove/update lives here
+  instead of inside UI hooks.
 - Keep `src/features/entity/columns/PermissionTypes.ts`,
   `src/features/entity/hooks/usePermissionValue.ts`, and
   `src/features/entity/columns/editors/PermissionColumnEditor.tsx` as the
@@ -57,6 +57,11 @@ later.
 - Do not add a second permission editor. The older
   `src/components/shared/PermissionEditor.tsx` should be retired from new work
   and replaced by `PermissionColumnEditor`.
+- Do not show Daptin join tables such as
+  `action_action_id_has_usergroup_usergroup_id` as first-class UI entities.
+  They are implementation tables for relationships and should be hidden from the
+  sidebar, `/admin/permissions`, import/export selectors, GraphQL entity
+  helpers, audit filters, and dashboard entity widgets.
 - Do not derive or update usergroup join tables inside React components or
   hooks. Existing code in `useEntityGroupRelations` currently constructs
   `${entityName}_${entityName}_id_has_usergroup_usergroup_id`; that must not
@@ -101,8 +106,11 @@ Scope: make entity row access management generic and source-backed.
      `src/components/shared/PermissionEditor.tsx`.
    - Replace its current `page[size]=200` plus client-side search with
      paginated `world` queries.
-   - Keep updates on `world.default_permission` through `jsonApi.update('world',
-     { id, default_permission })`.
+   - Keep this page scoped to table object access through `world.permission`
+     using `jsonApi.update('world', { id, permission })`.
+   - Treat `world_schema_json.DefaultPermission` / `default_permission` as a
+     separate future default-row-permission concern, not as this page's save
+     target.
 
 5. Remove specialized duplication
    - Keep action/integration detail pages if their custom tabs are necessary,
@@ -124,6 +132,6 @@ Minimum checks for this slice:
 - Adding/removing a group updates only Daptin relationships, then refreshes the
   paginated relation list.
 - `/admin/permissions` paginates `world`, does server-side search, updates
-  `default_permission`, and logs request/update boundaries.
+  `permission`, and logs request/update boundaries.
 - Repeat at least one read with a normal user session, not only admin, because
   admin visibility is not proof that permission-sensitive behavior is correct.

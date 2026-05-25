@@ -1,17 +1,228 @@
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any, no-case-declarations */
 import { daptinClient } from '@/daptin'
-import { safelySerializeData } from '@/features/entity/utils/serializer'
+import type {
+  DaptinJsonApiListResponse,
+  DaptinJsonApiQueryParams,
+  DaptinObjectUsergroupAccessResponse,
+  DaptinReferenceId,
+} from 'daptin-client'
 import { validateDaptinResponse } from '@/lib/utils'
+import { safelySerializeData } from '@/features/entity/utils/serializer'
 import {
   categorizeRelations,
   getRelationQueryParams,
   TableRelation,
 } from '../relations/relations-utils'
 
+const ACCESS_LOG_PREFIX = '[entity.access.groups]'
+
+type RelationPaginationParams = {
+  page?: number
+  pageSize?: number
+  sort?: string
+}
+
 /**
  * Centralized service for all relation API operations
  * Uses daptinClient.worldModel methods for consistent data access
  */
 export class RelationsApiService {
+  static async fetchUsergroups({
+    search,
+    page = 1,
+    pageSize = 20,
+    sort = 'name',
+  }: RelationPaginationParams & {
+    search?: string
+  }): Promise<DaptinJsonApiListResponse<{ name?: string }>> {
+    const params: DaptinJsonApiQueryParams = {
+      'page[size]': pageSize,
+      'page[number]': page,
+      sort,
+    }
+
+    if (search?.trim()) {
+      params.query = JSON.stringify([
+        {
+          column: 'name',
+          operator: 'contains',
+          value: `%${search.trim()}%`,
+        },
+      ])
+    }
+
+    console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:start`, {
+      search,
+      params,
+    })
+
+    try {
+      const response = await daptinClient.jsonApi.findAll<{ name?: string }>(
+        'usergroup',
+        params
+      )
+      console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:success`, {
+        count: Array.isArray(response.data) ? response.data.length : 0,
+        links: response.links,
+      })
+      return response
+    } catch (error) {
+      console.error(`${ACCESS_LOG_PREFIX} all-groups:fetch:error`, {
+        search,
+        params,
+        error,
+      })
+      throw error
+    }
+  }
+
+  static async fetchObjectUsergroups({
+    entityName,
+    entityId,
+    page = 1,
+    pageSize = 10,
+    sort = 'name',
+  }: RelationPaginationParams & {
+    entityName: string
+    entityId: DaptinReferenceId
+  }): Promise<DaptinObjectUsergroupAccessResponse<{ name?: string }>> {
+    const params: DaptinJsonApiQueryParams = {
+      'page[size]': pageSize,
+      'page[number]': page,
+      sort,
+    }
+
+    console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:start`, {
+      entityName,
+      entityId,
+      params,
+    })
+
+    try {
+      const response = await daptinClient.accessManager.listObjectUsergroups<{
+        name?: string
+      }>(entityName, entityId, params)
+      console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:success`, {
+        entityName,
+        entityId,
+        count: response.data.length,
+        links: response.links,
+      })
+      return response
+    } catch (error) {
+      console.error(`${ACCESS_LOG_PREFIX} related-groups:fetch:error`, {
+        entityName,
+        entityId,
+        params,
+        error,
+      })
+      throw error
+    }
+  }
+
+  static async addObjectUsergroup(
+    entityName: string,
+    entityId: DaptinReferenceId,
+    groupId: DaptinReferenceId
+  ): Promise<unknown> {
+    console.info(`${ACCESS_LOG_PREFIX} add:start`, {
+      entityName,
+      entityId,
+      groupId,
+    })
+
+    try {
+      const response = await daptinClient.accessManager.addObjectUsergroup(
+        entityName,
+        entityId,
+        groupId
+      )
+      console.info(`${ACCESS_LOG_PREFIX} add:success`, {
+        entityName,
+        entityId,
+        groupId,
+      })
+      return response
+    } catch (error) {
+      console.error(`${ACCESS_LOG_PREFIX} add:error`, {
+        entityName,
+        entityId,
+        groupId,
+        error,
+      })
+      throw error
+    }
+  }
+
+  static async removeObjectUsergroup(
+    entityName: string,
+    entityId: DaptinReferenceId,
+    groupId: DaptinReferenceId
+  ): Promise<unknown> {
+    console.info(`${ACCESS_LOG_PREFIX} remove:start`, {
+      entityName,
+      entityId,
+      groupId,
+    })
+
+    try {
+      const response = await daptinClient.accessManager.removeObjectUsergroup(
+        entityName,
+        entityId,
+        groupId
+      )
+      console.info(`${ACCESS_LOG_PREFIX} remove:success`, {
+        entityName,
+        entityId,
+        groupId,
+      })
+      return response
+    } catch (error) {
+      console.error(`${ACCESS_LOG_PREFIX} remove:error`, {
+        entityName,
+        entityId,
+        groupId,
+        error,
+      })
+      throw error
+    }
+  }
+
+  static async updateObjectUsergroupRelationPermission(
+    entityName: string,
+    relationReferenceId: DaptinReferenceId,
+    permission: number
+  ): Promise<unknown> {
+    console.info(`${ACCESS_LOG_PREFIX} permission:update:start`, {
+      entityName,
+      relationReferenceId,
+      permission,
+    })
+
+    try {
+      const response =
+        await daptinClient.accessManager.updateObjectUsergroupRelationPermission(
+          entityName,
+          relationReferenceId,
+          permission
+        )
+      console.info(`${ACCESS_LOG_PREFIX} permission:update:success`, {
+        entityName,
+        relationReferenceId,
+        permission,
+      })
+      return response
+    } catch (error) {
+      console.error(`${ACCESS_LOG_PREFIX} permission:update:error`, {
+        entityName,
+        relationReferenceId,
+        permission,
+        error,
+      })
+      throw error
+    }
+  }
+
   /**
    * Fetch relations for an entity
    */
@@ -20,7 +231,8 @@ export class RelationsApiService {
   ): Promise<TableRelation[]> {
     try {
       // Fetch world model using the worldManager API
-      const worldModel = await daptinClient.worldManager.getWorldByName(entityName)
+      const worldModel =
+        await daptinClient.worldManager.getWorldByName(entityName)
 
       if (!worldModel) {
         throw new Error(`Failed to get world model for ${entityName}`)
@@ -31,9 +243,10 @@ export class RelationsApiService {
       // Extract relations from the world_schema_json
       if (worldModel.world_schema_json) {
         try {
-          const parsedSchema = typeof worldModel.world_schema_json === 'string'
-            ? JSON.parse(worldModel.world_schema_json)
-            : worldModel.world_schema_json
+          const parsedSchema =
+            typeof worldModel.world_schema_json === 'string'
+              ? JSON.parse(worldModel.world_schema_json)
+              : worldModel.world_schema_json
 
           // Extract relations
           if (parsedSchema.Relations) {
@@ -44,10 +257,7 @@ export class RelationsApiService {
             )
 
             // Categorize relations by direction
-            const { allRelations } = categorizeRelations(
-              relations,
-              entityName
-            )
+            const { allRelations } = categorizeRelations(relations, entityName)
             return allRelations
           }
         } catch (jsonParseError) {
@@ -99,7 +309,10 @@ export class RelationsApiService {
         enhancedParams
       )
 
-      validateDaptinResponse(response, `Failed to fetch related ${relatedEntityName}`)
+      validateDaptinResponse(
+        response,
+        `Failed to fetch related ${relatedEntityName}`
+      )
 
       let data = response.data || []
       if (!(data instanceof Array)) {
@@ -131,7 +344,8 @@ export class RelationsApiService {
   ): Promise<any> {
     try {
       // Get the world model which contains all entity metadata
-      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+      const worldModel =
+        await daptinClient.worldManager.getWorldByName(sourceEntityName)
 
       if (!worldModel) {
         throw new Error(`Failed to get world model for ${sourceEntityName}`)
@@ -161,9 +375,10 @@ export class RelationsApiService {
       }
 
       // For many-to-many relations, use the relationships API
-      const relationName = relation.ObjectName === sourceEntityName
-        ? relation.SubjectName
-        : relation.ObjectName
+      const relationName =
+        relation.ObjectName === sourceEntityName
+          ? relation.SubjectName
+          : relation.ObjectName
 
       const response = await daptinClient.jsonApi
         .one(sourceEntityName, sourceEntityId)
@@ -195,7 +410,8 @@ export class RelationsApiService {
   ): Promise<any> {
     try {
       // Get the world model which contains all entity metadata
-      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+      const worldModel =
+        await daptinClient.worldManager.getWorldByName(sourceEntityName)
 
       if (!worldModel) {
         throw new Error(`Failed to get world model for ${sourceEntityName}`)
@@ -240,7 +456,8 @@ export class RelationsApiService {
   ): Promise<any> {
     try {
       // Get the world model which contains all entity metadata
-      const worldModel = await daptinClient.worldManager.getWorldByName(sourceEntityName)
+      const worldModel =
+        await daptinClient.worldManager.getWorldByName(sourceEntityName)
 
       if (!worldModel) {
         throw new Error(`Failed to get world model for ${sourceEntityName}`)
@@ -254,7 +471,7 @@ export class RelationsApiService {
             // We need to find another valid value to set it to or throw an error
             throw new Error(
               `Cannot delete 'belongs_to' relation from ${sourceEntityName} to ${targetEntityName}. ` +
-              `This is a required foreign key and must be set to a valid value. Use updateBelongsToRelation instead.`
+                `This is a required foreign key and must be set to a valid value. Use updateBelongsToRelation instead.`
             )
 
           case 'has_one':
@@ -275,9 +492,10 @@ export class RelationsApiService {
           case 'many_to_many':
           case 'has_many_and_belongs_to_many':
             // For many-to-many relations, use the relationships API
-            const relationName = relation.Object === sourceEntityName
-              ? relation.SubjectName
-              : relation.ObjectName
+            const relationName =
+              relation.Object === sourceEntityName
+                ? relation.SubjectName
+                : relation.ObjectName
 
             const response = await daptinClient.jsonApi
               .one(sourceEntityName, sourceEntityId)
@@ -315,9 +533,10 @@ export class RelationsApiService {
             }
 
             // Default to relationships API for unknown relation types
-            const defaultRelationName = relation.Object === sourceEntityName
-              ? relation.Subject
-              : relation.Object
+            const defaultRelationName =
+              relation.Object === sourceEntityName
+                ? relation.Subject
+                : relation.Object
 
             const defaultResponse = await daptinClient.jsonApi
               .one(sourceEntityName, sourceEntityId)
@@ -332,7 +551,9 @@ export class RelationsApiService {
         }
       }
 
-      throw new Error(`Invalid relation between ${sourceEntityName} and ${targetEntityName}`)
+      throw new Error(
+        `Invalid relation between ${sourceEntityName} and ${targetEntityName}`
+      )
     } catch (err) {
       console.error('Error deleting relation:', err)
       throw err

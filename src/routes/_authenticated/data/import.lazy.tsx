@@ -1,12 +1,32 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useCallback, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createLazyFileRoute } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
-import { EntityApiService } from '@/features/entity/services/EntityApiService'
-import { useToast } from '@/components/ui/use-toast'
+import {
+  Upload,
+  FileUp,
+  FileJson,
+  FileSpreadsheet,
+  File,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from 'lucide-react'
+import {
+  daptinVisibleWorldEntityQuery,
+  isVisibleDaptinWorldEntity,
+} from '@/lib/daptin/world-entities'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -16,8 +36,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
-import { Upload, FileUp, FileJson, FileSpreadsheet, File, X, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/components/ui/use-toast'
+import { EntityApiService } from '@/features/entity/services/EntityApiService'
 
 interface WorldEntity {
   reference_id: string
@@ -42,9 +63,10 @@ function ImportPage() {
     queryFn: async () => {
       const response = await daptinClient.jsonApi.findAll('world', {
         'page[size]': '200',
+        query: JSON.stringify(daptinVisibleWorldEntityQuery()),
       })
       return ((response.data || []) as WorldEntity[]).filter(
-        (e) => !e.table_name.includes('_has_')
+        isVisibleDaptinWorldEntity
       )
     },
   })
@@ -83,7 +105,10 @@ function ImportPage() {
       })
     },
     onSuccess: (result) => {
-      toast({ title: 'Import complete', description: 'Data imported successfully' })
+      toast({
+        title: 'Import complete',
+        description: 'Data imported successfully',
+      })
       setUploadedFile(null)
       setSelectedEntity('')
       // Handle any response messages
@@ -99,76 +124,88 @@ function ImportPage() {
       }
     },
     onError: (error) => {
-      toast({ variant: 'destructive', title: 'Import failed', description: error.message })
+      toast({
+        variant: 'destructive',
+        title: 'Import failed',
+        description: error.message,
+      })
     },
   })
 
-  const handleFiles = useCallback(async (files: FileList) => {
-    const file = files[0]
-    if (!file) return
+  const handleFiles = useCallback(
+    async (files: FileList) => {
+      const file = files[0]
+      if (!file) return
 
-    const validTypes = [
-      'application/json',
-      'text/csv',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ]
-    const ext = file.name.split('.').pop()?.toLowerCase()
-    const validExts = ['json', 'csv', 'xlsx', 'xls']
+      const validTypes = [
+        'application/json',
+        'text/csv',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ]
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      const validExts = ['json', 'csv', 'xlsx', 'xls']
 
-    if (!validTypes.includes(file.type) && !validExts.includes(ext || '')) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Please upload a JSON, CSV, or Excel file',
-      })
-      return
-    }
-
-    // Try to preview CSV/JSON files
-    let preview: string[][] | undefined
-    let rowCount: number | undefined
-
-    if (ext === 'csv' || file.type === 'text/csv') {
-      try {
-        const text = await file.text()
-        const lines = text.split('\n').filter(line => line.trim())
-        rowCount = lines.length - 1 // Exclude header
-        preview = lines.slice(0, 6).map(line => {
-          // Simple CSV parsing (doesn't handle quoted commas)
-          return line.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''))
+      if (!validTypes.includes(file.type) && !validExts.includes(ext || '')) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid file type',
+          description: 'Please upload a JSON, CSV, or Excel file',
         })
-      } catch {
-        // Preview failed, continue without it
+        return
       }
-    } else if (ext === 'json' || file.type === 'application/json') {
-      try {
-        const text = await file.text()
-        const data = JSON.parse(text)
-        if (Array.isArray(data)) {
-          rowCount = data.length
-          const headers = data.length > 0 ? Object.keys(data[0]) : []
-          preview = [headers]
-          data.slice(0, 5).forEach(row => {
-            preview!.push(headers.map(h => String(row[h] ?? '')))
+
+      // Try to preview CSV/JSON files
+      let preview: string[][] | undefined
+      let rowCount: number | undefined
+
+      if (ext === 'csv' || file.type === 'text/csv') {
+        try {
+          const text = await file.text()
+          const lines = text.split('\n').filter((line) => line.trim())
+          rowCount = lines.length - 1 // Exclude header
+          preview = lines.slice(0, 6).map((line) => {
+            // Simple CSV parsing (doesn't handle quoted commas)
+            return line
+              .split(',')
+              .map((cell) => cell.trim().replace(/^"|"$/g, ''))
           })
+        } catch {
+          // Preview failed, continue without it
         }
-      } catch {
-        // Preview failed, continue without it
+      } else if (ext === 'json' || file.type === 'application/json') {
+        try {
+          const text = await file.text()
+          const data = JSON.parse(text)
+          if (Array.isArray(data)) {
+            rowCount = data.length
+            const headers = data.length > 0 ? Object.keys(data[0]) : []
+            preview = [headers]
+            data.slice(0, 5).forEach((row) => {
+              preview!.push(headers.map((h) => String(row[h] ?? '')))
+            })
+          }
+        } catch {
+          // Preview failed, continue without it
+        }
       }
-    }
 
-    setUploadedFile({ file, preview, rowCount })
-  }, [toast])
+      setUploadedFile({ file, preview, rowCount })
+    },
+    [toast]
+  )
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-    if (e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files)
-    }
-  }, [handleFiles])
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDragging(false)
+      if (e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files)
+      }
+    },
+    [handleFiles]
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -189,10 +226,12 @@ function ImportPage() {
 
   const getFileIcon = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase()
-    if (ext === 'json') return <FileJson className="h-8 w-8 text-blue-500" />
-    if (ext === 'csv') return <FileSpreadsheet className="h-8 w-8 text-green-500" />
-    if (ext === 'xlsx' || ext === 'xls') return <FileSpreadsheet className="h-8 w-8 text-green-600" />
-    return <File className="h-8 w-8 text-gray-500" />
+    if (ext === 'json') return <FileJson className='h-8 w-8 text-blue-500' />
+    if (ext === 'csv')
+      return <FileSpreadsheet className='h-8 w-8 text-green-500' />
+    if (ext === 'xlsx' || ext === 'xls')
+      return <FileSpreadsheet className='h-8 w-8 text-green-600' />
+    return <File className='h-8 w-8 text-gray-500' />
   }
 
   const formatFileSize = (bytes: number) => {
@@ -202,24 +241,24 @@ function ImportPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Upload className="h-6 w-6" />
+    <div className='p-6'>
+      <div className='mb-6'>
+        <h1 className='flex items-center gap-2 text-2xl font-bold'>
+          <Upload className='h-6 w-6' />
           Import Data
         </h1>
-        <p className="text-muted-foreground">
+        <p className='text-muted-foreground'>
           Import data from CSV, Excel, or JSON files
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-6">
+      <div className='grid gap-6 md:grid-cols-3'>
+        <div className='space-y-6 md:col-span-2'>
           {/* File Upload Area */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileUp className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2 text-lg'>
+                <FileUp className='h-5 w-5' />
                 Upload File
               </CardTitle>
               <CardDescription>
@@ -231,7 +270,9 @@ function ImportPage() {
                 <div
                   className={cn(
                     'cursor-pointer rounded-lg border-2 border-dashed p-8 transition-colors',
-                    isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                    isDragging
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted-foreground/25 hover:border-muted-foreground/50'
                   )}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
@@ -239,59 +280,67 @@ function ImportPage() {
                   onDragLeave={handleDragLeave}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="flex flex-col items-center justify-center gap-4">
-                    <div className="flex gap-2">
-                      <FileJson className="h-10 w-10 text-muted-foreground" />
-                      <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
+                  <div className='flex flex-col items-center justify-center gap-4'>
+                    <div className='flex gap-2'>
+                      <FileJson className='text-muted-foreground h-10 w-10' />
+                      <FileSpreadsheet className='text-muted-foreground h-10 w-10' />
                     </div>
-                    <div className="text-center">
-                      <p className="font-medium">Drop your file here</p>
-                      <p className="text-sm text-muted-foreground">
+                    <div className='text-center'>
+                      <p className='font-medium'>Drop your file here</p>
+                      <p className='text-muted-foreground text-sm'>
                         or click to browse (JSON, CSV, XLSX)
                       </p>
                     </div>
                   </div>
                   <Input
                     ref={fileInputRef}
-                    type="file"
-                    accept=".json,.csv,.xlsx,.xls"
-                    onChange={(e) => e.target.files && handleFiles(e.target.files)}
-                    className="hidden"
+                    type='file'
+                    accept='.json,.csv,.xlsx,.xls'
+                    onChange={(e) =>
+                      e.target.files && handleFiles(e.target.files)
+                    }
+                    className='hidden'
                   />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className='space-y-4'>
                   {/* File Info */}
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
+                  <div className='bg-muted/50 flex items-center justify-between rounded-lg border p-4'>
+                    <div className='flex items-center gap-3'>
                       {getFileIcon(uploadedFile.file.name)}
                       <div>
-                        <p className="font-medium">{uploadedFile.file.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className='font-medium'>{uploadedFile.file.name}</p>
+                        <p className='text-muted-foreground text-sm'>
                           {formatFileSize(uploadedFile.file.size)}
-                          {uploadedFile.rowCount !== undefined && ` • ${uploadedFile.rowCount} rows`}
+                          {uploadedFile.rowCount !== undefined &&
+                            ` • ${uploadedFile.rowCount} rows`}
                         </p>
                       </div>
                     </div>
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant='ghost'
+                      size='icon'
                       onClick={() => setUploadedFile(null)}
                     >
-                      <X className="h-4 w-4" />
+                      <X className='h-4 w-4' />
                     </Button>
                   </div>
 
                   {/* Preview Table */}
                   {uploadedFile.preview && uploadedFile.preview.length > 0 && (
-                    <div className="border rounded-lg overflow-hidden">
-                      <div className="text-sm font-medium p-2 bg-muted">Preview</div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted/50">
+                    <div className='overflow-hidden rounded-lg border'>
+                      <div className='bg-muted p-2 text-sm font-medium'>
+                        Preview
+                      </div>
+                      <div className='overflow-x-auto'>
+                        <table className='w-full text-sm'>
+                          <thead className='bg-muted/50'>
                             <tr>
                               {uploadedFile.preview[0].map((header, i) => (
-                                <th key={i} className="px-3 py-2 text-left font-medium truncate max-w-32">
+                                <th
+                                  key={i}
+                                  className='max-w-32 truncate px-3 py-2 text-left font-medium'
+                                >
                                   {header}
                                 </th>
                               ))}
@@ -299,9 +348,12 @@ function ImportPage() {
                           </thead>
                           <tbody>
                             {uploadedFile.preview.slice(1).map((row, i) => (
-                              <tr key={i} className="border-t">
+                              <tr key={i} className='border-t'>
                                 {row.map((cell, j) => (
-                                  <td key={j} className="px-3 py-2 truncate max-w-32">
+                                  <td
+                                    key={j}
+                                    className='max-w-32 truncate px-3 py-2'
+                                  >
                                     {cell}
                                   </td>
                                 ))}
@@ -311,7 +363,7 @@ function ImportPage() {
                         </table>
                       </div>
                       {uploadedFile.rowCount && uploadedFile.rowCount > 5 && (
-                        <div className="text-sm text-muted-foreground p-2 bg-muted/50 text-center">
+                        <div className='text-muted-foreground bg-muted/50 p-2 text-center text-sm'>
                           ... and {uploadedFile.rowCount - 5} more rows
                         </div>
                       )}
@@ -323,25 +375,31 @@ function ImportPage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className='space-y-6'>
           {/* Import Options */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Import Options</CardTitle>
+              <CardTitle className='text-lg'>Import Options</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
                 <Label>Target Entity</Label>
                 {isLoading ? (
-                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className='h-10 w-full' />
                 ) : (
-                  <Select value={selectedEntity} onValueChange={setSelectedEntity}>
+                  <Select
+                    value={selectedEntity}
+                    onValueChange={setSelectedEntity}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select entity..." />
+                      <SelectValue placeholder='Select entity...' />
                     </SelectTrigger>
                     <SelectContent>
                       {entities?.map((entity) => (
-                        <SelectItem key={entity.reference_id} value={entity.table_name}>
+                        <SelectItem
+                          key={entity.reference_id}
+                          value={entity.table_name}
+                        >
                           {entity.table_name}
                         </SelectItem>
                       ))}
@@ -351,9 +409,11 @@ function ImportPage() {
               </div>
 
               <Button
-                className="w-full"
+                className='w-full'
                 onClick={() => importMutation.mutate()}
-                disabled={importMutation.isPending || !uploadedFile || !selectedEntity}
+                disabled={
+                  importMutation.isPending || !uploadedFile || !selectedEntity
+                }
               >
                 {importMutation.isPending ? 'Importing...' : 'Import Data'}
               </Button>
@@ -363,25 +423,25 @@ function ImportPage() {
           {/* Status */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Status</CardTitle>
+              <CardTitle className='text-lg'>Status</CardTitle>
             </CardHeader>
             <CardContent>
               {!uploadedFile && !selectedEntity && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">Upload a file to get started</span>
+                <div className='text-muted-foreground flex items-center gap-2'>
+                  <AlertCircle className='h-4 w-4' />
+                  <span className='text-sm'>Upload a file to get started</span>
                 </div>
               )}
               {uploadedFile && !selectedEntity && (
-                <div className="flex items-center gap-2 text-yellow-600">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">Select a target entity</span>
+                <div className='flex items-center gap-2 text-yellow-600'>
+                  <AlertCircle className='h-4 w-4' />
+                  <span className='text-sm'>Select a target entity</span>
                 </div>
               )}
               {uploadedFile && selectedEntity && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-sm">Ready to import</span>
+                <div className='flex items-center gap-2 text-green-600'>
+                  <CheckCircle2 className='h-4 w-4' />
+                  <span className='text-sm'>Ready to import</span>
                 </div>
               )}
             </CardContent>
@@ -390,19 +450,19 @@ function ImportPage() {
           {/* Supported Formats */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Supported Formats</CardTitle>
+              <CardTitle className='text-lg'>Supported Formats</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <FileJson className="h-4 w-4 text-blue-500" />
+            <CardContent className='space-y-2'>
+              <div className='flex items-center gap-2 text-sm'>
+                <FileJson className='h-4 w-4 text-blue-500' />
                 <span>JSON (array of objects)</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FileSpreadsheet className="h-4 w-4 text-green-500" />
+              <div className='flex items-center gap-2 text-sm'>
+                <FileSpreadsheet className='h-4 w-4 text-green-500' />
                 <span>CSV (comma-separated)</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FileSpreadsheet className="h-4 w-4 text-green-600" />
+              <div className='flex items-center gap-2 text-sm'>
+                <FileSpreadsheet className='h-4 w-4 text-green-600' />
                 <span>Excel (XLSX, XLS)</span>
               </div>
             </CardContent>

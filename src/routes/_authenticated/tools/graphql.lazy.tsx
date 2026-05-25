@@ -1,15 +1,24 @@
-import { createLazyFileRoute, useSearch } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createLazyFileRoute, useSearch } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
 import { DAPTIN_ENDPOINT } from '@/daptin'
-import { useToast } from '@/components/ui/use-toast'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Braces, Play, Copy, RotateCcw, Clock, FileJson } from 'lucide-react'
+import {
+  daptinVisibleWorldEntityQuery,
+  isVisibleDaptinWorldEntity,
+} from '@/lib/daptin/world-entities'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -17,7 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Braces, Play, Copy, RotateCcw, Clock, FileJson } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/components/ui/use-toast'
 
 interface WorldEntity {
   reference_id: string
@@ -60,7 +71,9 @@ function GraphQLPage() {
   const [result, setResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [executionTime, setExecutionTime] = useState<number | null>(null)
-  const [history, setHistory] = useState<Array<{ query: string; time: Date }>>([])
+  const [history, setHistory] = useState<Array<{ query: string; time: Date }>>(
+    []
+  )
 
   // Pre-populate query if entity param is provided
   useEffect(() => {
@@ -80,9 +93,10 @@ function GraphQLPage() {
     queryFn: async () => {
       const response = await daptinClient.jsonApi.findAll('world', {
         'page[size]': '200',
+        query: JSON.stringify(daptinVisibleWorldEntityQuery()),
       })
       return ((response.data || []) as WorldEntity[]).filter(
-        (e) => !e.table_name.includes('_has_')
+        isVisibleDaptinWorldEntity
       )
     },
   })
@@ -100,7 +114,11 @@ function GraphQLPage() {
         try {
           parsedVariables = JSON.parse(variables)
         } catch {
-          toast({ variant: 'destructive', title: 'Invalid Variables', description: 'Variables must be valid JSON' })
+          toast({
+            variant: 'destructive',
+            title: 'Invalid Variables',
+            description: 'Variables must be valid JSON',
+          })
           setIsLoading(false)
           return
         }
@@ -111,7 +129,7 @@ function GraphQLPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           query,
@@ -123,15 +141,26 @@ function GraphQLPage() {
       const endTime = Date.now()
       setExecutionTime(endTime - startTime)
       setResult(data)
-      setHistory(prev => [{ query, time: new Date() }, ...prev.slice(0, 9)])
+      setHistory((prev) => [{ query, time: new Date() }, ...prev.slice(0, 9)])
 
       if (data.errors) {
-        toast({ variant: 'destructive', title: 'Query Error', description: data.errors[0]?.message || 'Query failed' })
+        toast({
+          variant: 'destructive',
+          title: 'Query Error',
+          description: data.errors[0]?.message || 'Query failed',
+        })
       } else {
-        toast({ title: 'Query Executed', description: `Completed in ${endTime - startTime}ms` })
+        toast({
+          title: 'Query Executed',
+          description: `Completed in ${endTime - startTime}ms`,
+        })
       }
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Execution Failed', description: String(error) })
+      toast({
+        variant: 'destructive',
+        title: 'Execution Failed',
+        description: String(error),
+      })
       setResult({ error: String(error) })
     } finally {
       setIsLoading(false)
@@ -170,31 +199,35 @@ function GraphQLPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Braces className="h-6 w-6" />
+    <div className='p-6'>
+      <div className='mb-6'>
+        <h1 className='flex items-center gap-2 text-2xl font-bold'>
+          <Braces className='h-6 w-6' />
           GraphQL Explorer
         </h1>
-        <p className="text-muted-foreground">
+        <p className='text-muted-foreground'>
           Query the Daptin GraphQL API interactively
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className='grid gap-6 md:grid-cols-2'>
         {/* Query Editor */}
-        <div className="space-y-4">
+        <div className='space-y-4'>
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Query</CardTitle>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={formatQuery}>
-                    <FileJson className="h-4 w-4 mr-1" />
+              <div className='flex items-center justify-between'>
+                <CardTitle className='text-lg'>Query</CardTitle>
+                <div className='flex gap-1'>
+                  <Button variant='ghost' size='sm' onClick={formatQuery}>
+                    <FileJson className='mr-1 h-4 w-4' />
                     Format
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setQuery(EXAMPLE_QUERIES.customQuery)}>
-                    <RotateCcw className="h-4 w-4 mr-1" />
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => setQuery(EXAMPLE_QUERIES.customQuery)}
+                  >
+                    <RotateCcw className='mr-1 h-4 w-4' />
                     Clear
                   </Button>
                 </div>
@@ -204,65 +237,74 @@ function GraphQLPage() {
               <Textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="font-mono text-sm min-h-[300px] resize-y"
-                placeholder="Enter your GraphQL query..."
+                className='min-h-[300px] resize-y font-mono text-sm'
+                placeholder='Enter your GraphQL query...'
               />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Variables</CardTitle>
+              <CardTitle className='text-lg'>Variables</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={variables}
                 onChange={(e) => setVariables(e.target.value)}
-                className="font-mono text-sm min-h-[80px]"
+                className='min-h-[80px] font-mono text-sm'
                 placeholder='{"id": "123"}'
               />
             </CardContent>
           </Card>
 
-          <Button onClick={executeQuery} disabled={isLoading} className="w-full">
-            <Play className="h-4 w-4 mr-1" />
+          <Button
+            onClick={executeQuery}
+            disabled={isLoading}
+            className='w-full'
+          >
+            <Play className='mr-1 h-4 w-4' />
             {isLoading ? 'Executing...' : 'Execute Query'}
           </Button>
         </div>
 
         {/* Results & Tools */}
-        <div className="space-y-4">
+        <div className='space-y-4'>
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-lg">Result</CardTitle>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
+                  <CardTitle className='text-lg'>Result</CardTitle>
                   {executionTime !== null && (
-                    <Badge variant="outline" className="gap-1">
-                      <Clock className="h-3 w-3" />
+                    <Badge variant='outline' className='gap-1'>
+                      <Clock className='h-3 w-3' />
                       {executionTime}ms
                     </Badge>
                   )}
                 </div>
-                <Button variant="ghost" size="sm" onClick={copyResult} disabled={!result}>
-                  <Copy className="h-4 w-4" />
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={copyResult}
+                  disabled={!result}
+                >
+                  <Copy className='h-4 w-4' />
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg bg-muted/30 p-4 min-h-[300px] max-h-[500px] overflow-auto">
+              <div className='bg-muted/30 max-h-[500px] min-h-[300px] overflow-auto rounded-lg border p-4'>
                 {isLoading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                  <div className='space-y-2'>
+                    <Skeleton className='h-4 w-full' />
+                    <Skeleton className='h-4 w-3/4' />
+                    <Skeleton className='h-4 w-1/2' />
                   </div>
                 ) : result ? (
-                  <pre className="font-mono text-xs whitespace-pre-wrap">
+                  <pre className='font-mono text-xs whitespace-pre-wrap'>
                     {JSON.stringify(result, null, 2)}
                   </pre>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">
+                  <p className='text-muted-foreground py-8 text-center'>
                     Execute a query to see results
                   </p>
                 )}
@@ -273,17 +315,32 @@ function GraphQLPage() {
           {/* Quick Tools */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Examples</CardTitle>
+              <CardTitle className='text-lg'>Examples</CardTitle>
               <CardDescription>Load example queries</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => loadExample('introspection')}>
+            <CardContent className='space-y-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start'
+                onClick={() => loadExample('introspection')}
+              >
                 Schema Introspection
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => loadExample('allEntities')}>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start'
+                onClick={() => loadExample('allEntities')}
+              >
                 List All Entities
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => loadExample('users')}>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start'
+                onClick={() => loadExample('users')}
+              >
                 Query Users
               </Button>
             </CardContent>
@@ -291,17 +348,20 @@ function GraphQLPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Query Entity</CardTitle>
+              <CardTitle className='text-lg'>Query Entity</CardTitle>
               <CardDescription>Generate query for an entity</CardDescription>
             </CardHeader>
             <CardContent>
               <Select onValueChange={generateEntityQuery}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select entity..." />
+                  <SelectValue placeholder='Select entity...' />
                 </SelectTrigger>
                 <SelectContent>
                   {entities?.map((entity) => (
-                    <SelectItem key={entity.reference_id} value={entity.table_name}>
+                    <SelectItem
+                      key={entity.reference_id}
+                      value={entity.table_name}
+                    >
                       {entity.table_name}
                     </SelectItem>
                   ))}
@@ -314,17 +374,17 @@ function GraphQLPage() {
           {history.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">History</CardTitle>
+                <CardTitle className='text-lg'>History</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-1 max-h-32 overflow-auto">
+                <div className='max-h-32 space-y-1 overflow-auto'>
                   {history.map((item, i) => (
                     <button
                       key={i}
                       onClick={() => setQuery(item.query)}
-                      className="w-full text-left text-sm p-2 hover:bg-muted rounded-lg truncate font-mono"
+                      className='hover:bg-muted w-full truncate rounded-lg p-2 text-left font-mono text-sm'
                     >
-                      <span className="text-muted-foreground text-xs mr-2">
+                      <span className='text-muted-foreground mr-2 text-xs'>
                         {item.time.toLocaleTimeString()}
                       </span>
                       {item.query.slice(0, 50)}...
@@ -337,10 +397,12 @@ function GraphQLPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Endpoint</CardTitle>
+              <CardTitle className='text-lg'>Endpoint</CardTitle>
             </CardHeader>
             <CardContent>
-              <code className="text-xs block p-2 bg-muted rounded break-all">{graphqlEndpoint}</code>
+              <code className='bg-muted block rounded p-2 text-xs break-all'>
+                {graphqlEndpoint}
+              </code>
             </CardContent>
           </Card>
         </div>

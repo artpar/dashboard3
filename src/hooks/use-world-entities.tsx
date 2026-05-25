@@ -1,19 +1,17 @@
+/* eslint-disable no-console */
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin'
+import type { DaptinWorldEntity } from 'daptin-client'
+import {
+  daptinVisibleWorldEntityQuery,
+  isVisibleDaptinWorldEntity,
+} from '@/lib/daptin/world-entities'
+import { validateDaptinResponse } from '@/lib/utils'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ColumnDefinition } from '@/features/entity/columns'
-import { validateDaptinResponse } from '@/lib/utils'
 
-export interface WorldEntity {
-  id: string
-  reference_id: string
-  table_name: string
-  world_schema_json: string
-  is_hidden: boolean
-  is_top_level: boolean
-  icon?: string
-}
+export type WorldEntity = DaptinWorldEntity
 
 export type AuthPermission = number
 
@@ -78,16 +76,18 @@ export function useWorldEntities() {
         const response = await daptinClient.jsonApi.findAll('world', {
           'page[size]': '500',
           sort: 'table_name',
-          query: JSON.stringify([]),
+          query: JSON.stringify(daptinVisibleWorldEntityQuery()),
         })
 
         validateDaptinResponse(response, 'Failed to fetch world entities')
-        console.log("useWorldEntities: ", response.data)
+        console.log('useWorldEntities: ', response.data)
 
-        return response.data.map((entity: any) => ({
-          ...entity,
-          icon: entity.icon,
-        }));
+        return ((response.data || []) as WorldEntity[])
+          .filter(isVisibleDaptinWorldEntity)
+          .map((entity) => ({
+            ...entity,
+            icon: entity.icon,
+          }))
       } catch (err) {
         console.error('Error fetching world entities:', err)
         throw err

@@ -7,13 +7,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { PermissionAction, PermissionScope } from '@/features/entity/columns/PermissionTypes.ts'
+import {
+  PermissionAction,
+  PermissionScope,
+} from '@/features/entity/columns/PermissionTypes.ts'
 
 interface PermissionActionToggleProps {
   scope: PermissionScope
   action: PermissionAction
   isChecked: boolean
   onToggle: () => void
+  id?: string
   disabled?: boolean
   colors: {
     selected: string
@@ -28,16 +32,19 @@ export function PermissionActionToggle({
   action,
   isChecked,
   onToggle,
+  id,
   disabled,
   colors,
   explanation,
 }: PermissionActionToggleProps) {
+  const inputId = id || `${scope}-${action}`
+
   return (
     <div
-      className={`flex items-center space-x-2 rounded-md p-2 ${isChecked ? colors.selected : 'bg-background'} transition-colors`}
+      className={`flex min-h-10 items-center gap-3 rounded-md px-3 py-2 ${isChecked ? colors.selected : 'bg-background'} transition-colors`}
     >
       <Checkbox
-        id={`${scope}-${action}`}
+        id={inputId}
         checked={isChecked}
         onCheckedChange={onToggle}
         disabled={disabled}
@@ -45,10 +52,13 @@ export function PermissionActionToggle({
       />
 
       <label
-        htmlFor={`${scope}-${action}`}
-        className='flex-1 cursor-pointer text-sm font-medium'
+        htmlFor={inputId}
+        className='flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm'
       >
-        {action}
+        <span className='w-20 shrink-0 font-medium'>{action}</span>
+        <span className='text-muted-foreground truncate font-normal'>
+          {explanation}
+        </span>
       </label>
 
       <TooltipProvider>

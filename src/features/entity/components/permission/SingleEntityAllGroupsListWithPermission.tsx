@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { DaptinObjectUsergroupAccess } from 'daptin-client'
+import type {
+  DaptinObjectUsergroupAccess,
+  DaptinUsergroupEntity,
+} from 'daptin-client'
 import { Loader2, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -45,12 +48,6 @@ interface SingleEntityAllGroupsListWithPermissionProps {
   entityId: string
   className?: string
   disabled?: boolean
-}
-
-type UsergroupListRow = {
-  id?: string
-  reference_id?: string
-  name?: string
 }
 
 export function SingleEntityAllGroupsListWithPermission({
@@ -184,8 +181,10 @@ export function SingleEntityAllGroupsListWithPermission({
                   </div>
                 ) : allGroups.length > 0 ? (
                   <div className='space-y-1'>
-                    {allGroups.map((group: UsergroupListRow) => {
-                      const groupReferenceId = group.reference_id || group.id
+                    {allGroups.map((group) => {
+                      const usergroup = group as DaptinUsergroupEntity
+                      const groupReferenceId =
+                        usergroup.reference_id || String(usergroup.id || '')
                       if (!groupReferenceId) return null
                       const alreadyRelated =
                         isGroupAlreadyRelated(groupReferenceId)
@@ -198,7 +197,7 @@ export function SingleEntityAllGroupsListWithPermission({
                           disabled={isUpdating || alreadyRelated}
                         >
                           <span className='font-medium'>
-                            {group.name || groupReferenceId}
+                            {usergroup.name || groupReferenceId}
                           </span>
                           {alreadyRelated && (
                             <span className='text-muted-foreground ml-2 text-xs'>
@@ -270,7 +269,7 @@ export function SingleEntityAllGroupsListWithPermission({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className='grid gap-2 sm:grid-cols-2 lg:grid-cols-4'>
+                          <div className='divide-border rounded-md border'>
                             {Object.values(PermissionAction).map((action) => {
                               const flag = getPermissionFlag(
                                 PermissionScope.Group,
@@ -287,26 +286,31 @@ export function SingleEntityAllGroupsListWithPermission({
                                 `Group can ${action.toLowerCase()} this record`
 
                               return (
-                                <PermissionActionToggle
+                                <div
                                   key={`${relatedUserGroup.relationReferenceId}-${action}`}
-                                  scope={PermissionScope.Group}
-                                  action={action}
-                                  isChecked={isChecked}
-                                  onToggle={() =>
-                                    toggleGroupPermission(
-                                      relatedUserGroup.relationReferenceId,
-                                      flag,
-                                      permissionValue
-                                    )
-                                  }
-                                  disabled={disabled || isUpdating}
-                                  colors={{
-                                    selected: colors.selected,
-                                    text: colors.text,
-                                    border: colors.border,
-                                  }}
-                                  explanation={explanation}
-                                />
+                                  className='border-b last:border-b-0'
+                                >
+                                  <PermissionActionToggle
+                                    id={`${relatedUserGroup.relationReferenceId}-${action}`}
+                                    scope={PermissionScope.Group}
+                                    action={action}
+                                    isChecked={isChecked}
+                                    onToggle={() =>
+                                      toggleGroupPermission(
+                                        relatedUserGroup.relationReferenceId,
+                                        flag,
+                                        permissionValue
+                                      )
+                                    }
+                                    disabled={disabled || isUpdating}
+                                    colors={{
+                                      selected: colors.selected,
+                                      text: colors.text,
+                                      border: colors.border,
+                                    }}
+                                    explanation={explanation}
+                                  />
+                                </div>
                               )
                             })}
                           </div>

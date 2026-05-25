@@ -1,15 +1,13 @@
 /* eslint-disable no-console */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { daptinClient } from '@/daptin.ts'
 import type { DaptinObjectUsergroupAccess } from 'daptin-client'
 import {
   addPermission,
   hasPermission,
   removePermission,
 } from '@/features/entity/columns/PermissionTypes.ts'
-
-const ACCESS_LOG_PREFIX = '[entity.access.groups]'
+import { RelationsApiService } from '@/features/entity/services/RelationsApiService'
 
 type PaginationLinks = {
   current_page?: number
@@ -41,32 +39,12 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
       allGroupsPageSize,
     ],
     queryFn: async () => {
-      const params: Record<string, unknown> = {
-        'page[size]': allGroupsPageSize,
-        'page[number]': allGroupsPage,
+      return RelationsApiService.fetchUsergroups({
+        search: groupSearchQuery,
+        page: allGroupsPage,
+        pageSize: allGroupsPageSize,
         sort: 'name',
-      }
-
-      if (groupSearchQuery.trim()) {
-        params.query = JSON.stringify([
-          {
-            column: 'name',
-            operator: 'contains',
-            value: `%${groupSearchQuery.trim()}%`,
-          },
-        ])
-      }
-
-      console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:start`, {
-        groupSearchQuery,
-        params,
       })
-      const response = await daptinClient.jsonApi.findAll('usergroup', params)
-      console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:success`, {
-        count: Array.isArray(response.data) ? response.data.length : 0,
-        links: response.links,
-      })
-      return response
     },
   })
 
@@ -88,37 +66,20 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
     ],
     queryFn: async () => {
       if (!entityName || !entityId) {
-        console.warn(`${ACCESS_LOG_PREFIX} related-groups:fetch:skip`, {
+        console.warn('[entity.access.groups] related-groups:fetch:skip', {
           entityName,
           entityId,
         })
         return null
       }
 
-      const params = {
-        'page[size]': groupsPageSize,
-        'page[number]': groupsPage,
+      return RelationsApiService.fetchObjectUsergroups({
+        entityName,
+        entityId,
+        page: groupsPage,
+        pageSize: groupsPageSize,
         sort: 'name',
-      }
-
-      console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:start`, {
-        entityName,
-        entityId,
-        params,
       })
-
-      const response = await daptinClient.accessManager.listObjectUsergroups<{
-        name?: string
-      }>(entityName, entityId, params)
-
-      console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:success`, {
-        entityName,
-        entityId,
-        count: response.data.length,
-        links: response.links,
-      })
-
-      return response
     },
     enabled: Boolean(entityName && entityId),
   })
@@ -132,32 +93,17 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
     if (!entityName || !entityId || !groupId) return false
 
     setIsUpdating(true)
-    console.info(`${ACCESS_LOG_PREFIX} add:start`, {
-      entityName,
-      entityId,
-      groupId,
-    })
 
     try {
-      await daptinClient.accessManager.addObjectUsergroup(
+      await RelationsApiService.addObjectUsergroup(
         entityName,
         entityId,
         groupId
       )
       await refetchEntityGroups()
-      console.info(`${ACCESS_LOG_PREFIX} add:success`, {
-        entityName,
-        entityId,
-        groupId,
-      })
       return true
     } catch (error) {
-      console.error(`${ACCESS_LOG_PREFIX} add:error`, {
-        entityName,
-        entityId,
-        groupId,
-        error,
-      })
+      console.error('[entity.access.groups] add:handled-error', { error })
       return false
     } finally {
       setIsUpdating(false)
@@ -168,32 +114,17 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
     if (!entityName || !entityId || !groupId) return false
 
     setIsUpdating(true)
-    console.info(`${ACCESS_LOG_PREFIX} remove:start`, {
-      entityName,
-      entityId,
-      groupId,
-    })
 
     try {
-      await daptinClient.accessManager.removeObjectUsergroup(
+      await RelationsApiService.removeObjectUsergroup(
         entityName,
         entityId,
         groupId
       )
       await refetchEntityGroups()
-      console.info(`${ACCESS_LOG_PREFIX} remove:success`, {
-        entityName,
-        entityId,
-        groupId,
-      })
       return true
     } catch (error) {
-      console.error(`${ACCESS_LOG_PREFIX} remove:error`, {
-        entityName,
-        entityId,
-        groupId,
-        error,
-      })
+      console.error('[entity.access.groups] remove:handled-error', { error })
       return false
     } finally {
       setIsUpdating(false)
@@ -212,30 +143,18 @@ export function useEntityGroupRelations(entityName: string, entityId: string) {
       ? removePermission(currentPermission, permissionBit)
       : addPermission(currentPermission, permissionBit)
 
-    console.info(`${ACCESS_LOG_PREFIX} permission:update:start`, {
-      entityName,
-      relationReferenceId,
-      currentPermission,
-      newPermission,
-    })
-
     try {
-      await daptinClient.accessManager.updateObjectUsergroupRelationPermission(
+      await RelationsApiService.updateObjectUsergroupRelationPermission(
         entityName,
         relationReferenceId,
         newPermission
       )
       await refetchEntityGroups()
-      console.info(`${ACCESS_LOG_PREFIX} permission:update:success`, {
-        entityName,
-        relationReferenceId,
-        newPermission,
-      })
       return true
     } catch (error) {
-      console.error(`${ACCESS_LOG_PREFIX} permission:update:error`, {
-        entityName,
-        relationReferenceId,
+      console.error('[entity.access.groups] permission:update:handled-error', {
+        currentPermission,
+        newPermission,
         error,
       })
       return false

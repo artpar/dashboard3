@@ -38,12 +38,13 @@ export function PermissionScopeRow({
 }: PermissionScopeRowProps) {
   const colors = PERMISSION_COLORS[scope]
   const scopeTitle = title || scope
-  const scopeDescription = description || (
-    scope === PermissionScope.Guest
+  const scopeDescription =
+    description ||
+    (scope === PermissionScope.Guest
       ? 'Unauthenticated users'
       : scope === PermissionScope.User
-      ? 'Authenticated users'
-      : 'Users in the same group')
+        ? 'Authenticated users'
+        : 'Users in the same group')
 
   return (
     <TableRow>
@@ -52,29 +53,34 @@ export function PermissionScopeRow({
         <div className='text-muted-foreground text-xs'>{scopeDescription}</div>
       </TableCell>
       <TableCell>
-        <div className='grid grid-cols-2 gap-y-2 grid-rows-3 gap-2'>
+        <div className='divide-border rounded-md border'>
           {Object.values(PermissionAction).map((action) => {
             const flag = getPermissionFlag(scope, action)
             const isChecked = hasPermission(permissionValue, flag)
             const colors = PERMISSION_COLORS[scope]
-            const explanationKey = `${scope}${action}` as keyof typeof PERMISSION_EXPLANATIONS
-            const explanation = PERMISSION_EXPLANATIONS[explanationKey] || `${scope} can ${action}`
-            
+            const explanationKey =
+              `${scope}${action}` as keyof typeof PERMISSION_EXPLANATIONS
+            const explanation =
+              PERMISSION_EXPLANATIONS[explanationKey] ||
+              `${scope} can ${action}`
+
             return (
-              <PermissionActionToggle
-                key={action}
-                scope={scope}
-                action={action}
-                isChecked={isChecked}
-                onToggle={() => togglePermission(scope, action)}
-                disabled={disabled}
-                colors={{
-                  selected: colors.selected,
-                  text: colors.text,
-                  border: colors.border
-                }}
-                explanation={explanation}
-              />
+              <div key={action} className='border-b last:border-b-0'>
+                <PermissionActionToggle
+                  id={`${scope}-${action}-row`}
+                  scope={scope}
+                  action={action}
+                  isChecked={isChecked}
+                  onToggle={() => togglePermission(scope, action)}
+                  disabled={disabled}
+                  colors={{
+                    selected: colors.selected,
+                    text: colors.text,
+                    border: colors.border,
+                  }}
+                  explanation={explanation}
+                />
+              </div>
             )
           })}
         </div>
