@@ -158,6 +158,10 @@ Done when:
 
 ## Priority 3: Users & Access
 
+Code-level access plan:
+
+- `docs/UNIVERSAL_ENTITY_ACCESS_CODE_PLAN.md`
+
 Canonical URLs:
 
 - `/access/users`
