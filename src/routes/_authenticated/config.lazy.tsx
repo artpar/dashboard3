@@ -31,6 +31,7 @@ import {
   groupConfigsByCategory,
   type ConfigValueType,
 } from '@/lib/configCategories'
+import { Main } from '@/components/layout/main'
 
 interface ConfigItem {
   key: string
@@ -214,29 +215,39 @@ function ConfigPage() {
 
   if (error) {
     return (
-      <div className="flex-1 overflow-auto p-6">
-        <div className="text-center text-destructive">
+      <Main className="flex h-full flex-col overflow-hidden p-0">
+        <div className="border-b px-6 py-5">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <Settings className="h-6 w-6" />
+            System Configuration
+          </h1>
+          <p className="text-muted-foreground mt-1 max-w-3xl text-sm leading-6">
+            Manage system settings and configuration values
+          </p>
+        </div>
+        <div className="min-h-0 flex-1 overflow-auto p-6 text-center text-destructive">
           <p>Failed to load configuration: {(error as Error).message}</p>
           <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['system-config'] })} className="mt-4">
             Retry
           </Button>
         </div>
-      </div>
+      </Main>
     )
   }
 
   return (
-    <div className="flex-1 overflow-auto w-full p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+    <Main className="flex h-full w-full flex-col overflow-hidden p-0">
+      <div className="border-b px-6 py-5">
+        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <Settings className="h-6 w-6" />
           System Configuration
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-1 max-w-3xl text-sm leading-6">
           Manage system settings and configuration values
         </p>
       </div>
 
+      <div className="min-h-0 flex-1 overflow-auto p-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -437,6 +448,7 @@ function ConfigPage() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={!!editEntry} onOpenChange={() => { setEditEntry(null); setShowSecret(false) }}>
@@ -555,7 +567,7 @@ function ConfigPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Main>
   )
 }
 

@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/table'
 import { useToast } from '@/components/ui/use-toast'
 import { Main } from '@/components/layout/main'
+import EntityFilters from '@/features/entity/components/filter/EntityFilters'
 import { ColumnDefinition, ColumnViewer } from '@/features/entity/columns'
 import EntityDeleteDialog from '@/features/entity/components/dialogs/EntityDeleteDialog'
 import EntityPagination from '@/features/entity/components/pagination/EntityPagination'
@@ -186,25 +187,27 @@ function OAuthConnectionsContent() {
 
   if (error) {
     return (
-      <Main>
+      <Main className='flex h-full flex-col overflow-hidden p-0'>
         <OAuthHeader onRefresh={fetchData} />
-        <Alert variant='destructive'>
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error instanceof Error
-              ? error.message
-              : 'An error occurred while fetching OAuth connections'}
-          </AlertDescription>
-        </Alert>
+        <div className='min-h-0 flex-1 overflow-auto p-6'>
+          <Alert variant='destructive'>
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error
+                ? error.message
+                : 'An error occurred while fetching OAuth connections'}
+            </AlertDescription>
+          </Alert>
+        </div>
       </Main>
     )
   }
 
   return (
-    <Main className='flex flex-col'>
+    <Main className='flex h-full flex-col overflow-hidden p-0'>
       <OAuthHeader onRefresh={fetchData} />
 
-      <div className='min-h-0 flex-1'>
+      <div className='min-h-0 flex-1 overflow-auto'>
         {isLoading ? (
           <div className='space-y-4 p-6'>
             <Skeleton className='h-10 w-full' />
@@ -306,7 +309,7 @@ function OAuthConnectionsContent() {
         )}
       </div>
 
-      <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-2'>
+      <div className='mt-auto flex-shrink-0 border-t px-6 py-3'>
         <EntityPagination
           currentPage={currentPage}
           totalPages={pagination?.lastPage || totalPages}
@@ -325,11 +328,11 @@ function OAuthConnectionsContent() {
 
 function OAuthHeader({ onRefresh }: { onRefresh: () => void }) {
   return (
-    <div className='mb-4 flex flex-col gap-4'>
+    <div className='border-b px-6 py-5'>
       <div className='flex items-start justify-between gap-4'>
         <div>
-          <h1 className='text-2xl font-bold tracking-tight'>{OAUTH_TITLE}</h1>
-          <p className='text-muted-foreground mt-1 max-w-2xl text-sm'>
+          <h1 className='text-2xl font-semibold tracking-tight'>{OAUTH_TITLE}</h1>
+          <p className='text-muted-foreground mt-1 max-w-3xl text-sm leading-6'>
             {OAUTH_DESCRIPTION}
           </p>
         </div>
@@ -342,6 +345,9 @@ function OAuthHeader({ onRefresh }: { onRefresh: () => void }) {
         >
           <RefreshCw className='h-4 w-4' />
         </Button>
+      </div>
+      <div className='mt-4'>
+        <EntityFilters entityName='oauth_connect' />
       </div>
     </div>
   )

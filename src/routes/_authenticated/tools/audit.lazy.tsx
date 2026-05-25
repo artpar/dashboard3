@@ -53,6 +53,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Main } from '@/components/layout/main'
 
 interface AuditLog {
   reference_id: string
@@ -180,17 +181,18 @@ function AuditPage() {
   const totalPages = Math.ceil((auditData?.total || 0) / pageSize)
 
   return (
-    <div className='p-6'>
-      <div className='mb-6'>
-        <h1 className='flex items-center gap-2 text-2xl font-bold'>
+    <Main className='flex h-full flex-col overflow-hidden p-0'>
+      <div className='border-b px-6 py-5'>
+        <h1 className='flex items-center gap-2 text-2xl font-semibold tracking-tight'>
           <History className='h-6 w-6' />
           Audit Logs
         </h1>
-        <p className='text-muted-foreground'>
+        <p className='text-muted-foreground mt-1 max-w-3xl text-sm leading-6'>
           Track all data changes and system events
         </p>
       </div>
 
+      <div className='min-h-0 flex-1 overflow-auto p-6'>
       <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
@@ -376,6 +378,7 @@ function AuditPage() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
@@ -463,7 +466,7 @@ function AuditPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </Main>
   )
 }
 

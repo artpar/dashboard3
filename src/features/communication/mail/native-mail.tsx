@@ -8,6 +8,7 @@ import {
   Inbox,
   Mail,
   RefreshCw,
+  Search,
   Send,
   Server,
   Settings,
@@ -55,6 +56,10 @@ type MailCollectionResult = Awaited<
 
 const PAGE_SIZE = 10
 type MailFilter = { column: string; operator: string; value: string }
+type MailCollectionFilters = {
+  _search?: string
+  _advanced?: MailFilter[]
+}
 
 function valueText(row: DaptinRow | null | undefined, key: string): string {
   const value = row?.[key]
@@ -80,7 +85,7 @@ function relationFilter(column: string, value?: string): MailFilter[] | undefine
 function useMailCollection(
   entityName: string,
   page: number,
-  filters?: MailFilter[]
+  filters?: MailCollectionFilters
 ) {
   return useQuery({
     queryKey: ['native-mail', entityName, page, filters],
@@ -95,7 +100,7 @@ function useMailCollection(
       return EntityApiService.fetchEntityCollection(entityName, {
         page,
         pageSize: PAGE_SIZE,
-        filters: filters ? { _advanced: filters } : undefined,
+        filters,
         sort: '-created_at',
       })
     },
@@ -214,20 +219,6 @@ function MailPageHeader({
           <p className='text-muted-foreground text-sm leading-6'>{description}</p>
         </div>
         {action ? <div className='flex shrink-0 gap-2'>{action}</div> : null}
-      </div>
-      <div className='mt-4 flex flex-wrap gap-2'>
-        <Button asChild variant='ghost' size='sm'>
-          <Link to='/mail'>Overview</Link>
-        </Button>
-        <Button asChild variant='ghost' size='sm'>
-          <Link to='/mail/servers'>Servers</Link>
-        </Button>
-        <Button asChild variant='ghost' size='sm'>
-          <Link to='/mail/accounts'>Accounts</Link>
-        </Button>
-        <Button asChild variant='ghost' size='sm'>
-          <Link to='/mail/outbox'>Outbox</Link>
-        </Button>
       </div>
     </div>
   )
@@ -364,11 +355,44 @@ function NativeCollectionPage({
   action?: ReactNode
 }) {
   const [page, setPage] = useState(1)
-  const query = useMailCollection(entityName, page, filters)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const collectionFilters: MailCollectionFilters | undefined =
+    searchQuery || filters
+      ? {
+          ...(searchQuery ? { _search: searchQuery } : {}),
+          ...(filters ? { _advanced: filters } : {}),
+        }
+      : undefined
+  const query = useMailCollection(entityName, page, collectionFilters)
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextSearch = searchInput.trim()
+    console.log('Native mail collection search', {
+      entityName,
+      search: nextSearch || null,
+      endpoint: DAPTIN_ENDPOINT,
+    })
+    setSearchQuery(nextSearch)
+    setPage(1)
+  }
 
   return (
     <Main className='flex h-full flex-col overflow-hidden p-0'>
       <MailPageHeader title={title} description={description} action={action} />
+      <div className='border-b px-6 py-3'>
+        <form onSubmit={handleSearch} className='relative max-w-xl'>
+          <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+          <Input
+            type='search'
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder={`Search ${entityName.replace(/_/g, ' ')}...`}
+            className='pl-9'
+          />
+        </form>
+      </div>
       <div className='min-h-0 flex-1 overflow-auto'>
         {query.isLoading ? <LoadingRows /> : null}
         {query.error ? <ErrorPanel title={`Could not load ${title}`} error={query.error} /> : null}
@@ -650,10 +674,11 @@ export function NativeMailServersPage() {
 export function NativeMailServerDetailPage({ serverId }: { serverId: string }) {
   const server = useMailSingle('mail_server', serverId)
   const [accountsPage, setAccountsPage] = useState(1)
+  const accountFilters = relationFilter('mail_server_id', serverId)
   const accounts = useMailCollection(
     'mail_account',
     accountsPage,
-    relationFilter('mail_server_id', serverId)
+    accountFilters ? { _advanced: accountFilters } : undefined
   )
   const syncMailServers = useNativeMailAction('mail_server', 'sync_mail_servers')
   const { toast } = useToast()
@@ -820,10 +845,11 @@ export function NativeMailAccountsPage() {
 export function NativeMailAccountDetailPage({ accountId }: { accountId: string }) {
   const account = useMailSingle('mail_account', accountId)
   const [boxPage, setBoxPage] = useState(1)
+  const boxFilters = relationFilter('mail_account_id', accountId)
   const boxes = useMailCollection(
     'mail_box',
     boxPage,
-    relationFilter('mail_account_id', accountId)
+    boxFilters ? { _advanced: boxFilters } : undefined
   )
 
   return (

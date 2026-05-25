@@ -5,7 +5,6 @@ import { SearchProvider } from '@/context/search-context';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthGuard } from '@/components/auth-guard';
 import AppSidebar from '@/components/layout/app-sidebar'
-import { ShellStatusBar } from '@/components/layout/shell-status-bar'
 import SkipToMain from '@/components/skip-to-main';
 
 
@@ -30,7 +29,6 @@ function RouteComponent() {
               'overflow-hidden'
             )}
           >
-            <ShellStatusBar />
             <main className='min-h-0 flex-1 overflow-auto p-2'>
               <Outlet />
             </main>
