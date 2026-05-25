@@ -318,7 +318,7 @@ and endpoints. They are not runtime classifications.
   management actions like register/update/rotate/disable/enable/revoke.
 - Do not treat internal OAuth token/code tables as the main management UI.
 
-### Actions And Automation
+### Workflows
 
 - Manage `action`, `task`, `smd`, state rows, `data_exchange`, `stream`, and
   `template`.

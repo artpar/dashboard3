@@ -21,6 +21,9 @@ import { Route as auth500Import } from './routes/(auth)/500'
 
 // Create Virtual Routes
 
+const AuthenticatedTemplatesLazyImport = createFileRoute(
+  '/_authenticated/templates',
+)()
 const AuthenticatedConfigLazyImport = createFileRoute(
   '/_authenticated/config',
 )()
@@ -56,6 +59,9 @@ const AuthenticatedToolsGraphqlLazyImport = createFileRoute(
 )()
 const AuthenticatedToolsAuditLazyImport = createFileRoute(
   '/_authenticated/tools/audit',
+)()
+const AuthenticatedTemplatesTemplateIdLazyImport = createFileRoute(
+  '/_authenticated/templates/$templateId',
 )()
 const AuthenticatedStorageSitesLazyImport = createFileRoute(
   '/_authenticated/storage/sites',
@@ -160,6 +166,16 @@ const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
+const AuthenticatedTemplatesLazyRoute = AuthenticatedTemplatesLazyImport.update(
+  {
+    id: '/templates',
+    path: '/templates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/_authenticated/templates.lazy').then((d) => d.Route),
+)
 
 const AuthenticatedConfigLazyRoute = AuthenticatedConfigLazyImport.update({
   id: '/config',
@@ -317,6 +333,17 @@ const AuthenticatedToolsAuditLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/tools/audit.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedTemplatesTemplateIdLazyRoute =
+  AuthenticatedTemplatesTemplateIdLazyImport.update({
+    id: '/$templateId',
+    path: '/$templateId',
+    getParentRoute: () => AuthenticatedTemplatesLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/templates.$templateId.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const AuthenticatedStorageSitesLazyRoute =
@@ -726,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfigLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/templates': {
+      id: '/_authenticated/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthenticatedTemplatesLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/': {
       id: '/_authenticated/'
       path: '/'
@@ -880,6 +914,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStorageSitesLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/templates/$templateId': {
+      id: '/_authenticated/templates/$templateId'
+      path: '/$templateId'
+      fullPath: '/templates/$templateId'
+      preLoaderRoute: typeof AuthenticatedTemplatesTemplateIdLazyImport
+      parentRoute: typeof AuthenticatedTemplatesLazyImport
+    }
     '/_authenticated/tools/audit': {
       id: '/_authenticated/tools/audit'
       path: '/tools/audit'
@@ -1023,6 +1064,21 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
     AuthenticatedSettingsRouteLazyRouteChildren,
   )
 
+interface AuthenticatedTemplatesLazyRouteChildren {
+  AuthenticatedTemplatesTemplateIdLazyRoute: typeof AuthenticatedTemplatesTemplateIdLazyRoute
+}
+
+const AuthenticatedTemplatesLazyRouteChildren: AuthenticatedTemplatesLazyRouteChildren =
+  {
+    AuthenticatedTemplatesTemplateIdLazyRoute:
+      AuthenticatedTemplatesTemplateIdLazyRoute,
+  }
+
+const AuthenticatedTemplatesLazyRouteWithChildren =
+  AuthenticatedTemplatesLazyRoute._addFileChildren(
+    AuthenticatedTemplatesLazyRouteChildren,
+  )
+
 interface AuthenticatedAdminActionsLazyRouteChildren {
   AuthenticatedAdminActionsActionIdLazyRoute: typeof AuthenticatedAdminActionsActionIdLazyRoute
 }
@@ -1131,6 +1187,7 @@ const AuthenticatedStorageSitesLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedConfigLazyRoute: typeof AuthenticatedConfigLazyRoute
+  AuthenticatedTemplatesLazyRoute: typeof AuthenticatedTemplatesLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminActionsLazyRoute: typeof AuthenticatedAdminActionsLazyRouteWithChildren
   AuthenticatedAdminGroupsLazyRoute: typeof AuthenticatedAdminGroupsLazyRoute
@@ -1163,6 +1220,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedConfigLazyRoute: AuthenticatedConfigLazyRoute,
+  AuthenticatedTemplatesLazyRoute: AuthenticatedTemplatesLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminActionsLazyRoute:
     AuthenticatedAdminActionsLazyRouteWithChildren,
@@ -1219,6 +1277,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/config': typeof AuthenticatedConfigLazyRoute
+  '/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
   '/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
@@ -1241,6 +1300,7 @@ export interface FileRoutesByFullPath {
   '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
+  '/templates/$templateId': typeof AuthenticatedTemplatesTemplateIdLazyRoute
   '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
   '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
@@ -1270,6 +1330,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/config': typeof AuthenticatedConfigLazyRoute
+  '/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
   '/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
@@ -1292,6 +1353,7 @@ export interface FileRoutesByTo {
   '/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
+  '/templates/$templateId': typeof AuthenticatedTemplatesTemplateIdLazyRoute
   '/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
   '/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/$entity': typeof AuthenticatedEntityIndexLazyRoute
@@ -1325,6 +1387,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/config': typeof AuthenticatedConfigLazyRoute
+  '/_authenticated/templates': typeof AuthenticatedTemplatesLazyRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/actions': typeof AuthenticatedAdminActionsLazyRouteWithChildren
   '/_authenticated/admin/groups': typeof AuthenticatedAdminGroupsLazyRoute
@@ -1347,6 +1410,7 @@ export interface FileRoutesById {
   '/_authenticated/storage/certificates': typeof AuthenticatedStorageCertificatesLazyRouteWithChildren
   '/_authenticated/storage/cloud-stores': typeof AuthenticatedStorageCloudStoresLazyRouteWithChildren
   '/_authenticated/storage/sites': typeof AuthenticatedStorageSitesLazyRouteWithChildren
+  '/_authenticated/templates/$templateId': typeof AuthenticatedTemplatesTemplateIdLazyRoute
   '/_authenticated/tools/audit': typeof AuthenticatedToolsAuditLazyRoute
   '/_authenticated/tools/graphql': typeof AuthenticatedToolsGraphqlLazyRoute
   '/_authenticated/$entity/': typeof AuthenticatedEntityIndexLazyRoute
@@ -1380,6 +1444,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/config'
+    | '/templates'
     | '/'
     | '/admin/actions'
     | '/admin/groups'
@@ -1402,6 +1467,7 @@ export interface FileRouteTypes {
     | '/storage/certificates'
     | '/storage/cloud-stores'
     | '/storage/sites'
+    | '/templates/$templateId'
     | '/tools/audit'
     | '/tools/graphql'
     | '/$entity'
@@ -1430,6 +1496,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/config'
+    | '/templates'
     | '/'
     | '/admin/actions'
     | '/admin/groups'
@@ -1452,6 +1519,7 @@ export interface FileRouteTypes {
     | '/storage/certificates'
     | '/storage/cloud-stores'
     | '/storage/sites'
+    | '/templates/$templateId'
     | '/tools/audit'
     | '/tools/graphql'
     | '/$entity'
@@ -1483,6 +1551,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/config'
+    | '/_authenticated/templates'
     | '/_authenticated/'
     | '/_authenticated/admin/actions'
     | '/_authenticated/admin/groups'
@@ -1505,6 +1574,7 @@ export interface FileRouteTypes {
     | '/_authenticated/storage/certificates'
     | '/_authenticated/storage/cloud-stores'
     | '/_authenticated/storage/sites'
+    | '/_authenticated/templates/$templateId'
     | '/_authenticated/tools/audit'
     | '/_authenticated/tools/graphql'
     | '/_authenticated/$entity/'
@@ -1580,6 +1650,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/config",
+        "/_authenticated/templates",
         "/_authenticated/",
         "/_authenticated/admin/actions",
         "/_authenticated/admin/groups",
@@ -1652,6 +1723,13 @@ export const routeTree = rootRoute
     "/_authenticated/config": {
       "filePath": "_authenticated/config.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/_authenticated/templates": {
+      "filePath": "_authenticated/templates.lazy.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/templates/$templateId"
+      ]
     },
     "/_authenticated/": {
       "filePath": "_authenticated/index.tsx",
@@ -1761,6 +1839,10 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/storage/sites/$siteId"
       ]
+    },
+    "/_authenticated/templates/$templateId": {
+      "filePath": "_authenticated/templates.$templateId.lazy.tsx",
+      "parent": "/_authenticated/templates"
     },
     "/_authenticated/tools/audit": {
       "filePath": "_authenticated/tools/audit.lazy.tsx",

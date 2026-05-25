@@ -149,11 +149,16 @@ allowed because they express dashboard UI needs rather than SDK behavior.
     `storageManager.cloudStore.createSite`.
 
 - Template route/component addition
-  - Add `/automation/templates` and `/automation/templates/:id` only after the
-    storage changes compile.
+  - Add `/templates` and `/templates/:id` only after the storage changes
+    compile.
   - Use `CollectionEntityManagementComponent` for the list first.
   - Use `EntityApiService` or a narrow hook for detail CRUD over `template`.
   - Use `DaptinTemplateEntity` for row typing.
+  - Treat site attachment as Daptin does: template `content` may be
+    `site://<site_reference_id>/<path>` or
+    `subsite://<site_reference_id>/<path>`, optionally base64 encoded before
+    render. Resolve the referenced site with `DaptinSiteEntity` over JSON:API;
+    do not invent a dashboard-side template-site relation.
   - Do not create `TemplateManager`, `TemplateService`, or template render
     helpers unless a real public Daptin API is confirmed.
 

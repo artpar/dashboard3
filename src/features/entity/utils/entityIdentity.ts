@@ -1,6 +1,8 @@
+import type { DaptinEntityBase } from 'daptin-client'
+
 export type EntityRecord = {
-  id?: string | number | null
-  reference_id?: string | number | null
+  id?: DaptinEntityBase['id']
+  reference_id?: DaptinEntityBase['reference_id']
 }
 
 const SPECIALIZED_DETAIL_ROUTES: Record<string, string> = {
@@ -11,6 +13,7 @@ const SPECIALIZED_DETAIL_ROUTES: Record<string, string> = {
   smd: '/admin/state-machines',
   mail_server: '/communication/email',
   action: '/admin/actions',
+  template: '/templates',
 }
 
 export function getEntityId(item: EntityRecord): string {

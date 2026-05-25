@@ -7,6 +7,7 @@ import {
   Users,
   UsersRound,
   GitBranch,
+  FileText,
   Cloud,
   Globe,
   ShieldCheck,
@@ -42,40 +43,147 @@ const teamsData = [
 
 // Admin section items
 const adminItems = [
-  { title: 'Actions', url: '/admin/actions', icon: Zap, description: 'Server-side workflows beyond CRUD — send emails, call APIs, manage files' },
-  { title: 'Permissions', url: '/admin/permissions', icon: Shield, description: 'Table and row-level access control for guests, owners, and groups' },
-  { title: 'Users', url: '/admin/users', icon: Users, description: 'User accounts with JWT authentication and group membership' },
-  { title: 'Groups', url: '/admin/groups', icon: UsersRound, description: 'User groups for bulk permission assignment' },
-  { title: 'State Machines', url: '/admin/state-machines', icon: GitBranch, description: 'Define valid state transitions for record lifecycles' },
+  {
+    title: 'Permissions',
+    url: '/admin/permissions',
+    icon: Shield,
+    description:
+      'Table and row-level access control for guests, owners, and groups',
+  },
+  {
+    title: 'Users',
+    url: '/admin/users',
+    icon: Users,
+    description: 'User accounts with JWT authentication and group membership',
+  },
+  {
+    title: 'Groups',
+    url: '/admin/groups',
+    icon: UsersRound,
+    description: 'User groups for bulk permission assignment',
+  },
+]
+
+// Workflow section items
+const workflowItems = [
+  {
+    title: 'Actions',
+    url: '/admin/actions',
+    icon: Zap,
+    description:
+      'Server-side workflows beyond CRUD — send emails, call APIs, manage files',
+  },
+  {
+    title: 'State Machines',
+    url: '/admin/state-machines',
+    icon: GitBranch,
+    description: 'Define valid state transitions for record lifecycles',
+  },
+  {
+    title: 'Templates',
+    url: '/templates',
+    icon: FileText,
+    description: 'Reusable response and page templates stored in Daptin',
+  },
 ]
 
 // Storage section items
 const storageItems = [
-  { title: 'Cloud Stores', url: '/storage/cloud-stores', icon: Cloud, description: 'Storage backends — S3, GCS, Azure, local filesystem, and more' },
-  { title: 'Sites', url: '/storage/sites', icon: Globe, description: 'Static sites served from cloud storage with domain routing' },
-  { title: 'Certificates', url: '/storage/certificates', icon: ShieldCheck, description: 'SSL/TLS certificates for HTTPS and DKIM signing' },
+  {
+    title: 'Cloud Stores',
+    url: '/storage/cloud-stores',
+    icon: Cloud,
+    description:
+      'Storage backends — S3, GCS, Azure, local filesystem, and more',
+  },
+  {
+    title: 'Sites',
+    url: '/storage/sites',
+    icon: Globe,
+    description: 'Static sites served from cloud storage with domain routing',
+  },
+  {
+    title: 'Certificates',
+    url: '/storage/certificates',
+    icon: ShieldCheck,
+    description: 'SSL/TLS certificates for HTTPS and DKIM signing',
+  },
 ]
 
 // Communication section items
 const communicationItems = [
-  { title: 'OAuth', url: '/communication/oauth', icon: KeyRound, description: 'OAuth 2.0 provider configs for social login and API access' },
-  { title: 'Email', url: '/communication/email', icon: Mail, description: 'SMTP/IMAP server configurations for sending and receiving mail' },
-  { title: 'WebSocket', url: '/communication/websocket', icon: Radio, description: 'Real-time event streaming over WebSocket connections' },
+  {
+    title: 'OAuth',
+    url: '/communication/oauth',
+    icon: KeyRound,
+    description: 'OAuth 2.0 provider configs for social login and API access',
+  },
+  {
+    title: 'Email',
+    url: '/communication/email',
+    icon: Mail,
+    description:
+      'SMTP/IMAP server configurations for sending and receiving mail',
+  },
+  {
+    title: 'WebSocket',
+    url: '/communication/websocket',
+    icon: Radio,
+    description: 'Real-time event streaming over WebSocket connections',
+  },
 ]
 
 // Data section items
 const dataItems = [
-  { title: 'Import', url: '/data/import', icon: Upload, description: 'Import data from CSV, JSON, Excel, and other formats' },
-  { title: 'Export', url: '/data/export', icon: Download, description: 'Export entity data to CSV, JSON, Excel, PDF, or HTML' },
-  { title: 'Exchanges', url: '/data/exchanges', icon: RefreshCw, description: 'Bidirectional sync between entities and external systems' },
-  { title: 'Streams', url: '/data/streams', icon: Layers, description: 'Data transformation pipelines for processing records' },
-  { title: 'Integrations', url: '/data/integrations', icon: Plug, description: 'Connect external APIs via OpenAPI specs — each operation becomes an action' },
+  {
+    title: 'Import',
+    url: '/data/import',
+    icon: Upload,
+    description: 'Import data from CSV, JSON, Excel, and other formats',
+  },
+  {
+    title: 'Export',
+    url: '/data/export',
+    icon: Download,
+    description: 'Export entity data to CSV, JSON, Excel, PDF, or HTML',
+  },
+  {
+    title: 'Exchanges',
+    url: '/data/exchanges',
+    icon: RefreshCw,
+    description: 'Bidirectional sync between entities and external systems',
+  },
+  {
+    title: 'Streams',
+    url: '/data/streams',
+    icon: Layers,
+    description: 'Data transformation pipelines for processing records',
+  },
+  {
+    title: 'Integrations',
+    url: '/data/integrations',
+    icon: Plug,
+    description:
+      'Connect external APIs via OpenAPI specs — each operation becomes an action',
+  },
 ]
 
 // Tools section items
 const toolsItems = [
-  { title: 'GraphQL', url: '/tools/graphql', icon: Code, description: 'Query and mutate entities using the auto-generated GraphQL API' },
-  { title: 'Audit Logs', url: '/tools/audit', icon: ClipboardList, description: 'Track all data changes with user, timestamp, and before/after values' },
+  {
+    title: 'GraphQL',
+    url: '/tools/graphql',
+    icon: Code,
+    description:
+      'Query and mutate entities using the auto-generated GraphQL API',
+  },
+  {
+    title: 'Audit Logs',
+    url: '/tools/audit',
+    icon: ClipboardList,
+    description:
+      'Track all data changes with user, timestamp, and before/after values',
+  },
 ]
 
 // Entities that have dedicated pages in other sections - exclude from Entities list
@@ -86,6 +194,7 @@ const excludedEntities = new Set([
   'user_account',
   'user_otp_account',
   'smd',
+  'template',
   // Storage section
   'cloud_store',
   'site',
@@ -142,6 +251,10 @@ export function useSidebarData(): SidebarData {
           items: adminItems,
         },
         {
+          title: 'Workflows',
+          items: workflowItems,
+        },
+        {
           title: 'Storage',
           items: storageItems,
         },
@@ -159,9 +272,7 @@ export function useSidebarData(): SidebarData {
         },
         {
           title: 'Settings',
-          items: [
-            { title: 'Config', url: '/config', icon: Settings },
-          ],
+          items: [{ title: 'Config', url: '/config', icon: Settings }],
         },
         {
           title: 'Entities',

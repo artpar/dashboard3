@@ -47,7 +47,7 @@ Primary sidebar:
 5. Mail
 6. Integrations
 7. OAuth
-8. Actions & Automation
+8. Workflows
 9. Config
 10. Activity
 11. Advanced
@@ -323,23 +323,23 @@ Done when:
 - A user can execute an installed integration operation from the dashboard.
 - OAuth consumer setup and OAuth provider management are not mixed together.
 
-## Priority 7: Actions & Automation
+## Priority 7: Workflows
 
 Canonical URLs:
 
 - `/actions`
 - `/actions/:id`
 - `/actions/:id/execute`
-- `/automation/tasks`
-- `/automation/tasks/:id`
-- `/automation/state-machines`
-- `/automation/state-machines/:id`
-- `/automation/exchanges`
-- `/automation/exchanges/:id`
-- `/automation/streams`
-- `/automation/streams/:id`
-- `/automation/templates`
-- `/automation/templates/:id`
+- `/tasks`
+- `/tasks/:id`
+- `/state-machines`
+- `/state-machines/:id`
+- `/data/exchanges`
+- `/data/exchanges/:id`
+- `/data/streams`
+- `/data/streams/:id`
+- `/templates`
+- `/templates/:id`
 
 User workflows:
 
@@ -358,17 +358,18 @@ Page contents:
 - State machine list/detail with definition, related entities, trigger event
   controls.
 - Exchange and stream pages with config, preview/test/sync actions, last result.
-- Template list/detail with content preview and related actions.
+- Template list/detail with content preview, related actions, and attached site
+  file when content uses Daptin `site://` or `subsite://` source syntax.
 
 Backing Daptin state:
 
 - `action`, `task`, `smd`, state rows, `data_exchange`, `stream`, `template`,
-  state-machine manager/actions.
+  `site`, state-machine manager/actions.
 
 Done when:
 
 - A user can run an action and understand the result.
-- Automation pages explain the Daptin row/action behind each workflow.
+- Workflow pages explain the Daptin row/action behind each workflow.
 
 ## Priority 8: Config, Activity, Advanced
 
