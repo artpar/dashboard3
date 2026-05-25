@@ -1,229 +1,285 @@
+/* eslint-disable no-console */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { daptinClient } from '@/daptin.ts'
+import type { DaptinObjectUsergroupAccess } from 'daptin-client'
 import {
   addPermission,
   hasPermission,
   removePermission,
 } from '@/features/entity/columns/PermissionTypes.ts'
-// We use patterns from RelationsApiService but with specialized implementation for usergroup relations
-// import { RelationsApiService } from '@/features/entity/services/RelationsApiService.ts'
 
-/**
- * Hook for managing the groups that a specific entity belongs to
- * and their associated permissions
- */
+const ACCESS_LOG_PREFIX = '[entity.access.groups]'
+
+type PaginationLinks = {
+  current_page?: number
+  from?: number
+  last_page?: number
+  per_page?: number
+  to?: number
+  total?: number
+}
+
+function readPaginationLinks(value: unknown): PaginationLinks {
+  if (!value || typeof value !== 'object') return {}
+  return value as PaginationLinks
+}
+
 export function useEntityGroupRelations(entityName: string, entityId: string) {
   const [isUpdating, setIsUpdating] = useState(false)
   const [groupSearchQuery, setGroupSearchQuery] = useState('')
+  const [allGroupsPage, setAllGroupsPage] = useState(1)
+  const [allGroupsPageSize, setAllGroupsPageSize] = useState(20)
+  const [groupsPage, setGroupsPage] = useState(1)
+  const [groupsPageSize, setGroupsPageSize] = useState(10)
 
-  // Fetch available groups with optional search
-  const { data: allGroups, isLoading: isLoadingAllGroups } = useQuery({
-    queryKey: ['usergroups', groupSearchQuery],
+  const { data: allGroupsResponse, isLoading: isLoadingAllGroups } = useQuery({
+    queryKey: [
+      'usergroups',
+      groupSearchQuery,
+      allGroupsPage,
+      allGroupsPageSize,
+    ],
     queryFn: async () => {
-      const params: Record<string, any> = {}
+      const params: Record<string, unknown> = {
+        'page[size]': allGroupsPageSize,
+        'page[number]': allGroupsPage,
+        sort: 'name',
+      }
+
       if (groupSearchQuery.trim()) {
         params.query = JSON.stringify([
-          { column: 'name', operator: 'contains', value: `%${groupSearchQuery.trim()}%` },
+          {
+            column: 'name',
+            operator: 'contains',
+            value: `%${groupSearchQuery.trim()}%`,
+          },
         ])
       }
+
+      console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:start`, {
+        groupSearchQuery,
+        params,
+      })
       const response = await daptinClient.jsonApi.findAll('usergroup', params)
-      return response.data || []
+      console.info(`${ACCESS_LOG_PREFIX} all-groups:fetch:success`, {
+        count: Array.isArray(response.data) ? response.data.length : 0,
+        links: response.links,
+      })
+      return response
     },
   })
 
-  // Fetch all groups that this entity belongs to
+  const allGroups = allGroupsResponse?.data || []
+  const allGroupsPagination = readPaginationLinks(allGroupsResponse?.links)
+
   const {
-    data: entityGroups,
+    data: entityGroupsResponse,
     isLoading: isLoadingGroups,
     refetch: refetchEntityGroups,
     error: entityGroupsError,
   } = useQuery({
-    queryKey: ['entity-groups', entityName, entityId],
+    queryKey: [
+      'entity-groups',
+      entityName,
+      entityId,
+      groupsPage,
+      groupsPageSize,
+    ],
     queryFn: async () => {
       if (!entityName || !entityId) {
-        console.log('useEntityGroupRelations: Missing entityName or entityId', {
+        console.warn(`${ACCESS_LOG_PREFIX} related-groups:fetch:skip`, {
           entityName,
           entityId,
         })
-        return []
+        return null
       }
 
-      try {
-        // Use the RelationsApiService to fetch related records
-        // Since we don't have a specific relation object for usergroups,
-        // we'll use the direct API approach
-        const response = await daptinClient.jsonApi
-          .one(entityName, entityId)
-          .all('usergroup_id')
-          .get()
-
-        return response.data || []
-      } catch (error) {
-        console.error(
-          `Failed to load groups for ${entityName}:${entityId}:`,
-          error
-        )
-        return []
+      const params = {
+        'page[size]': groupsPageSize,
+        'page[number]': groupsPage,
+        sort: 'name',
       }
+
+      console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:start`, {
+        entityName,
+        entityId,
+        params,
+      })
+
+      const response = await daptinClient.accessManager.listObjectUsergroups<{
+        name?: string
+      }>(entityName, entityId, params)
+
+      console.info(`${ACCESS_LOG_PREFIX} related-groups:fetch:success`, {
+        entityName,
+        entityId,
+        count: response.data.length,
+        links: response.links,
+      })
+
+      return response
     },
-    enabled: !!entityName && !!entityId,
+    enabled: Boolean(entityName && entityId),
   })
 
-  /**
-   * Add entity to a group
-   * Uses the relationships API pattern from RelationsApiService
-   */
+  const entityGroups = entityGroupsResponse?.data || []
+  const entityGroupsPagination = readPaginationLinks(
+    entityGroupsResponse?.links
+  )
+
   const addEntityToGroup = async (groupId: string) => {
     if (!entityName || !entityId || !groupId) return false
 
     setIsUpdating(true)
+    console.info(`${ACCESS_LOG_PREFIX} add:start`, {
+      entityName,
+      entityId,
+      groupId,
+    })
 
     try {
-      // Use the relationships API to create a relation between usergroup and entity
-      // This follows the pattern used in RelationsApiService.createRelation for many-to-many relations
-      await daptinClient.jsonApi
-        .one('usergroup', groupId)
-        .relationships(`${entityName}_id`)
-        .patch([
-          {
-            type: entityName,
-            id: entityId,
-          },
-        ])
-
-      // Refresh entity groups
+      await daptinClient.accessManager.addObjectUsergroup(
+        entityName,
+        entityId,
+        groupId
+      )
       await refetchEntityGroups()
-      setIsUpdating(false)
+      console.info(`${ACCESS_LOG_PREFIX} add:success`, {
+        entityName,
+        entityId,
+        groupId,
+      })
       return true
     } catch (error) {
-      console.error('Failed to add entity to group:', error)
-      setIsUpdating(false)
+      console.error(`${ACCESS_LOG_PREFIX} add:error`, {
+        entityName,
+        entityId,
+        groupId,
+        error,
+      })
       return false
+    } finally {
+      setIsUpdating(false)
     }
   }
 
-  /**
-   * Remove entity from a group
-   * Uses the relationships API pattern from RelationsApiService
-   */
-  const removeEntityFromGroup = async (groupId: any) => {
+  const removeEntityFromGroup = async (groupId: string) => {
     if (!entityName || !entityId || !groupId) return false
 
     setIsUpdating(true)
+    console.info(`${ACCESS_LOG_PREFIX} remove:start`, {
+      entityName,
+      entityId,
+      groupId,
+    })
 
     try {
-      console.log("RemoveEntityFromGroup", entityName, entityId, groupId)
-      // Use the relationships API to delete the relation
-      // This follows the pattern used in RelationsApiService.deleteRelation for many-to-many relations
-      await daptinClient.jsonApi
-        .one('usergroup', groupId)
-        .relationships(`${entityName}_id`)
-        .destroy([{
-            type: entityName,
-            id: entityId,
-          },
-        ])
-
-      // Refresh entity groups
+      await daptinClient.accessManager.removeObjectUsergroup(
+        entityName,
+        entityId,
+        groupId
+      )
       await refetchEntityGroups()
-      setIsUpdating(false)
+      console.info(`${ACCESS_LOG_PREFIX} remove:success`, {
+        entityName,
+        entityId,
+        groupId,
+      })
       return true
     } catch (error) {
-      console.error('Failed to remove entity from group:', error)
-      setIsUpdating(false)
+      console.error(`${ACCESS_LOG_PREFIX} remove:error`, {
+        entityName,
+        entityId,
+        groupId,
+        error,
+      })
       return false
+    } finally {
+      setIsUpdating(false)
     }
   }
 
-  /**
-   * Toggle permission for entity-group relation
-   * Updates the permission value on the relation record
-   */
   const toggleGroupPermission = async (
-    relationReferenceId: any,
+    relationReferenceId: string,
     permissionBit: number,
     currentPermission: number
   ) => {
-    if (!entityName || !entityId || !relationReferenceId) return false
+    if (!entityName || !relationReferenceId) return false
 
     setIsUpdating(true)
-
-    // Calculate new permission value
     const newPermission = hasPermission(currentPermission, permissionBit)
       ? removePermission(currentPermission, permissionBit)
       : addPermission(currentPermission, permissionBit)
 
+    console.info(`${ACCESS_LOG_PREFIX} permission:update:start`, {
+      entityName,
+      relationReferenceId,
+      currentPermission,
+      newPermission,
+    })
+
     try {
-      // Get the relation ID and table name
-      const relationId = relationReferenceId
-      const relationTableName = `${entityName}_${entityName}_id_has_usergroup_usergroup_id`
-      await daptinClient.worldManager.loadModel(relationTableName, false)
-
-      // Update the relation record using the correct jsonApi update method
-      await daptinClient.jsonApi.update(relationTableName, {
-        id: relationId,
-        permission: newPermission,
-      })
-
-      // Refresh entity groups
+      await daptinClient.accessManager.updateObjectUsergroupRelationPermission(
+        entityName,
+        relationReferenceId,
+        newPermission
+      )
       await refetchEntityGroups()
-      setIsUpdating(false)
+      console.info(`${ACCESS_LOG_PREFIX} permission:update:success`, {
+        entityName,
+        relationReferenceId,
+        newPermission,
+      })
       return true
     } catch (error) {
-      console.error('Failed to update permission:', error)
-      setIsUpdating(false)
+      console.error(`${ACCESS_LOG_PREFIX} permission:update:error`, {
+        entityName,
+        relationReferenceId,
+        error,
+      })
       return false
+    } finally {
+      setIsUpdating(false)
     }
   }
 
-  /**
-   * Get groups that the entity is not a member of yet
-   */
-  const getAvailableGroups = () => {
-    if (!allGroups || !entityGroups) return []
-
-    // Get the IDs of groups the entity is already a member of
-    const memberGroupIds = entityGroups.map(
-      (relation: any) => relation.usergroup_id
+  const isGroupAlreadyRelated = (groupReferenceId: string) =>
+    entityGroups.some(
+      (relation) => relation.groupReferenceId === groupReferenceId
     )
 
-    // Filter out groups the entity is already a member of
-    return allGroups.filter(
-      (group: any) => !memberGroupIds.includes(group.reference_id)
-    )
-  }
-
-  console.log('useEntityGroupRelations: Hook state', {
-    entityName,
-    entityId,
-    entityGroups,
-    allGroups: allGroups?.length,
-    entityGroupsError,
-    isLoadingGroups,
-  })
-
-  /**
-   * Get a specific group relation by ID
-   */
   const getGroupRelation = (relationId: string) => {
-    if (!entityGroups) return null
-    return entityGroups.find((relation: any) => relation.id === relationId)
+    return entityGroups.find(
+      (relation: DaptinObjectUsergroupAccess) =>
+        relation.relationReferenceId === relationId ||
+        relation.groupReferenceId === relationId
+    )
   }
 
   return {
     allGroups,
+    allGroupsPagination,
+    allGroupsPage,
+    allGroupsPageSize,
     entityGroups,
+    entityGroupsPagination,
+    groupsPage,
+    groupsPageSize,
     isLoadingGroups,
     isLoadingAllGroups,
     isUpdating,
     entityGroupsError,
     groupSearchQuery,
     setGroupSearchQuery,
+    setAllGroupsPage,
+    setAllGroupsPageSize,
+    setGroupsPage,
+    setGroupsPageSize,
     addEntityToGroup,
     removeEntityFromGroup,
     toggleGroupPermission,
-    getAvailableGroups,
+    isGroupAlreadyRelated,
     getGroupRelation,
     refetchEntityGroups,
   }

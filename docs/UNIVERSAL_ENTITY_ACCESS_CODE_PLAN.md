@@ -26,6 +26,10 @@ later.
 
 ## Reuse
 
+- Use `daptin-client@0.7.12` or newer for Daptin access behavior. SDK issue
+  `daptin/daptin-js-client#24` added `accessManager`, typed permission
+  constants, and permission utilities so dashboard code does not own generated
+  usergroup join-table logic.
 - Keep `src/features/entity/SingleEntityManagementComponent.tsx` as the common
   detail surface for generic entity rows. It already has `Details`, `Actions`,
   `Permissions`, `Groups`, and `Relations` tabs.
@@ -66,27 +70,24 @@ later.
 
 Scope: make entity row access management generic and source-backed.
 
-1. Add relation-owned methods to `RelationsApiService`
-   - `fetchEntityUsergroups(entityName, entityId, { page, pageSize, sort })`
-     calls `daptinClient.jsonApi.one(entityName, entityId).all('usergroup_id')`
-     with pagination-compatible params if the SDK supports params on that
-     builder.
-   - If the SDK builder cannot pass pagination params, use the verified REST
-     shape through the SDK's JSON:API layer where possible:
-     `/api/<entity>/<id>/usergroup_id?page[size]=...&page[number]=...`.
-     Keep this fallback contained in `RelationsApiService`.
+1. Use SDK-owned access methods
+   - Fetch related groups with
+     `daptinClient.accessManager.listObjectUsergroups(entityName, entityId,
+     params)`.
+   - Add/remove related groups with `addObjectUsergroup` and
+     `removeObjectUsergroup`.
+   - Update relation-row permissions with
+     `updateObjectUsergroupRelationPermission` when `relationReferenceId` is
+     already available.
    - Log request start, success, returned count, page metadata, and errors under
      a stable prefix such as `[entity.access.groups]`.
 
 2. Replace `useEntityGroupRelations` internals
    - Keep the hook API only if it prevents wider UI churn.
-   - Internally delegate to `RelationsApiService` for related group fetch,
-     available group search, add relation, remove relation, and relation
-     permission update.
-   - Fix the current remove path: it receives relation metadata but calls
-     `.one('usergroup', groupId)`. The implementation must use the real group
-     reference id for relationship removal and the relation reference id only
-     for updating the relation row permission.
+   - Internally delegate to `accessManager` for related group fetch, add
+     relation, remove relation, and relation permission update.
+   - Fix the current remove path: remove uses `groupReferenceId`, while
+     permission update uses `relationReferenceId`.
 
 3. Make the group tab paginated
    - Update `SingleEntityAllGroupsListWithPermission` to render Daptin page
@@ -126,4 +127,3 @@ Minimum checks for this slice:
   `default_permission`, and logs request/update boundaries.
 - Repeat at least one read with a normal user session, not only admin, because
   admin visibility is not proof that permission-sensitive behavior is correct.
-

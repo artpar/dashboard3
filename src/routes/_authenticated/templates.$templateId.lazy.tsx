@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import type { ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createLazyFileRoute, Link } from '@tanstack/react-router'
 import { daptinClient } from '@/daptin'
 import type { DaptinSiteEntity, DaptinTemplateEntity } from 'daptin-client'
@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import PermissionColumnEditor from '@/features/entity/columns/editors/PermissionColumnEditor'
+import { SingleEntityAllGroupsListWithPermission } from '@/features/entity/components/permission/SingleEntityAllGroupsListWithPermission'
 
 function formatDateTime(value?: string | null): string {
   if (!value) return '-'
@@ -132,6 +134,7 @@ function CodeBlock({
 
 function TemplateDetailPage() {
   const { templateId } = Route.useParams()
+  const queryClient = useQueryClient()
 
   const {
     data: template,
@@ -195,6 +198,33 @@ function TemplateDetailPage() {
       }
     },
     enabled: Boolean(siteReferenceId),
+  })
+
+  const updatePermissionMutation = useMutation({
+    mutationFn: async (permission: number) => {
+      console.info('[templates.detail.permission] update:start', {
+        templateId,
+        permission,
+      })
+      const response = await daptinClient.jsonApi.update('template', {
+        id: templateId,
+        permission,
+      })
+      console.info('[templates.detail.permission] update:success', {
+        templateId,
+        permission,
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template', templateId] })
+    },
+    onError: (permissionError) => {
+      console.error('[templates.detail.permission] update:error', {
+        templateId,
+        error: permissionError,
+      })
+    },
   })
 
   if (isLoading) {
@@ -267,6 +297,8 @@ function TemplateDetailPage() {
           <TabsList>
             <TabsTrigger value='overview'>Overview</TabsTrigger>
             <TabsTrigger value='content'>Content</TabsTrigger>
+            <TabsTrigger value='permissions'>Permissions</TabsTrigger>
+            <TabsTrigger value='groups'>Groups</TabsTrigger>
             <TabsTrigger value='raw'>Raw</TabsTrigger>
           </TabsList>
 
@@ -404,6 +436,26 @@ function TemplateDetailPage() {
                 </pre>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value='permissions'>
+            <PermissionColumnEditor
+              value={Number(template.permission || 0)}
+              onChange={(permission) =>
+                updatePermissionMutation.mutate(permission)
+              }
+              disabled={updatePermissionMutation.isPending}
+              entityType='template'
+              entityId={templateId}
+            />
+          </TabsContent>
+
+          <TabsContent value='groups'>
+            <SingleEntityAllGroupsListWithPermission
+              entityName='template'
+              entityId={templateId}
+              disabled={false}
+            />
           </TabsContent>
 
           <TabsContent value='raw'>
