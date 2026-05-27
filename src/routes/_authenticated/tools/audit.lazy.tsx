@@ -192,7 +192,7 @@ function AuditPage() {
         </p>
       </div>
 
-      <div className='min-h-0 flex-1 overflow-auto p-6'>
+      <div className='min-h-0 flex-1 overflow-auto'>
       <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>

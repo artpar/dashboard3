@@ -64,21 +64,27 @@ Goal: make the product shape obvious before deep feature work.
 Build:
 
 - Sidebar grouped by the navigation model above.
-- Top bar showing endpoint, connection state, signed-in user, admin/normal-user
-  mode, and command/search entry.
-- Empty route pages for every major section only if each page explains the
-  intended workflow and links to available subpages.
-- Redirects from old routes where necessary so existing links do not break.
+- Command/search and user/session controls should use the existing sidebar and
+  command menu surfaces. Do not add a second persistent top nav/status bar.
+- Empty or placeholder route pages for missing major sections only if each page
+  explains the intended workflow, the Daptin primitive, and the available
+  fallback.
+- Keep existing working URLs unless a user-facing workflow requires a new route.
+  Do not rename routes only to make the URL taxonomy cleaner.
 
 Done when:
 
 - A user can open the app and see every major Daptin capability represented.
 - No primary nav label is API-first or table-first unless the section is Raw
   Entities.
+- Every visible sidebar and command-menu destination opens a page, either a real
+  workflow or a clearly labeled placeholder.
+- There is only one global navigation surface; endpoint/connection diagnostics
+  belong on Overview or diagnostic pages, not in a second shell bar.
 
 ## Priority 1: Overview
 
-Canonical URL:
+Current URL:
 
 - `/`
 
@@ -114,15 +120,15 @@ Done when:
 
 ## Priority 2: Data And Raw Fallback
 
-Canonical URLs:
+Current routes:
 
 - `/data`
-- `/data/:entity`
-- `/data/:entity/:id`
 - `/data/import`
 - `/data/export`
-- `/raw/:entity`
-- `/raw/:entity/:id`
+- `/$entity`
+- `/$entity/$referenceId`
+- `/$entity/$referenceId/edit`
+- `/create/$entity`
 
 User workflows:
 
@@ -136,13 +142,13 @@ Page contents:
 
 - `/data`: table directory with user-facing table names, record counts, schema
   status, audit/state/translation flags, and quick links.
-- `/data/:entity`: dense record table with search, filters, sort, pagination,
+- `/$entity`: dense record table with search, filters, sort, pagination,
   create, import/export, bulk actions, and row actions.
-- `/data/:entity/:id`: tabs for Overview, Fields, Relations, Permissions,
+- `/$entity/$referenceId`: tabs for Overview, Fields, Relations, Permissions,
   Actions, Activity, Raw.
 - `/data/import`: file upload, entity picker, preview, import result, errors.
 - `/data/export`: entity picker, filter summary, format, download action.
-- `/raw/*`: low-level generated table browser with minimal product polish and
+- `/$entity/*`: low-level generated table browser with minimal product polish and
   clear "fallback" labeling.
 
 Backing Daptin state:
@@ -162,14 +168,13 @@ Code-level access plan:
 
 - `docs/UNIVERSAL_ENTITY_ACCESS_CODE_PLAN.md`
 
-Canonical URLs:
+Current routes:
 
-- `/access/users`
-- `/access/users/:id`
-- `/access/groups`
-- `/access/groups/:id`
-- `/access/permissions`
-- `/access/permissions/:entity`
+- `/admin/users`
+- `/admin/groups`
+- `/admin/permissions`
+- Raw detail fallback: `/user_account/$referenceId`,
+  `/usergroup/$referenceId`, and related generated entity routes.
 
 User workflows:
 
@@ -202,16 +207,15 @@ Done when:
 
 ## Priority 4: Files & Sites
 
-Canonical URLs:
+Current routes:
 
-- `/files/cloud-stores`
-- `/files/cloud-stores/:id`
-- `/files/cloud-stores/:id/browser`
-- `/files/sites`
-- `/files/sites/:id`
-- `/files/certificates`
-- `/files/certificates/:id`
-- `/files/ftp`
+- `/storage/cloud-stores`
+- `/storage/cloud-stores/$storeId`
+- `/storage/sites`
+- `/storage/sites/$siteId`
+- `/storage/certificates`
+- `/storage/certificates/$certId`
+- FTP page still needs a visible route.
 
 User workflows:
 
@@ -248,7 +252,7 @@ Done when:
 
 ## Priority 5: Mail
 
-Canonical URLs:
+Current routes:
 
 - `/mail`
 - `/mail/servers`
@@ -286,16 +290,12 @@ Done when:
 
 ## Priority 6: Integrations And OAuth
 
-Canonical URLs:
+Current routes:
 
-- `/integrations`
-- `/integrations/:id`
-- `/integrations/:id/operations/:operationId`
-- `/oauth`
-- `/oauth/consumers`
-- `/oauth/consumers/:id`
-- `/oauth/provider/apps`
-- `/oauth/provider/apps/:id`
+- `/data/integrations`
+- `/data/integrations/$integrationId`
+- `/communication/oauth`
+- OAuth provider-management pages still need visible routes or placeholders.
 
 User workflows:
 
@@ -329,21 +329,17 @@ Done when:
 
 ## Priority 7: Workflows
 
-Canonical URLs:
+Current routes:
 
-- `/actions`
-- `/actions/:id`
-- `/actions/:id/execute`
-- `/tasks`
-- `/tasks/:id`
-- `/state-machines`
-- `/state-machines/:id`
+- `/admin/actions`
+- `/admin/actions/$actionId`
+- `/admin/state-machines`
+- `/admin/state-machines/$smdId`
 - `/data/exchanges`
-- `/data/exchanges/:id`
 - `/data/streams`
-- `/data/streams/:id`
 - `/templates`
-- `/templates/:id`
+- `/templates/$templateId`
+- Task pages still need visible routes.
 
 User workflows:
 
@@ -377,18 +373,14 @@ Done when:
 
 ## Priority 8: Config, Activity, Advanced
 
-Canonical URLs:
+Current routes:
 
 - `/config`
-- `/activity`
-- `/activity/audit`
-- `/advanced/graphql`
-- `/advanced/live`
-- `/advanced/feeds`
-- `/advanced/yjs`
-- `/advanced/llm`
-- `/advanced/metering`
-- `/advanced/system-tables`
+- `/tools/audit`
+- `/tools/graphql`
+- `/communication/websocket`
+- Activity home, feeds, YJS, LLM, metering, and system-table pages still need
+  visible routes or placeholders.
 
 User workflows:
 
@@ -499,7 +491,9 @@ Affected workflows:
 ## Implementation Note
 
 The existing routes under Admin, Storage, Communication, Data, Tools, and Config
-can be reused during migration, but the finished product navigation should move
-toward the canonical URLs in this document. The migration should be page-led:
-when a page is rebuilt, do the internal SDK/hook cleanup required for that page
-as part of the page work.
+are valid routes. Do not rename or rewrite URLs just to make the taxonomy look
+cleaner. Navigation work should make user-facing labels, grouping, page homes,
+and missing destinations clearer while keeping working links stable.
+
+When a page is rebuilt for a real workflow, do the internal SDK/hook cleanup
+required for that page as part of the page work.

@@ -225,7 +225,7 @@ function ConfigPage() {
             Manage system settings and configuration values
           </p>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto p-6 text-center text-destructive">
+        <div className="min-h-0 flex-1 overflow-auto text-center text-destructive">
           <p>Failed to load configuration: {(error as Error).message}</p>
           <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['system-config'] })} className="mt-4">
             Retry
@@ -247,7 +247,7 @@ function ConfigPage() {
         </p>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto p-6">
+      <div className="min-h-0 flex-1 overflow-auto">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
