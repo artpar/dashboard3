@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { daptinClient } from '@/daptin';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { daptinClient } from '@/daptin'
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Chart data interfaces
 export interface ChartData {
@@ -45,9 +64,8 @@ export const useEntityAggregateData = (
         const result = await daptinClient.aggregateClient
           .entity(entityName)
           .groupBy(groupByField)
+          .project(`${groupByField} as day`)
           .count()
-          .max(groupByField)
-          .min(groupByField)
           .execute()
 
         return result as AggregateResult[]

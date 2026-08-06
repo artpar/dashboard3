@@ -1,3 +1,4 @@
+import React from 'react'
 import { format, subDays } from 'date-fns'
 import {
   Users,
@@ -12,9 +13,8 @@ import {
   Shield,
   Key,
   Cloud,
-  Server
+  Server,
 } from 'lucide-react'
-import React from 'react'
 
 // Interface for aggregate data from API
 export interface AggregateData {
@@ -23,9 +23,9 @@ export interface AggregateData {
   attributes: {
     __type: string
     count: number
-    date: string
-    max: string
-    min: string
+    day?: string
+    date?: string
+    'date(created_at)'?: string
   }
 }
 
@@ -65,15 +65,28 @@ export const processChartData = (
     return generateEmptyChartData()
   }
 
-  // Sort by date
-  const sortedData = [...aggregateData].sort((a, b) => {
-    return new Date(a.attributes.date).getTime() - new Date(b.attributes.date).getTime()
-  })
+  const validData = aggregateData
+    .map((item) => ({
+      item,
+      date:
+        item.attributes.day ||
+        item.attributes['date(created_at)'] ||
+        item.attributes.date,
+    }))
+    .filter(({ date }) => date && !Number.isNaN(new Date(date).getTime()))
+    .sort(
+      ({ date: a }, { date: b }) =>
+        new Date(a!).getTime() - new Date(b!).getTime()
+    )
 
-  return sortedData.map(item => ({
-    date: item.attributes.date,
+  if (!validData.length) {
+    return generateEmptyChartData()
+  }
+
+  return validData.map(({ item, date }) => ({
+    date: date!,
     count: item.attributes.count,
-    formattedDate: format(new Date(item.attributes["date(created_at)"] || item.attributes["date"]), dateFormat),
+    formattedDate: format(new Date(date!), dateFormat),
   }))
 }
 
@@ -88,20 +101,33 @@ export const processCumulativeChartData = (
     return generateEmptyChartData()
   }
 
-  // Sort by date
-  const sortedData = [...aggregateData].sort((a, b) => {
-    return new Date(a.attributes.date).getTime() - new Date(b.attributes.date).getTime()
-  })
+  const validData = aggregateData
+    .map((item) => ({
+      item,
+      date:
+        item.attributes.day ||
+        item.attributes['date(created_at)'] ||
+        item.attributes.date,
+    }))
+    .filter(({ date }) => date && !Number.isNaN(new Date(date).getTime()))
+    .sort(
+      ({ date: a }, { date: b }) =>
+        new Date(a!).getTime() - new Date(b!).getTime()
+    )
 
-  let cumulativeCount = 0;
+  if (!validData.length) {
+    return generateEmptyChartData()
+  }
 
-  return sortedData.map(item => {
-    cumulativeCount += item.attributes.count;
+  let cumulativeCount = 0
+
+  return validData.map(({ item, date }) => {
+    cumulativeCount += item.attributes.count
     return {
-      date: item.attributes.date,
+      date: date!,
       count: cumulativeCount,
-      formattedDate: format(new Date(item.attributes["date(created_at)"] || item.attributes["date"]), dateFormat),
-    };
+      formattedDate: format(new Date(date!), dateFormat),
+    }
   })
 }
 
@@ -129,22 +155,22 @@ export const generateEmptyChartData = (days: number = 30): ChartData[] => {
  */
 export const getEntityIcon = (entityName: string): React.ReactNode => {
   const iconMap: Record<string, React.ReactNode> = {
-    user_account: <Users className="text-blue-500 h-6 w-6" />,
-    usergroup: <Users className="text-indigo-500 h-6 w-6" />,
-    memory: <Lightbulb className="text-yellow-500 h-6 w-6" />,
-    document: <FileText className="text-green-500 h-6 w-6" />,
-    task: <ClipboardList className="text-purple-500 h-6 w-6" />,
-    workgroup: <Layers className="text-orange-500 h-6 w-6" />,
-    mail: <Mail className="text-red-500 h-6 w-6" />,
-    calendar: <Calendar className="text-cyan-500 h-6 w-6" />,
-    site: <Globe className="text-emerald-500 h-6 w-6" />,
-    certificate: <Shield className="text-pink-500 h-6 w-6" />,
-    credential: <Key className="text-amber-500 h-6 w-6" />,
-    cloud_store: <Cloud className="text-sky-500 h-6 w-6" />,
-    mail_server: <Server className="text-rose-500 h-6 w-6" />,
+    user_account: <Users className='h-6 w-6 text-blue-500' />,
+    usergroup: <Users className='h-6 w-6 text-indigo-500' />,
+    memory: <Lightbulb className='h-6 w-6 text-yellow-500' />,
+    document: <FileText className='h-6 w-6 text-green-500' />,
+    task: <ClipboardList className='h-6 w-6 text-purple-500' />,
+    workgroup: <Layers className='h-6 w-6 text-orange-500' />,
+    mail: <Mail className='h-6 w-6 text-red-500' />,
+    calendar: <Calendar className='h-6 w-6 text-cyan-500' />,
+    site: <Globe className='h-6 w-6 text-emerald-500' />,
+    certificate: <Shield className='h-6 w-6 text-pink-500' />,
+    credential: <Key className='h-6 w-6 text-amber-500' />,
+    cloud_store: <Cloud className='h-6 w-6 text-sky-500' />,
+    mail_server: <Server className='h-6 w-6 text-rose-500' />,
   }
 
-  return iconMap[entityName] || <Database className="text-gray-500 h-6 w-6" />
+  return iconMap[entityName] || <Database className='h-6 w-6 text-gray-500' />
 }
 
 /**
@@ -173,7 +199,9 @@ export const getEntityColor = (entityName: string): string => {
 /**
  * Calculate total from aggregate data
  */
-export const calculateTotalFromAggregates = (aggregateData: AggregateData[] | undefined): number => {
+export const calculateTotalFromAggregates = (
+  aggregateData: AggregateData[] | undefined
+): number => {
   if (!aggregateData) return 0
   return aggregateData.reduce((total, item) => total + item.attributes.count, 0)
 }
