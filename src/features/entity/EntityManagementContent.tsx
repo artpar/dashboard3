@@ -92,8 +92,8 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
 
   return (
     <>
-      <Main className='flex h-full min-w-0 flex-col overflow-hidden'>
-        <div className='flex-shrink-0'>
+      <Main className='flex h-full w-full min-w-0 max-w-full flex-col overflow-hidden'>
+        <div className='min-w-0 shrink-0'>
           <EntityHeader
             title={
               title ||
@@ -107,7 +107,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
           />
         </div>
         {/* Main content with collection views */}
-        <div className='min-h-0 min-w-0 flex-1 overflow-hidden'>
+        <div className='min-h-0 min-w-0 max-w-full flex-1 overflow-hidden'>
           {isLoading ? (
             <div className='space-y-4 p-6'>
               <Skeleton className='h-10 w-full' />
@@ -120,8 +120,7 @@ export const EntityManagementContent: React.FC<EntityManagementProps> = ({
           )}
         </div>
 
-        {/* Fixed pagination at the bottom */}
-        <div className='mt-auto flex-shrink-0 border-t border-t-gray-300 pt-2'>
+        <div className='bg-background sticky bottom-0 z-20 w-full min-w-0 shrink-0 border-t pt-2'>
           <EntityPagination
             currentPage={currentPage}
             totalPages={pagination?.lastPage || totalPages}

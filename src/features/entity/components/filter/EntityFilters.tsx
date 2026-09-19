@@ -65,7 +65,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
     console.log('Applying filters from dialog:', newFilters)
     
     // Create a new filters object preserving search and quick filters
-    const updatedFilters: Record<string, any> = {}
+    const updatedFilters: Record<string, unknown> = {}
 
     // Preserve search term if it exists
     if (filters._search) {
@@ -117,7 +117,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
   // Handle clearing all filters
   const handleClearAllFilters = () => {
     // Preserve only search if it exists
-    const newFilters: Record<string, any> = {}
+    const newFilters: Record<string, unknown> = {}
     if (filters._search) {
       newFilters._search = filters._search
     }
@@ -136,7 +136,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
 
   return (
     <div className='flex flex-col'>
-      <div className='flex flex-row space-x-2'>
+      <div className='flex min-w-0 flex-wrap items-center gap-2'>
         {/* Search bar */}
         <div className='flex flex-col'>
           <TooltipProvider>
@@ -160,7 +160,7 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <div className='flex w-150 flex-row gap-3 sm:flex-col'>
+        <div className='flex min-w-0 w-full max-w-150 flex-1'>
           <form onSubmit={handleSearch} className='relative flex-1'>
             <Search className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4' />
             <Input
@@ -172,8 +172,6 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
             />
           </form>
         </div>
-      </div>
-      <div className='flex flex-row gap-3 space-x-4 px-2 lg:flex-row pt-2'>
         {/* Quick filters button */}
         {quickFilterColumns.length > 0 && (
           <Popover open={showQuickFilters} onOpenChange={setShowQuickFilters}>
@@ -274,15 +272,16 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({ entityName }) => {
             </PopoverContent>
           </Popover>
         )}
-        {/* Active filter badges */}
-        {activeFilterCount > 0 && (
+      </div>
+      {activeFilterCount > 0 && (
+        <div className='pt-2'>
           <EntityFilterBadges
             filters={filters}
             onRemoveFilter={handleRemoveFilter}
             onClearAllFilters={handleClearAllFilters}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Filter dialog */}
       <EntityFilterDialog

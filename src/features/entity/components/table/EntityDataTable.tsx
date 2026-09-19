@@ -109,7 +109,7 @@ const EntityDataTableView: React.FC<EntityDataTableViewProps> = ({
 }) => {
   return (
     <>
-      <div className='h-full w-full overflow-auto'>
+      <div className='h-full w-full min-w-0 max-w-full overflow-auto'>
         <Table className='sticky-header-table'>
           <TableHeader className='bg-background'>
             <TableRow>

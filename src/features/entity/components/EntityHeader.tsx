@@ -194,7 +194,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
   }
 
   return (
-    <div className='flex flex-col space-y-4'>
+    <div className='flex min-w-0 flex-col gap-4'>
       {actionSchema && (
         <ActionExecuteComponent
           actionSchema={actionSchema}
@@ -227,9 +227,9 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           refresh()
         }}
       />
-      {/* Header with title and description */}
-      <div className='flex items-start justify-between'>
-        <div>
+      {/* Header with title and actions */}
+      <div className='flex min-w-0 flex-wrap items-start justify-between gap-3'>
+        <div className='min-w-0'>
           <h1 className='text-2xl font-bold tracking-tight'>{title}</h1>
           {description && (
             <p className='text-muted-foreground mt-1 max-w-2xl text-sm'>
@@ -237,14 +237,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             </p>
           )}
         </div>
-      </div>
-
-      {/* Enhanced filtering component */}
-      <EntityFilters entityName={entityName} />
-
-      {/* Action buttons */}
-      <div className='flex space-x-2'>
-        <div className='flex flex-wrap items-center justify-start gap-2'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -603,7 +596,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className='flex justify-end gap-2 p-2'>
+        <div className='flex items-center gap-2'>
           <Button
             variant='outline'
             size='sm'
@@ -626,7 +619,7 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
         </div>
 
         {selectedItems.length > 0 && (
-          <div className='flex justify-end gap-2 p-2'>
+          <div className='flex items-center gap-2'>
             <div className='flex space-x-2'>
               <Button
                 variant='destructive'
@@ -641,6 +634,8 @@ export const EntityHeader: React.FC<EntityHeaderProps> = ({
           </div>
         )}
       </div>
+
+      <EntityFilters entityName={entityName} />
     </div>
   )
 }

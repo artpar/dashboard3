@@ -1,5 +1,4 @@
 import React from 'react'
-import { Checkbox } from '@/components/ui/checkbox.tsx'
 import {
   Pagination,
   PaginationContent,
@@ -16,8 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useEntityCollectionData } from '@/features/entity/hooks/useEntityCollectionData.tsx'
-import { EntityAggregateViewComponent } from '@/features/dashboard/components/EntityAggregateViewComponent.tsx'
 
 interface EntityPaginationProps {
   currentPage: number
@@ -42,8 +39,8 @@ export const EntityPagination: React.FC<EntityPaginationProps> = ({
   onPageSizeChange,
 }) => {
   return (
-    <div className='flex justify-between'>
-      <Pagination>
+    <div className='flex w-full min-w-0 flex-wrap items-center justify-between gap-2'>
+      <Pagination className='min-w-0 overflow-x-auto'>
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -130,7 +127,7 @@ export const EntityPagination: React.FC<EntityPaginationProps> = ({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-      <div className='flex items-center space-x-2'>
+      <div className='flex shrink-0 items-center gap-2'>
         <Select
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(parseInt(value))}
