@@ -1,8 +1,8 @@
 import { daptinClient } from '@/daptin'
-import { TableInfo } from '@/hooks/use-world-entities.tsx'
 import { TableRelation } from '@/features/entity/SingleEntityAllRelationsViewComponent.tsx'
 import { ColumnDefinition } from '@/features/entity/columns'
 import { safelySerializeData } from '@/features/entity/utils/serializer.ts'
+import { getWorldSchema } from '@/features/entity/utils/worldSchema'
 import { validateDaptinResponse } from '@/lib/utils'
 
 /**
@@ -20,60 +20,36 @@ export class EntityApiService {
   }> {
     try {
       // Fetch schema information from world entity
-      const worldResponse = await daptinClient.worldManager.getWorldByName(entityName)
+      const worldResponse =
+        await daptinClient.worldManager.getWorldByName(entityName)
+      if (!worldResponse) {
+        throw new Error(`World schema not found for ${entityName}`)
+      }
 
-      let schema: any = null
-      let columns: ColumnDefinition[] = []
-      let relations: any[] = []
+      const schema = worldResponse
+      const worldSchema = getWorldSchema(worldResponse, entityName)
+      const columns = worldSchema.Columns
+      const relations = (worldSchema.Relations || []).filter(
+        (relation: any) =>
+          relation.Subject === entityName || relation.Object === entityName
+      )
       let actions: any[] = []
 
-      if (worldResponse) {
-        schema = worldResponse;
+      try {
+        const actionsResponse = await daptinClient.jsonApi.findAll('action', {
+          world_id: schema.reference_id,
+        })
 
-        // Parse column information from schema
-        if (schema.world_schema_json) {
-          try {
-            const parsedSchema: TableInfo = JSON.parse(schema.world_schema_json)
-
-            // Extract columns
-            if (parsedSchema && parsedSchema.Columns) {
-              columns = parsedSchema.Columns
-            }
-
-            // Extract relations
-            if (parsedSchema.Relations) {
-              relations = parsedSchema.Relations.filter(
-                (relation: any) =>
-                  relation.Subject === entityName ||
-                  relation.Object === entityName
-              )
-            }
-
-            // Fetch actions for this entity
-            try {
-              const actionsResponse = await daptinClient.jsonApi.findAll(
-                'action', {
-                  world_id: schema['reference_id'],
-                }
-              )
-
-              if (actionsResponse.data && actionsResponse.data.length > 0) {
-                actions = actionsResponse.data.map(row => {
-                  return {
-                    ActionName: row.action_name,
-                    Label: row.label,
-                    ReferenceId: row.reference_id,
-                    InstanceOptional: row.instance_optional,
-                  }
-                })
-              }
-            } catch (actionError) {
-              console.warn('Error fetching actions:', actionError)
-            }
-          } catch (jsonParseError) {
-            console.error('Error parsing world_schema_json:', jsonParseError)
-          }
+        if (actionsResponse.data && actionsResponse.data.length > 0) {
+          actions = actionsResponse.data.map((row) => ({
+            ActionName: row.action_name,
+            Label: row.label,
+            ReferenceId: row.reference_id,
+            InstanceOptional: row.instance_optional,
+          }))
         }
+      } catch (actionError) {
+        console.warn('Error fetching actions:', actionError)
       }
 
       return { schema, columns, relations, actions }

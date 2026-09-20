@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DAPTIN_ENDPOINT } from '@/daptin'
 import { useWorldEntities } from '@/hooks/use-world-entities'
+import { getWorldSchema } from '@/features/entity/utils/worldSchema'
 import { EntityReferenceEditor } from './EntityReference'
 import { FileReferenceEditor } from './FileReference'
 import { ForeignKeyColumnEditorProps } from './types.js'
@@ -43,13 +44,11 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
     const entityMetadata = entities.find(
       (e) => e.table_name === referencedEntity
     )
-    if (!entityMetadata || !entityMetadata.world_schema_json) return
+    if (!entityMetadata) return
 
     try {
-      // Parse the schema to find a label column
-      const schema = JSON.parse(entityMetadata.world_schema_json)
-      if (!schema || !schema.Columns) return
-
+      // Read the schema to find a label column
+      const schema = getWorldSchema(entityMetadata, referencedEntity)
       // First look for a column with ColumnType 'label'
       let labelCol = schema.Columns.find((col) => col.ColumnType === 'label')
 
@@ -67,7 +66,7 @@ export const ForeignKeyColumnEditor: React.FC<ForeignKeyColumnEditorProps> = ({
       // Set the label column name if found
       setLabelColumn(labelCol ? labelCol.ColumnName : null)
     } catch (err) {
-      console.error('Error parsing schema for label column:', err)
+      console.error('Error reading schema for label column:', err)
     }
   }, [referencedEntity, entities])
 

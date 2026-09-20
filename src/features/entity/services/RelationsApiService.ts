@@ -8,6 +8,7 @@ import type {
 } from 'daptin-client'
 import { validateDaptinResponse } from '@/lib/utils'
 import { safelySerializeData } from '@/features/entity/utils/serializer'
+import { getWorldSchema } from '@/features/entity/utils/worldSchema'
 import {
   categorizeRelations,
   getRelationQueryParams,
@@ -238,34 +239,12 @@ export class RelationsApiService {
         throw new Error(`Failed to get world model for ${entityName}`)
       }
 
-      let relations: TableRelation[] = []
-
-      // Extract relations from the world_schema_json
-      if (worldModel.world_schema_json) {
-        try {
-          const parsedSchema =
-            typeof worldModel.world_schema_json === 'string'
-              ? JSON.parse(worldModel.world_schema_json)
-              : worldModel.world_schema_json
-
-          // Extract relations
-          if (parsedSchema.Relations) {
-            relations = parsedSchema.Relations.filter(
-              (relation: any) =>
-                relation.Subject === entityName ||
-                relation.Object === entityName
-            )
-
-            // Categorize relations by direction
-            const { allRelations } = categorizeRelations(relations, entityName)
-            return allRelations
-          }
-        } catch (jsonParseError) {
-          console.error('Error parsing world_schema_json:', jsonParseError)
-        }
-      }
-
-      return relations
+      const worldSchema = getWorldSchema(worldModel, entityName)
+      const relations = (worldSchema.Relations || []).filter(
+        (relation: any) =>
+          relation.Subject === entityName || relation.Object === entityName
+      )
+      return categorizeRelations(relations, entityName).allRelations
     } catch (err) {
       console.error(`Error fetching relations for ${entityName}:`, err)
       throw err
