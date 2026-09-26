@@ -1,285 +1,85 @@
-# Dashboard3 - Dynamic Admin Dashboard
+# Dashboard3
 
-A modern, feature-rich admin dashboard built with React and TypeScript, powered by Daptin Backend-as-a-Service. This dashboard provides a dynamic interface for managing any data model without hardcoding forms or tables.
+Dashboard3 is a web console for managing a [Daptin](https://github.com/daptin/daptin) server. It reads entity definitions from Daptin and provides record tables, forms, detail pages, and tools for operating the server. The frontend is a React and TypeScript single-page app built with Vite.
 
-![Dashboard Interface](public/images/shadcn-admin.png)
+## What is in the console
 
-## Overview
+- **Data:** Browse Daptin tables, create and edit records, filter and sort results, manage relations, and import or export data.
+- **Users and access:** Manage users, groups, and entity permissions.
+- **Files and sites:** Configure cloud stores, hosted sites, and certificates.
+- **Workflows:** Manage actions, state machines, templates, exchanges, and streams.
+- **Connections:** Configure integrations, OAuth, and native mail servers and accounts.
+- **Tools:** Inspect audit activity, use the GraphQL console, and check WebSocket behavior.
 
-Dashboard3 is a comprehensive admin interface that dynamically adapts to your data schema. It connects to a Daptin backend to provide instant CRUD operations, relationship management, and advanced filtering capabilities for any entity type defined in your backend.
+The sidebar also includes a generated **Raw Entities** section for tables discovered from the connected Daptin server. Available records and actions depend on that server's schema and the signed-in user's permissions.
 
-## Key Features
+## Run locally
 
-### Core Functionality
-- **Dynamic Entity Management** - Automatically generates UI for any entity/table without custom code
-- **Smart Column System** - Intelligent rendering of different data types with appropriate viewers and editors
-- **Advanced Filtering** - Multi-level filtering with quick filters, advanced queries, and right-click context menu filters
-- **Relationship Management** - Visual management of entity relationships with add/remove capabilities
-- **Bulk Operations** - Select multiple items for bulk delete, copy, and paste operations
-- **Real-time Updates** - WebSocket support for live data synchronization
+You need Node.js 18 or newer, pnpm 9.6.0, and access to a Daptin server with a user account.
 
-### User Experience
-- **Responsive Design** - Fully responsive layout that works on desktop, tablet, and mobile
-- **Dark/Light Mode** - Theme switching with system preference detection
-- **Keyboard Shortcuts** - Copy (Ctrl+C) and paste (Ctrl+V) support for data manipulation
-- **Context Menus** - Right-click on any cell to quickly add filters based on values
-- **Smart Search** - Global search across entities and within tables
-- **Audit Trail** - Built-in tracking of creation and modification timestamps
-
-### Security & Access Control
-- **JWT Authentication** - Secure token-based authentication
-- **Row-level Permissions** - Fine-grained access control per record
-- **User & Group Management** - Complete user administration interface
-- **Session Management** - Automatic token refresh and expiry handling
-
-## Tech Stack
-
-### Frontend
-- **Framework:** [React 19](https://react.dev/) with TypeScript
-- **UI Library:** [Shadcn/UI](https://ui.shadcn.com) (Radix UI + Tailwind CSS)
-- **Routing:** [TanStack Router v1](https://tanstack.com/router/latest)
-- **State Management:** [Zustand](https://github.com/pmndrs/zustand) + [TanStack Query](https://tanstack.com/query/latest)
-- **Build Tool:** [Vite](https://vitejs.dev/)
-- **Package Manager:** [pnpm](https://pnpm.io/)
-
-### Backend
-- **BaaS Platform:** [Daptin](https://github.com/daptin/daptin)
-- **API Client:** `daptin-client` for REST/GraphQL communication
-- **Real-time:** WebSocket connections for live updates
-
-### Development Tools
-- **Type Checking:** TypeScript
-- **Linting:** ESLint with custom configuration
-- **Formatting:** Prettier
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Form Handling:** React Hook Form with Zod validation
-
-## Installation
-
-### Prerequisites
-- Node.js 18+ 
-- pnpm package manager
-- Daptin backend instance (local or remote)
-
-### Setup
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/artpar/dashboard3.git
 cd dashboard3
-```
-
-2. Install dependencies:
-```bash
-pnpm install
-```
-
-3. Configure environment variables for local development:
-```bash
+pnpm install --frozen-lockfile
 cp .env.example .env
-```
-
-Edit `.env` if your local Daptin backend is not on the default URL:
-```env
-VITE_DAPTIN_URL=http://localhost:6336
-```
-
-Production builds should not define a Daptin endpoint. When no endpoint
-environment variable is set, the dashboard uses the same origin that served it.
-
-4. Start the development server:
-```bash
 pnpm dev
 ```
 
-The application will be available at `http://localhost:5173`
+The example environment file points to `http://localhost:6336`. Edit `VITE_DAPTIN_URL` in `.env` if your Daptin API is elsewhere. Vite prints the local dashboard URL when it starts, usually `http://localhost:5173/`. Sign in with an account from the connected Daptin server.
 
-## Configuration
+To use a different API for one session without changing `.env`:
 
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_DAPTIN_URL` | Optional local Daptin backend override | current browser origin |
-
-### Daptin Backend Setup
-
-1. Install and run Daptin:
 ```bash
-docker run -p 6336:6336 daptin/daptin
+VITE_DAPTIN_URL=https://your-daptin-server.example pnpm dev
 ```
 
-2. Access Daptin admin at `http://localhost:6336`
+## API configuration
 
-3. Configure your data models and permissions
+The dashboard chooses its API origin in this order:
 
-## Project Structure
+1. `VITE_DAPTIN_ENDPOINT`, if set.
+2. `VITE_DAPTIN_URL`, if set.
+3. The origin serving the dashboard.
 
-```
-src/
-├── features/              # Feature modules
-│   ├── auth/             # Authentication flows
-│   ├── dashboard/        # Dashboard and analytics
-│   ├── entity/           # Dynamic entity management
-│   │   ├── columns/      # Column viewers and editors
-│   │   ├── components/   # Entity UI components
-│   │   │   ├── table/    # Data table with context menus
-│   │   │   ├── filter/   # Filter components
-│   │   │   └── dialogs/  # Modal dialogs
-│   │   ├── hooks/        # Entity-specific hooks
-│   │   └── providers/    # Data providers
-│   ├── settings/         # User preferences
-│   └── users/            # User management
-├── components/           # Shared components
-│   ├── ui/              # Base UI components (Shadcn)
-│   └── layout/          # Layout components
-├── routes/              # TanStack Router routes
-├── stores/              # Zustand global stores
-├── hooks/               # Custom React hooks
-└── lib/                 # Utilities and helpers
+The first two values are Vite environment variables and are embedded in the browser build. Set them **before** starting the dev server or building for production. A separate API origin must allow requests from the dashboard origin. For a deployment where Daptin serves the dashboard and API from the same origin, leave both variables unset at build time.
+
+> `.env.example` is for local development. If you copied it to `.env`, remove or override that local API setting before making a same-origin production build.
+
+## Build and deploy
+
+```bash
+pnpm build       # Type-check and create dist/
+pnpm preview     # Preview the production build locally
 ```
 
-## Usage
+Serve `dist/` as a single-page app and route unknown paths to `index.html`, since TanStack Router handles pages in the browser. [`netlify.toml`](netlify.toml) contains that redirect for Netlify.
 
-### Basic Operations
-
-#### Entity Management
-Navigate to any entity from the sidebar to:
-- View records in a paginated table
-- Create new records with the "New" button
-- Edit records by clicking the eye icon
-- Delete single or multiple records
-- Export data to clipboard
-
-#### Filtering Data
-
-**Quick Filters:**
-- Use the search bar for text search
-- Click filter badges for boolean/enum fields
-- Right-click any cell for context menu filters
-
-**Advanced Filters:**
-- Click the filter icon to open advanced filter dialog
-- Combine multiple conditions with AND/OR logic
-- Save filter presets for reuse
-
-**Context Menu Filters (Right-click):**
-- **Equals** - Filter for exact match
-- **Not Equals** - Exclude specific value
-- **Contains** - Text search within field
-- **Greater/Less Than** - Numeric comparisons
-- **NULL filters** - Find or exclude empty values
-
-#### Managing Relationships
-1. Navigate to entity detail view
-2. Click "Relations" tab
-3. Use "Add" to link related entities
-4. Use "Remove" to unlink relationships
-
-#### Bulk Operations
-1. Select multiple rows with checkboxes
-2. Use toolbar actions:
-   - Copy selected (Ctrl+C)
-   - Delete selected
-   - Export selected
+Pushing a `v*` Git tag runs [the release workflow](.github/workflows/build-and-release.yml). It builds the app and attaches a ZIP of `dist/` to a GitHub Release. The release workflow derives the build version from the tag.
 
 ## Development
 
-### Running Commands
+| Command             | Purpose                                 |
+| ------------------- | --------------------------------------- |
+| `pnpm dev`          | Start the Vite development server       |
+| `pnpm build`        | Run TypeScript checks and build `dist/` |
+| `pnpm lint`         | Run ESLint                              |
+| `pnpm format:check` | Check formatting with Prettier          |
+| `pnpm format`       | Format the repository                   |
+| `pnpm knip`         | Check for unused code and dependencies  |
 
-```bash
-# Development server
-pnpm dev
+The main code locations are:
 
-# Build for production
-pnpm build
+| Path                                                                                         | Contents                                                                  |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`src/routes/`](src/routes/)                                                                 | TanStack Router pages                                                     |
+| [`src/features/entity/`](src/features/entity/)                                               | Schema-driven record views, forms, columns, relations, and data providers |
+| [`src/features/`](src/features/)                                                             | Dashboard and other Daptin management features                            |
+| [`src/components/layout/data/sidebar-data.tsx`](src/components/layout/data/sidebar-data.tsx) | Navigation and generated entity links                                     |
+| [`src/daptin.ts`](src/daptin.ts)                                                             | Daptin client and API endpoint selection                                  |
+| [`src/components/ui/`](src/components/ui/)                                                   | Shared UI components                                                      |
 
-# Preview production build
-pnpm preview
+The UI uses React 19, TanStack Router, TanStack Query, Tailwind CSS, and Radix-based components. Entity viewers and editors are selected from Daptin column metadata in [`src/features/entity/columns/`](src/features/entity/columns/).
 
-# Type checking
-pnpm type-check
+## License and credits
 
-# Linting
-pnpm lint
-
-# Format code
-pnpm format
-
-# Check for unused dependencies
-pnpm knip
-```
-
-### Adding New Features
-
-1. Create feature module in `src/features/`
-2. Define routes in `src/routes/`
-3. Add navigation in `src/components/layout/data/sidebar-data.tsx`
-4. Follow existing patterns for consistency
-
-### Custom Column Types
-
-To add support for new data types:
-
-1. Create viewer in `src/features/entity/columns/viewers/`
-2. Create editor in `src/features/entity/columns/editors/`
-3. Register in `ColumnComponentManager.tsx`
-
-## Architecture Decisions
-
-### Dynamic Entity System
-The application generates UI dynamically based on Daptin's schema rather than hardcoding forms. This allows the same codebase to manage any data model.
-
-### Column Component Pattern
-A flexible system maps database column types to React components, enabling consistent rendering and editing across different data types.
-
-### Context-Aware Filtering
-Right-click context menus provide intuitive filtering based on actual data values, reducing the cognitive load of constructing queries.
-
-### Provider Pattern
-Data providers encapsulate API calls and state management, separating concerns and enabling easy testing.
-
-## Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch
-3. Follow existing code patterns
-4. Add tests for new features
-5. Submit a pull request
-
-## Troubleshooting
-
-### Common Issues
-
-**Connection to Daptin fails:**
-- Verify Daptin is running and accessible
-- Check `VITE_DAPTIN_URL` in `.env` for local development
-- Ensure CORS is configured in Daptin
-
-**Authentication errors:**
-- Clear localStorage and re-login
-- Check token expiry settings
-- Verify user permissions in Daptin
-
-**Data not updating:**
-- Check WebSocket connection status
-- Verify entity permissions
-- Clear React Query cache
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built on top of [Shadcn/UI](https://ui.shadcn.com) components
-- Powered by [Daptin](https://github.com/daptin/daptin) Backend-as-a-Service
-- Original template inspiration from [shadcn-admin](https://github.com/satnaing/shadcn-admin)
-
-## Support
-
-For issues and questions:
-- GitHub Issues: [github.com/artpar/dashboard3/issues](https://github.com/artpar/dashboard3/issues)
-- Daptin Documentation: [daptin.github.io](https://daptin.github.io)
+This repository is licensed under the [MIT License](LICENSE). Its UI started from the [shadcn-admin](https://github.com/satnaing/shadcn-admin) template; Dashboard3's Daptin integration and management pages live in this repository.
